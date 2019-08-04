@@ -25,5 +25,9 @@ public class User {
     @OneToMany
     private Set<Bid> bids;
 
+    @OneToMany
+    private Set<LoginInfo> loginInfos;
+
+
 
 }
