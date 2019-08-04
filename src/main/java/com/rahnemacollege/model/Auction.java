@@ -17,7 +17,7 @@ public class Auction {
     private int base_price;
     private Date date;
     private List<Picture> pictures;
-    private int category_id;
+    private Category category;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,13 +27,13 @@ public class Auction {
     private User winner;
     private User owner;
 
-    public Auction(String title,String description,int base_price,List pictures,int category_id,Date date){
+    public Auction(String title,String description,int base_price,List pictures,Category category,Date date){
         this.title = title;
         this.description = description;
         this.base_price = base_price;
         this.pictures = pictures;
         this.date = date;
-        this.category_id = category_id;
+        this.category = category;
         state = State.SOON;
     }
 
