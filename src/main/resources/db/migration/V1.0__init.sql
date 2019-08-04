@@ -3,7 +3,7 @@ CREATE TABLE Categories
     id   INT         NOT NULL AUTO_INCREMENT,
     name VARCHAR(40) NOT NULL,
     PRIMARY KEY (id)
-);
+) ENGINE = InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE Pictures
 (
@@ -11,7 +11,7 @@ CREATE TABLE Pictures
     filename VARCHAR(100) NOT NULL,
     date     DATE         NOT NULL,
     PRIMARY KEY (id)
-);
+) ENGINE = InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE Bids
 (
@@ -21,7 +21,8 @@ CREATE TABLE Bids
     price       INT  NOT NULL,
     date        DATE NOT NULL,
     PRIMARY KEY (id)
-);
+) ENGINE = InnoDB  DEFAULT CHARSET=utf8;
+
 CREATE TABLE Auctions
 (
     id           INT         NOT NULL AUTO_INCREMENT,
@@ -35,7 +36,7 @@ CREATE TABLE Auctions
     picture_uid  INT         NOT NULL,
     owner        INT         NOT NULL,
     PRIMARY KEY (id)
-);
+) ENGINE = InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE Login_infos
 (
@@ -43,7 +44,7 @@ CREATE TABLE Login_infos
     user_uid INT  NOT NULL,
     date     DATE NOT NULL,
     PRIMARY KEY (id)
-);
+) ENGINE = InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE Users
 (
@@ -54,4 +55,4 @@ CREATE TABLE Users
     picture   VARCHAR(100),
     bookmarks INT,
     PRIMARY KEY (id)
-);
+) ENGINE = InnoDB  DEFAULT CHARSET=utf8;
