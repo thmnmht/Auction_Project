@@ -6,13 +6,17 @@
  * User Manual available at https://docs.gradle.org/5.5.1/userguide/tutorial_java_projects.html
  */
 
-plugins {
-    // Apply the java plugin to add support for Java
-    id 'java'
-
-    // Apply the application plugin to add support for building a CLI application
-    id 'application'
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.6.RELEASE")
+    }
 }
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 
 repositories {
     // Use jcenter for resolving dependencies.
@@ -21,14 +25,29 @@ repositories {
 }
 
 dependencies {
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    compile 'org.springframework.boot:spring-boot-starter-data-rest'
+
+
+    // JPA Data (We are going to use Repositories, Entities, Hibernate)
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Use MySQL Connector-J
+    compile 'mysql:mysql-connector-java'
+
+
+    compile 'org.springframework.boot:spring-boot-starter-hateoas'
+    
+    
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:27.1-jre'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
+
+    //lombok
+    compileOnly 'org.projectlombok:lombok:1.18.8'
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
 }
 
-application {
-    // Define the main class for the application
-    mainClassName = 'com.rahnemacollege.App'
-}
