@@ -2,7 +2,6 @@ package com.rahnemacollege.domain;
 
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.model.Picture;
-import com.rahnemacollege.model.User;
 import lombok.Data;
 
 import java.util.Date;
@@ -23,7 +22,7 @@ public class AuctionDomain {
 
 
 
-    public AuctionDomain(String title,String description,int base_price,int category_id,Date date){
+    public AuctionDomain(String title,String description,int base_price,Category category,Date date){
         this.title = title;
         this.description = description;
         this.base_price = base_price;

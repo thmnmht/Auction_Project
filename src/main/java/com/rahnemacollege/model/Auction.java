@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 
 @Data
@@ -26,11 +27,6 @@ public class Auction {
     private User winner;
     private User owner;
 
-
-//    @Version
-//    private Integer version;
-
-
     public Auction(String title,String description,int base_price,List pictures,int category_id,Date date){
         this.title = title;
         this.description = description;
@@ -40,6 +36,12 @@ public class Auction {
         this.category_id = category_id;
         state = State.SOON;
     }
+
+    @Version
+    private Integer version;
+
+    @OneToMany
+    private Set<Bid> bids;
 
 
 
