@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 
 @Data
@@ -25,6 +26,9 @@ public class Auction {
     private User owner;
     @Version
     private Integer version;
+    @OneToMany
+    private Set<Bid> bids;
+
 
 
 
