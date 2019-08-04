@@ -9,18 +9,14 @@ import java.util.Date;
 
 @Data
 @Entity
-public class Bid {
+public class LoginInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     @ManyToOne
-    private Auction auction;
-    @ManyToOne
     private User user;
-    private int price;
     private Date date;
-
 
 
 }
