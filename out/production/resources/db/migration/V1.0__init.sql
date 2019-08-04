@@ -35,11 +35,11 @@ CREATE TABLE Auctions
     title        VARCHAR(50) NOT NULL,
     description  VARCHAR(1000),
     base_price   INT         NOT NULL,
-    category_uid INT         NOT NULL,
+    category_id INT         NOT NULL,
     date         DATE        NOT NULL,
-    state        VARCHAR(20) NOT NULL,
+    state        INT         NOT NULL,
     winner       INT,
-    picture_uid  INT         NOT NULL,
+    picture_id  INT         NOT NULL,
     owner        INT         NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (winner)
@@ -48,10 +48,10 @@ CREATE TABLE Auctions
     FOREIGN KEY (owner)
         REFERENCES Users (id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (category_uid)
+    FOREIGN KEY (category_id)
         REFERENCES Categories (id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (picture_uid)
+    FOREIGN KEY (picture_id)
         REFERENCES Pictures (id)
         ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE = InnoDB
@@ -60,10 +60,10 @@ CREATE TABLE Auctions
 CREATE TABLE Login_infos
 (
     id       INT  NOT NULL AUTO_INCREMENT,
-    user_uid INT  NOT NULL,
+    user_id INT  NOT NULL,
     date     DATE NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (user_uid)
+    FOREIGN KEY (user_id)
         REFERENCES Users (id)
         ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE = InnoDB
@@ -72,15 +72,15 @@ CREATE TABLE Login_infos
 CREATE TABLE Bids
 (
     id          INT  NOT NULL AUTO_INCREMENT,
-    auction_uid INT  NOT NULL,
-    user_uid    INT  NOT NULL,
+    auction_id INT  NOT NULL,
+    user_id    INT  NOT NULL,
     price       INT  NOT NULL,
     date        DATE NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (user_uid)
+    FOREIGN KEY (user_id)
         REFERENCES Users (id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (auction_uid)
+    FOREIGN KEY (auction_id)
         REFERENCES Auctions (id)
         ON UPDATE CASCADE ON DELETE RESTRICT
 

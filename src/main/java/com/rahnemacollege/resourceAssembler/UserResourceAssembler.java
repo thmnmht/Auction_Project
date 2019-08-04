@@ -16,6 +16,7 @@ public class UserResourceAssembler extends ResourceAssemblerSupport<User, UserRe
         UserResource ur = super.createResourceWithId(user.getId(),user);
         ur.setName(user.getName());
         ur.setEmail(user.getEmail());
+        System.err.println(ur.getLinks());
         return ur;
     }
 }

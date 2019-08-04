@@ -17,10 +17,10 @@ public class Auction {
     private Date date;
 
     @OneToMany
-    @Column(name = "picture_uid")
+//    @Column(name = "picture_uid")
     private List<Picture> pictures;
     @ManyToOne
-    @Column(name = "category_uid")
+//    @Column(name = "category_uid")
     private Category category;
 
     @Id
