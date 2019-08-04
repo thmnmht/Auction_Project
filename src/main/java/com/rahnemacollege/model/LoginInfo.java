@@ -15,7 +15,7 @@ public class LoginInfo {
     private int id;
 
     @ManyToOne
-    @Column(name = "user_uid")
+//    @Column(name = "user_uid")
     private User user;
     private Date date;
 

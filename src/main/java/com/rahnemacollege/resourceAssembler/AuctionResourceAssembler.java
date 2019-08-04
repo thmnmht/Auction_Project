@@ -1,5 +1,6 @@
 package com.rahnemacollege.resourceAssembler;
 
+import com.rahnemacollege.controller.AuctionController;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.resources.AuctionResource;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
@@ -12,7 +13,7 @@ public class AuctionResourceAssembler extends ResourceAssemblerSupport<Auction, 
      *
      */
     public AuctionResourceAssembler() {
-        super(Auction.class, AuctionResource.class);
+        super(AuctionController.class, AuctionResource.class);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.rahnemacollege.resourceAssembler;
 
+import com.rahnemacollege.controller.UserController;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.resources.UserResource;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
@@ -7,7 +8,7 @@ import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 
 public class UserResourceAssembler extends ResourceAssemblerSupport<User, UserResource> {
     public UserResourceAssembler() {
-        super(User.class, UserResource.class);
+        super(UserController.class, UserResource.class);
     }
 
     @Override

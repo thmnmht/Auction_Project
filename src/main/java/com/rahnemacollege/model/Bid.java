@@ -14,12 +14,14 @@ public class Bid {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    @Column(name = "auction_uid")
+
     @ManyToOne
+//    @Column(name = "auction_uid")
     private Auction auction;
 
-    @Column(name = "user_uid")
+
     @ManyToOne
+//    @Column(name = "user_uid")
     private User user;
     private int price;
     private Date date;

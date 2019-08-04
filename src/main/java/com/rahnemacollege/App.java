@@ -5,14 +5,13 @@ package com.rahnemacollege;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 
-//@SpringBootApplication(exclude = {JacksonAutoConfiguration.class})
-@Configuration @EnableAutoConfiguration @ComponentScan
+
+@SpringBootApplication(exclude = {JacksonAutoConfiguration.class}, scanBasePackages={
+        "com.rahnemacollege.resourceAssembler", "com.rahnemacollege.resources"})
+//@Configuration @EnableAutoConfiguration @ComponentScan
 public class App implements CommandLineRunner {
 
     public static void main(String[] args)

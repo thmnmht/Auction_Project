@@ -31,14 +31,21 @@ public class UserController {
         userService.addUser(user);
         return assembler.toResource(user);
     }
+//
+//    @GetMapping("/all")
+//    public Resources<UserResource> all() {
+//        List<UserResource> users = userService.getAll().stream()
+//                .map(assembler::toResource)
+//                .collect(Collectors.toList());
+//        return new Resources<>(users,
+//                linkTo(methodOn(UserController.class).all()).withSelfRel());
+//    }
+
 
     @GetMapping("/all")
-    public Resources<UserResource> all() {
-        List<UserResource> users = userService.getAll().stream()
-                .map(assembler::toResource)
-                .collect(Collectors.toList());
-        return new Resources<>(users,
-                linkTo(methodOn(UserController.class).all()).withSelfRel());
+    public String all() {
+
+        return "salam!!";
     }
 
 

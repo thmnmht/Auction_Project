@@ -9,6 +9,7 @@ import java.util.Set;
 
 @Data
 @Entity
+@Table(name = "auctions")
 public class Auction {
 
     private String title;
@@ -26,7 +27,9 @@ public class Auction {
     private int id;
 
     private int state;
+    @ManyToOne
     private User winner;
+    @ManyToOne
     private User owner;
 
     public Auction(String title,String description,int base_price,List pictures,Category category,Date date){
