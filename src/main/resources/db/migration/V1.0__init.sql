@@ -3,7 +3,8 @@ CREATE TABLE Categories
     id   INT         NOT NULL AUTO_INCREMENT,
     name VARCHAR(40) NOT NULL,
     PRIMARY KEY (id)
-) ENGINE = InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 CREATE TABLE Pictures
 (
@@ -11,7 +12,8 @@ CREATE TABLE Pictures
     filename VARCHAR(100) NOT NULL,
     date     DATE         NOT NULL,
     PRIMARY KEY (id)
-) ENGINE = InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 CREATE TABLE Bids
 (
@@ -20,8 +22,16 @@ CREATE TABLE Bids
     user_uid    INT  NOT NULL,
     price       INT  NOT NULL,
     date        DATE NOT NULL,
-    PRIMARY KEY (id)
-) ENGINE = InnoDB  DEFAULT CHARSET=utf8;
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_uid)
+        REFERENCES Users (id)
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (auction_uid)
+        REFERENCES Auctions (id)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 CREATE TABLE Auctions
 (
@@ -35,16 +45,30 @@ CREATE TABLE Auctions
     winner       INT,
     picture_uid  INT         NOT NULL,
     owner        INT         NOT NULL,
-    PRIMARY KEY (id)
-) ENGINE = InnoDB  DEFAULT CHARSET=utf8;
+    PRIMARY KEY (id),
+    FOREIGN KEY (winner, owner)
+        REFERENCES Users (id)
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (category_uid)
+        REFERENCES Categories (id)
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (picture_uid)
+        REFERENCES Pictures (id)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 CREATE TABLE Login_infos
 (
     id       INT  NOT NULL AUTO_INCREMENT,
     user_uid INT  NOT NULL,
     date     DATE NOT NULL,
-    PRIMARY KEY (id)
-) ENGINE = InnoDB  DEFAULT CHARSET=utf8;
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_uid)
+        REFERENCES Users (id)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 CREATE TABLE Users
 (
@@ -54,5 +78,9 @@ CREATE TABLE Users
     password  VARCHAR(100) NOT NULL,
     picture   VARCHAR(100),
     bookmarks INT,
-    PRIMARY KEY (id)
-) ENGINE = InnoDB  DEFAULT CHARSET=utf8;
+    PRIMARY KEY (id),
+    FOREIGN KEY (bookmarks)
+        REFERENCES Auctions (id)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
