@@ -19,7 +19,7 @@ public class Auction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private int id;
     private State state = State.SOON;
     private User winner;
     private User owner;

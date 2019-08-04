@@ -17,8 +17,9 @@ public class AuctionDomain {
     private int base_price;
     private String date;
     private List<Long> pictures;
-    private Category category;
+    private String category;
     private User winner;
     private User owner;
+
 
 }
