@@ -16,6 +16,7 @@ public class Auction {
     private String description;
     private int base_price;
     private Date date;
+    @OneToMany
     private List<Picture> pictures;
     private Category category;
 
@@ -23,8 +24,10 @@ public class Auction {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    private State state;
+    private int state;
+    @ManyToOne
     private User winner;
+    @ManyToOne
     private User owner;
 
     public Auction(String title,String description,int base_price,List pictures,Category category,Date date){
@@ -34,14 +37,14 @@ public class Auction {
         this.pictures = pictures;
         this.date = date;
         this.category = category;
-        state = State.SOON;
+        state = 0;
     }
 
     @Version
     private Integer version;
 
     @OneToMany
-    private Set<Bid> bids;
+    private List<Bid> bids;
 
 
 
