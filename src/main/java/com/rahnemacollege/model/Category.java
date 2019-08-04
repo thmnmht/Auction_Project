@@ -1,16 +1,13 @@
 package com.rahnemacollege.model;
 
+import lombok.Data;
 import lombok.Getter;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
-public enum Category {
-
-    DIGITAL_GOODS(1 , "کالای دیجیتال" ),
-    HOME(3 , "منزل" ),
-    SPORT(2 , "ورزشی" );
+@Data
+public class Category {
 
     @Id @Getter
     private final int id;

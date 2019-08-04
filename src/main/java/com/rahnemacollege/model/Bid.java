@@ -2,8 +2,6 @@ package com.rahnemacollege.model;
 
 
 import lombok.Data;
-
-
 import javax.persistence.*;
 import java.util.Date;
 

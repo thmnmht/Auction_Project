@@ -2,7 +2,6 @@ package com.rahnemacollege.resources;
 
 import lombok.Data;
 import org.springframework.hateoas.ResourceSupport;
-
 import java.util.Date;
 
 
