@@ -1,17 +1,23 @@
 package com.rahnemacollege.model;
 
 import lombok.Data;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Date;
 
 @Data
 @Entity
+@Table(name = "Pictures")
 public class Picture {
 
 
     @Id
     private int id;
+
+    @Column(name = "filename")
     private String fileName;
     private Date date;
 
