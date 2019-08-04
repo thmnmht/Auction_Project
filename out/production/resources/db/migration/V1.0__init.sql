@@ -15,23 +15,19 @@ CREATE TABLE Pictures
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
-CREATE TABLE Bids
-(
-    id          INT  NOT NULL AUTO_INCREMENT,
-    auction_uid INT  NOT NULL,
-    user_uid    INT  NOT NULL,
-    price       INT  NOT NULL,
-    date        DATE NOT NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (user_uid)
-        REFERENCES Users (id)
-        ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (auction_uid)
-        REFERENCES Auctions (id)
-        ON UPDATE CASCADE ON DELETE RESTRICT
 
+
+CREATE TABLE Users
+(
+    id        INT          NOT NULL AUTO_INCREMENT,
+    name      VARCHAR(40)  NOT NULL,
+    email     VARCHAR(40)  NOT NULL,
+    password  VARCHAR(100) NOT NULL,
+    picture   VARCHAR(100),
+    PRIMARY KEY (id)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
+
 
 CREATE TABLE Auctions
 (
@@ -46,7 +42,10 @@ CREATE TABLE Auctions
     picture_uid  INT         NOT NULL,
     owner        INT         NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (winner, owner)
+    FOREIGN KEY (winner)
+        REFERENCES Users (id)
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (owner)
         REFERENCES Users (id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (category_uid)
@@ -70,17 +69,24 @@ CREATE TABLE Login_infos
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
-CREATE TABLE Users
+CREATE TABLE Bids
 (
-    id        INT          NOT NULL AUTO_INCREMENT,
-    name      VARCHAR(40)  NOT NULL,
-    email     VARCHAR(40)  NOT NULL,
-    password  VARCHAR(100) NOT NULL,
-    picture   VARCHAR(100),
-    bookmarks INT,
+    id          INT  NOT NULL AUTO_INCREMENT,
+    auction_uid INT  NOT NULL,
+    user_uid    INT  NOT NULL,
+    price       INT  NOT NULL,
+    date        DATE NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (bookmarks)
+    FOREIGN KEY (user_uid)
+        REFERENCES Users (id)
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (auction_uid)
         REFERENCES Auctions (id)
         ON UPDATE CASCADE ON DELETE RESTRICT
+
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
+ALTER TABLE  Users ADD COLUMN bookmarks INT, ADD
+    FOREIGN KEY (bookmarks)
+    REFERENCES Auctions (id)
+    ON UPDATE CASCADE ON DELETE RESTRICT
