@@ -2,7 +2,6 @@ package com.rahnemacollege.model;
 
 import lombok.Data;
 import lombok.Getter;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
