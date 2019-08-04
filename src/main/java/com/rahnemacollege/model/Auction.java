@@ -23,7 +23,7 @@ public class Auction {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    private State state;
+    private int state;
     private User winner;
     private User owner;
 
@@ -34,7 +34,7 @@ public class Auction {
         this.pictures = pictures;
         this.date = date;
         this.category = category;
-        state = State.SOON;
+        state = 0; //0:soon 1:started 2:finished
     }
 
     @Version

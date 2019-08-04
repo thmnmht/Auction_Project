@@ -20,13 +20,17 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
 
-//plugins {
-//    // Apply the java plugin to add support for Java
-//    id 'java'
-//
-//    // Apply the application plugin to add support for building a CLI application
-//    id 'application'
-//}
+plugins {
+
+    id "org.flywaydb.flyway" version "5.2.4"
+}
+
+
+flyway {
+    url = 'jdbc:mysql://localhost:3306/db_example'
+    user = 'springuser'
+    password = 'springuser'
+}
 
 repositories {
     mavenCentral()
