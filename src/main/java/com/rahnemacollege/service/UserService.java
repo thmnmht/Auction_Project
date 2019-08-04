@@ -5,9 +5,9 @@ import com.rahnemacollege.repository.UserRepository;
 
 
 @org.springframework.stereotype.Service
-public class Service {
+public class UserService {
     private final UserRepository repository;
-    public Service(UserRepository repository) {
+    public UserService(UserRepository repository) {
         this.repository = repository;
     }
 
