@@ -1,6 +1,5 @@
 package com.rahnemacollege.domain;
 
-import com.rahnemacollege.model.Category;
 import com.rahnemacollege.model.User;
 import lombok.Data;
 
