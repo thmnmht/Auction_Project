@@ -4,10 +4,14 @@ import com.rahnemacollege.model.User;
 import com.rahnemacollege.resourceAssembler.UserResourceAssembler;
 import com.rahnemacollege.resources.UserResource;
 import com.rahnemacollege.service.UserService;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/users")
@@ -27,5 +31,16 @@ public class UserController {
         userService.addUser(user);
         return assembler.toResource(user);
     }
+
+    @GetMapping("/all")
+    public Resources<UserResource> all() {
+        List<UserResource> users = userService.getAll().stream()
+                .map(assembler::toResource)
+                .collect(Collectors.toList());
+        return new Resources<>(users,
+                linkTo(methodOn(UserController.class).all()).withSelfRel());
+    }
+
+
 
 }
