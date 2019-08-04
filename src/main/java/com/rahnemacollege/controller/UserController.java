@@ -25,7 +25,7 @@ public class UserController {
         this.assembler = assembler;
     }
 
-    @PostMapping
+    @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public UserResource add(@RequestBody User user) {
         userService.addUser(user);
