@@ -1,7 +1,6 @@
 package com.rahnemacollege.model;
 
 import lombok.Data;
-
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
@@ -16,7 +15,10 @@ public class Auction {
     private String description;
     private int base_price;
     private Date date;
+
+    @OneToMany
     private List<Picture> pictures;
+    @ManyToOne
     private Category category;
 
     @Id
