@@ -3,12 +3,21 @@
  */
 package com.rahnemacollege;
 
-public class App {
-    public String getGreeting() {
-        return "Hello world.";
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+
+@SpringBootApplication(exclude = {JacksonAutoConfiguration.class})
+public class App implements CommandLineRunner {
+
+    public static void main(String[] args)
+    {
+        SpringApplication.run(App.class, args);
     }
 
-    public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+    @Override
+    public void run(String... args) throws Exception {
+        //TODO: add category to DB
     }
 }
