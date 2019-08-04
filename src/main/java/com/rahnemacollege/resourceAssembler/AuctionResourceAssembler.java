@@ -1,9 +1,7 @@
 package com.rahnemacollege.resourceAssembler;
 
 import com.rahnemacollege.model.Auction;
-import com.rahnemacollege.model.User;
 import com.rahnemacollege.resources.AuctionResource;
-import com.rahnemacollege.resources.UserResource;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 
 

@@ -22,9 +22,9 @@ public class AuctionController {
 
     @PostMapping("/add")
     @ResponseStatus(HttpStatus.CREATED)
-    public AuctionResource add(@RequestBody AuctionDomain auctionDomain, @RequestPart MultipartFile img) throws IOException {
+    public AuctionResource add(@RequestBody AuctionDomain auctionDomain, @RequestPart MultipartFile[] images) throws IOException {
         //set photo for auction
-//        auctionDomain.setPictures(auctionService.makePictures(img));
+        auctionDomain.setPictures(auctionService.makePictures(images));
 
         return auctionService.addAuction(auctionDomain);
     }

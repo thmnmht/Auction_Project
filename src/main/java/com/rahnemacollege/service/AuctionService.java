@@ -34,6 +34,7 @@ public class AuctionService {
 
      public List<Picture> makePictures(MultipartFile... images) throws IOException {
          ArrayList<Picture> pictures = new ArrayList<>();
+
          int counter = 1;
          for (MultipartFile image:
                  images) {
