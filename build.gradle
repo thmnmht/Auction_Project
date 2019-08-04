@@ -6,6 +6,7 @@
  * User Manual available at https://docs.gradle.org/5.5.1/userguide/tutorial_java_projects.html
  */
 
+
 buildscript {
     repositories {
         mavenCentral()
@@ -18,11 +19,23 @@ apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
+
+//plugins {
+//    // Apply the java plugin to add support for Java
+//    id 'java'
+//
+//    // Apply the application plugin to add support for building a CLI application
+//    id 'application'
+//}
+
 repositories {
-    // Use jcenter for resolving dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
+    mavenCentral()
 }
+
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 
 dependencies {
     compile 'org.springframework.boot:spring-boot-starter-web'
@@ -46,8 +59,15 @@ dependencies {
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
 
-    //lombok
+
+    // JPA Data (We are going to use Repositories, Entities, Hibernate)
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Use MySQL Connector-J
+    compile 'mysql:mysql-connector-java'
     compileOnly 'org.projectlombok:lombok:1.18.8'
     annotationProcessor 'org.projectlombok:lombok:1.18.8'
-}
 
+
+
+}
