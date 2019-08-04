@@ -37,7 +37,7 @@ CREATE TABLE Auctions
     base_price   INT         NOT NULL,
     category_id INT         NOT NULL,
     date         DATE        NOT NULL,
-    state        VARCHAR(20) NOT NULL,
+    state        INT         NOT NULL,
     winner       INT,
     picture_id  INT         NOT NULL,
     owner        INT         NOT NULL,

@@ -4,7 +4,6 @@ import lombok.Data;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 
 @Data
@@ -18,8 +17,10 @@ public class Auction {
     private Date date;
 
     @OneToMany
+    @Column(name = "picture_uid")
     private List<Picture> pictures;
     @ManyToOne
+    @Column(name = "category_uid")
     private Category category;
 
     @Id
@@ -41,12 +42,9 @@ public class Auction {
         this.category = category;
         state = 0; //0:soon 1:started 2:finished
     }
-
-    @Version
-    private Integer version;
-
-    @OneToMany
-    private Set<Bid> bids;
+//
+//    @OneToMany
+//    private Set<Bid> bids;
 
 
 
