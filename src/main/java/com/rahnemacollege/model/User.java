@@ -26,11 +26,11 @@ public class User {
     @ManyToMany
     private Set<Auction> bookmarks;
 
-    @OneToMany
-    private Set<Bid> bids;
-
-    @OneToMany
-    private Set<LoginInfo> loginInfos;
+//    @OneToMany
+//    private Set<Bid> bids;
+//
+//    @OneToMany
+//    private Set<LoginInfo> loginInfos;
 
 
 
