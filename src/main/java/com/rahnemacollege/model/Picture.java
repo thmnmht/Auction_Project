@@ -3,6 +3,7 @@ package com.rahnemacollege.model;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Data
@@ -17,6 +18,7 @@ public class Picture {
 
     @Column(name = "filename")
     private String fileName;
+    @NotNull(message = "Invalid date.")
     private Date date;
 
     public Picture(String fileName){
