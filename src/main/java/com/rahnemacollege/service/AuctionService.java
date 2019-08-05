@@ -18,10 +18,14 @@ import java.util.*;
 @Service
 public class AuctionService {
 
+    private final AuctionRepository auctionRepository;
+    private final ResourceAssembler assembler;
+
     @Autowired
-    private AuctionRepository auctionRepository;
-    @Autowired
-    private ResourceAssembler assembler;
+    public AuctionService(AuctionRepository auctionRepository, ResourceAssembler assembler) {
+        this.auctionRepository = auctionRepository;
+        this.assembler = assembler;
+    }
 
     public Auction addAuction(AuctionDomain auctionDomain){
         Auction auction = toAuction(auctionDomain);
