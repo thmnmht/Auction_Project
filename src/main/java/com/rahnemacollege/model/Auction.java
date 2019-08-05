@@ -37,6 +37,8 @@ public class Auction {
     @ManyToOne
     private User owner;
 
+
+    public Auction(){}
     public Auction(String title,String description,int base_price,List pictures,Category category,Date date){
         this.title = title;
         this.description = description;

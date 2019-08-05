@@ -3,6 +3,7 @@ package com.rahnemacollege.model;
 import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import java.security.PublicKey;
 import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -33,5 +34,11 @@ public class User {
 //    private Set<LoginInfo> loginInfos;
 
 
+    public User(){}
+    public User(String name,String email,String password){
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
 
 }

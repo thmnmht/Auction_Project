@@ -8,13 +8,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.util.Date;
 
 
 @SpringBootApplication(exclude = {JacksonAutoConfiguration.class}, scanBasePackages={
         "com.rahnemacollege"})
-//@Configuration @EnableAutoConfiguration @ComponentScan
+@EnableJpaRepositories("com.rahnemacollege.repository")
 public class App extends SpringBootServletInitializer {
 
     public static void main(String[] args)

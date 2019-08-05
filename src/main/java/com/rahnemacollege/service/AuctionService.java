@@ -19,12 +19,10 @@ import java.util.*;
 public class AuctionService {
 
     private final AuctionRepository auctionRepository;
-    private final ResourceAssembler assembler;
 
     @Autowired
-    public AuctionService(AuctionRepository auctionRepository, ResourceAssembler assembler) {
+    public AuctionService(AuctionRepository auctionRepository) {
         this.auctionRepository = auctionRepository;
-        this.assembler = assembler;
     }
 
     public Auction addAuction(AuctionDomain auctionDomain){
@@ -64,10 +62,6 @@ public class AuctionService {
 
     public Optional<Auction> findById(int id) {
         return auctionRepository.findById(id);
-    }
-
-    public Resource<Auction> toResource(Auction auction) {
-        return assembler.toResource(auction);
     }
 
     public List<Auction> getAll() {
