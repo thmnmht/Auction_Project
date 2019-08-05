@@ -3,11 +3,13 @@ package com.rahnemacollege.controller;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.util.ResourceAssembler;
 import com.rahnemacollege.service.UserService;
+import com.rahnemacollege.util.exceptions.NotFoundException;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +31,7 @@ public class UserController {
 
     @PostMapping("/signup")
 //    @ResponseStatus(HttpStatus.CREATED)
-    public Resource<User> add(@RequestBody User user) {
+    public Resource<User> add(@RequestBody @Valid User user) {
         userService.addUser(user);
         return assembler.toResource(user);
     }
@@ -54,7 +56,7 @@ public class UserController {
 
     @GetMapping("/find/{id}")
     public Resource<User> one(int id) {
-        User user = userService.findById(id).orElseThrow(() -> new IllegalArgumentException(id + " was not found!"));
+        @Valid User user = userService.findById(id).orElseThrow(() -> new NotFoundException(id ,User.class));
         return assembler.toResource(user);
     }
 

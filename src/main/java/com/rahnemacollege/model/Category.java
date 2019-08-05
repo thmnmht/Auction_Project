@@ -3,10 +3,7 @@ package com.rahnemacollege.model;
 import lombok.Data;
 import lombok.Getter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Data
@@ -14,6 +11,7 @@ import javax.persistence.Table;
 public class Category {
 
     @Id @Getter
+    @GeneratedValue(strategy= GenerationType.AUTO)
     private int id;
 
     @Getter

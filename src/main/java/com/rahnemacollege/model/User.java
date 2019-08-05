@@ -16,9 +16,9 @@ import javax.persistence.Id;
 public class User {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-    private int id;
+    private Integer id;
     private String name;
-    @Email
+    @Email(message = "Invalid email address.")
     private String email;
     private String password;
     private String picture;

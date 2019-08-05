@@ -2,10 +2,7 @@ package com.rahnemacollege.model;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 
 @Data
@@ -15,7 +12,8 @@ public class Picture {
 
 
     @Id
-    private int id;
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    private Integer id;
 
     @Column(name = "filename")
     private String fileName;

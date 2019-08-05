@@ -12,7 +12,7 @@ public class LoginInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private Integer id;
 
     @ManyToOne
 //    @Column(name = "user_uid")
