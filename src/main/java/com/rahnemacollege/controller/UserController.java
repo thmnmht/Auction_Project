@@ -24,7 +24,6 @@ public class UserController {
 
 
     @PostMapping("/signup")
-//    @ResponseStatus(HttpStatus.CREATED)
     public Resource<User> add(@RequestBody @Valid UserDomain userDomain) {
         User user = userService.addUser(userDomain);
         return assembler.toResource(user);

@@ -4,7 +4,6 @@ import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.UserRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

@@ -8,7 +8,6 @@ import com.rahnemacollege.util.ResourceAssembler;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @RestController
@@ -25,16 +24,13 @@ public class AuctionController {
 
 
     @PostMapping("/add")
-//    @ResponseStatus(HttpStatus.CREATED)
-    public Resource<Auction> add(@RequestBody AuctionDomain auctionDomain, @RequestPart MultipartFile[] images) throws IOException {
-        //set photo for auction
-        auctionDomain.setPictures(auctionService.makePictures(images));
+    public Resource<Auction> add(@RequestBody AuctionDomain auctionDomain) throws IOException {
         return assembler.toResource(auctionService.addAuction(auctionDomain));
     }
 
     @GetMapping("/greeting")
     public String greeting() {
-        return "hello world";
+        return "hello world :)";
     }
 
     @GetMapping("/find/{id}")

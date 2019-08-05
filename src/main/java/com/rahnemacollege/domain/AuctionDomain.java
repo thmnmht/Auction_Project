@@ -3,6 +3,8 @@ package com.rahnemacollege.domain;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.model.Picture;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.Date;
 import java.util.List;
 
@@ -17,7 +19,7 @@ public class AuctionDomain {
     private int base_price;
     private Date date;
     private Category category;
-    private List<Picture> pictures;
+    private MultipartFile[] pictures;
 
 
 

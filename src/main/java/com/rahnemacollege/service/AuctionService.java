@@ -5,9 +5,7 @@ import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Picture;
 import com.rahnemacollege.repository.AuctionRepository;
-import com.rahnemacollege.util.ResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
@@ -25,26 +23,23 @@ public class AuctionService {
         this.auctionRepository = auctionRepository;
     }
 
-    public Auction addAuction(AuctionDomain auctionDomain){
+    public Auction addAuction(AuctionDomain auctionDomain) throws IOException {
         Auction auction = toAuction(auctionDomain);
         auctionRepository.save(auction);
         return auction;
     }
 
 
-     public List<Picture> makePictures(MultipartFile... images) throws IOException {
+     public List<Picture> savePictures(String title,MultipartFile[] images) throws IOException {
          ArrayList<Picture> pictures = new ArrayList<>();
-
-         int counter = 1;
          for (MultipartFile image:
                  images) {
 
-             String imageName = "image/" + new Date().getTime() + "@" + counter + ".jpg";
-             counter++;
+             String imageName = "image/" + new Date().getTime() + "_" + title + ".jpg";
              Picture picture = new Picture(imageName);
              pictures.add(picture);
 
-             //getting image
+             //saving image
              File upl = new File(imageName);
              upl.createNewFile();
              FileOutputStream fout = new FileOutputStream(upl);
@@ -56,8 +51,8 @@ public class AuctionService {
      }
     
     
-    public Auction toAuction(AuctionDomain auctionDomain){
-        return new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),auctionDomain.getPictures(),auctionDomain.getCategory(),auctionDomain.getDate());
+    public Auction toAuction(AuctionDomain auctionDomain) throws IOException {
+        return new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(), savePictures(auctionDomain.getTitle(),auctionDomain.getPictures()),auctionDomain.getCategory(),auctionDomain.getDate());
     }
 
     public Optional<Auction> findById(int id) {
