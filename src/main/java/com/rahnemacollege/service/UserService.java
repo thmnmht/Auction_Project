@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -23,5 +24,9 @@ public class UserService {
         ArrayList<User> users = new ArrayList<>();
         repository.findAll().forEach(users::add);
         return users;
+    }
+
+    public Optional<com.rahnemacollege.model.User> findById(int id) {
+        return repository.findById(id);
     }
 }

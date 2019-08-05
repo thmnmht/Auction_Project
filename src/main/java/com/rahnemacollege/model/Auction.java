@@ -2,6 +2,8 @@ package com.rahnemacollege.model;
 
 import lombok.Data;
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -13,6 +15,7 @@ public class Auction {
 
     private String title;
     private String description;
+    @Min(message = "Price cannot be negative", value = 0)
     private int base_price;
     private Date date;
 
@@ -29,6 +32,7 @@ public class Auction {
 
     private int state;
     @ManyToOne
+//    @NotNull(message = "Who is the owner of this auction?")
     private User winner;
     @ManyToOne
     private User owner;

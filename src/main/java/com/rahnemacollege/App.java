@@ -7,20 +7,19 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+
+import java.util.Date;
 
 
 @SpringBootApplication(exclude = {JacksonAutoConfiguration.class}, scanBasePackages={
-        "com.rahnemacollege.resourceAssembler", "com.rahnemacollege.resources"})
+        "com.rahnemacollege"})
 //@Configuration @EnableAutoConfiguration @ComponentScan
-public class App implements CommandLineRunner {
+public class App extends SpringBootServletInitializer {
 
     public static void main(String[] args)
     {
+        System.err.println(new Date());
         SpringApplication.run(App.class, args);
-    }
-
-    @Override
-    public void run(String... args) throws Exception {
-        //TODO: add category to DB
     }
 }

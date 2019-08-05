@@ -5,17 +5,15 @@ import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Picture;
 import com.rahnemacollege.repository.AuctionRepository;
-import com.rahnemacollege.resourceAssembler.AuctionResourceAssembler;
-import com.rahnemacollege.resources.AuctionResource;
+import com.rahnemacollege.util.ResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class AuctionService {
@@ -23,12 +21,12 @@ public class AuctionService {
     @Autowired
     private AuctionRepository auctionRepository;
     @Autowired
-    private AuctionResourceAssembler assembler;
+    private ResourceAssembler assembler;
 
-    public AuctionResource addAuction(AuctionDomain auctionDomain){
+    public Auction addAuction(AuctionDomain auctionDomain){
         Auction auction = toAuction(auctionDomain);
         auctionRepository.save(auction);
-        return assembler.toResource(auction);
+        return auction;
     }
 
 
@@ -60,4 +58,17 @@ public class AuctionService {
         return new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),auctionDomain.getPictures(),auctionDomain.getCategory(),auctionDomain.getDate());
     }
 
+    public Optional<Auction> findById(int id) {
+        return auctionRepository.findById(id);
+    }
+
+    public Resource<Auction> toResource(Auction auction) {
+        return assembler.toResource(auction);
+    }
+
+    public List<Auction> getAll() {
+        ArrayList<Auction> auctions = new ArrayList<>();
+        auctionRepository.findAll().forEach(auctions::add);
+        return auctions;
+    }
 }
