@@ -7,18 +7,18 @@ import java.util.Date;
 
 @Data
 @Entity
-@Table(name = "Pictures")
-public class Picture {
+@Table(name = "User_Pictures")
+public class UserPicture {
 
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer id;
-
-    
     private Date date;
-
-    public Picture(){
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+    public UserPicture(){
         date = new Date();
     }
 

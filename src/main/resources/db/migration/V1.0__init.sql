@@ -6,27 +6,28 @@ CREATE TABLE Categories
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
-CREATE TABLE Pictures
-(
-    id       INT          NOT NULL AUTO_INCREMENT,
-    filename VARCHAR(100) NOT NULL,
-    date     DATE         NOT NULL,
-    PRIMARY KEY (id)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
-
 
 
 CREATE TABLE Users
 (
-    id        INT          NOT NULL AUTO_INCREMENT,
+    id        INT          NOT NULL PRIMARY KEY AUTO_INCREMENT,
     name      VARCHAR(40)  NOT NULL,
     email     VARCHAR(40)  NOT NULL,
-    password  VARCHAR(100) NOT NULL,
-    picture   VARCHAR(100),
-    PRIMARY KEY (id)
+    password  VARCHAR(100) NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
+
+  CREATE TABLE User_Pictures
+(
+    id       INT          NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    user_id  INT          NOT NULL,
+    date     DATE         NOT NULL,
+    FOREIGN KEY (user_id)
+        REFERENCES Users (id)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
 
 
 CREATE TABLE Auctions
@@ -38,21 +39,30 @@ CREATE TABLE Auctions
     category_id INT         NOT NULL,
     date         DATE        NOT NULL,
     state        INT         NOT NULL,
-    winner       INT,
-    picture_id  INT         NOT NULL,
-    owner        INT         NOT NULL,
+    winner_id       INT      NOT NULL,
+    owner_id        INT         NOT NULL,
+    max_number  INT        NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (winner)
+    FOREIGN KEY (winner_id)
         REFERENCES Users (id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (owner)
+    FOREIGN KEY (owner_id)
         REFERENCES Users (id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (category_id)
         REFERENCES Categories (id)
-        ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (picture_id)
-        REFERENCES Pictures (id)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+  CREATE TABLE Auction_Pictures
+(
+    id       INT          NOT NULL AUTO_INCREMENT,
+    Auction_id  INT          NOT NULL,
+    date     DATE         NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (Auction_id)
+        REFERENCES Auctions (id)
         ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -86,7 +96,8 @@ CREATE TABLE Bids
 
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
-ALTER TABLE  Users ADD COLUMN bookmarks INT, ADD
-    FOREIGN KEY (bookmarks)
-    REFERENCES Auctions (id)
+
+  ALTER TABLE  Users ADD COLUMN picture_id INT, ADD
+    FOREIGN KEY (picture_id)
+    REFERENCES User_Pictures (id)
     ON UPDATE CASCADE ON DELETE RESTRICT

@@ -22,8 +22,8 @@ public class User {
     @Email(message = "Invalid email address.")
     private String email;
     private String password;
-    private String picture;
-
+    @OneToOne(mappedBy = "user")
+    private UserPicture picture;
     @ManyToMany
     private Set<Auction> bookmarks;
 
@@ -39,6 +39,9 @@ public class User {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.picture = null;
+        this.bookmarks = null;
+
     }
 
 }

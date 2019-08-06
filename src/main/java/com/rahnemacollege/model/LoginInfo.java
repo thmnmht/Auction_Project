@@ -13,9 +13,8 @@ public class LoginInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
-
     @ManyToOne
-//    @Column(name = "user_uid")
+    @JoinColumn(name = "user_id")
     private User user;
     private Date date;
 

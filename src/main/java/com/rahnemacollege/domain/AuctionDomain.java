@@ -11,12 +11,13 @@ import java.util.Date;
 @Data
 public class AuctionDomain {
 
+    private MultipartFile[] pictures;
     private String title;
     private String description;
     private int base_price;
-    private Date date;
     private Category category;
-    private MultipartFile[] pictures;
+    private Date date;
+    private int max_number;
 
 
 
