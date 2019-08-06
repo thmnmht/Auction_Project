@@ -3,6 +3,7 @@ package com.rahnemacollege.model;
 
 import lombok.Data;
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Data
@@ -15,8 +16,8 @@ public class LoginInfo {
     private Integer id;
 
     @ManyToOne
-//    @Column(name = "user_uid")
     private User user;
+    @NotNull(message = "Invalid date.")
     private Date date;
 
 

@@ -11,7 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-
+import javax.validation.constraints.Size;
 
 @Data
 @Entity
@@ -20,9 +20,11 @@ public class User {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer id;
+    @Size(min = 4, max = 100, message = "Invalid name")
     private String name;
     @Email(message = "Invalid email address.")
     private String email;
+    @Size(min = 6, max = 100, message = "Invalid name")
     private String password;
     private String picture;
 
