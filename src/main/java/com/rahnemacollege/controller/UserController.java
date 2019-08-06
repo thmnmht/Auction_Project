@@ -36,7 +36,7 @@ public class UserController {
 
 
     @GetMapping("/find/{id}")
-    public Resource<User> one(int id) {
+    public Resource<User> one(@PathVariable int id) {
         @Valid User user = userService.findById(id).orElseThrow(() -> new NotFoundException(id ,User.class));
         return assembler.toResource(user);
     }
