@@ -36,7 +36,7 @@ public class ResourceAssembler {
     public Resource<Auction> toResource(Auction auction){
         return new Resource<>(auction,
                 linkTo(methodOn(AuctionController.class).all()).withRel("all"),
-                linkTo(methodOn(AuctionController.class).one(auction.getId())).withRel("all"));
+                linkTo(methodOn(AuctionController.class).one(auction.getId())).withRel("self"));
     }
 
 }

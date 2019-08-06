@@ -1,9 +1,10 @@
 package com.rahnemacollege.model;
 
 import lombok.Data;
+import org.springframework.data.rest.core.annotation.RestResource;
+
 import javax.persistence.*;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class Auction {
     private int base_price;
     @ManyToOne
     @JoinColumn(name = "category_id")
+    @RestResource(exported = false)
     private Category category;
     private Date date;
     private int state;
