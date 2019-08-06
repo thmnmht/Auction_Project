@@ -20,10 +20,8 @@ public class Auction {
     private Date date;
 
     @OneToMany
-//    @Column(name = "picture_uid")
     private List<Picture> pictures;
     @ManyToOne
-//    @Column(name = "category_uid")
     private Category category;
 
     @Id
@@ -48,9 +46,6 @@ public class Auction {
         this.category = category;
         state = 0; //0:soon 1:started 2:finished
     }
-//
-//    @OneToMany
-//    private Set<Bid> bids;
 
 
 
