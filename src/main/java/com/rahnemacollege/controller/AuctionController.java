@@ -6,12 +6,14 @@ import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.util.ResourceAssembler;
+import org.hibernate.validator.constraints.URL;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLConnection;
 import java.util.List;
 
 @RestController
@@ -43,7 +45,7 @@ public class AuctionController {
     }
 
     @GetMapping("/find/{id}")
-    public Resource<Auction> one(int id) {
+    public Resource<Auction> one(@PathVariable int id) {
         Auction auction = auctionService.findById(id).orElseThrow(() -> new IllegalArgumentException(id+ " was not found!"));
         return assembler.toResource(auction);
     }
