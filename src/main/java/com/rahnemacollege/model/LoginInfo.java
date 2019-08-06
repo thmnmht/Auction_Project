@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Data
 @Entity
-@Table(name = "Login_infos")
+@Table(name = "login_infos")
 public class LoginInfo {
 
     @Id

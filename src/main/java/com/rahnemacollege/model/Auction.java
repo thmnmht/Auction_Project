@@ -1,9 +1,10 @@
 package com.rahnemacollege.model;
 
 import lombok.Data;
+import org.springframework.data.rest.core.annotation.RestResource;
+
 import javax.persistence.*;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "auctions")
-public class Auction {
+public class    Auction {
 
     private String title;
     private String description;
@@ -21,7 +22,9 @@ public class Auction {
 
     @OneToMany
     private List<Picture> pictures;
+
     @ManyToOne
+    @RestResource(exported = false)
     private Category category;
 
     @Id

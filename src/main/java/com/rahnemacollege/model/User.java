@@ -1,6 +1,8 @@
 package com.rahnemacollege.model;
 
 import lombok.Data;
+import org.springframework.data.rest.core.annotation.RestResource;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.security.PublicKey;
@@ -13,7 +15,7 @@ import javax.persistence.Id;
 
 @Data
 @Entity
-@Table(name = "Users")
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -25,6 +27,7 @@ public class User {
     private String picture;
 
     @ManyToMany
+    @RestResource(exported = false)
     private Set<Auction> bookmarks;
 
 //    @OneToMany

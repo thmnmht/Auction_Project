@@ -3,12 +3,16 @@ package com.rahnemacollege.controller;
 
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
+import com.rahnemacollege.model.Category;
 import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.util.ResourceAssembler;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/auctions")
@@ -20,6 +24,11 @@ public class AuctionController {
     public AuctionController(AuctionService auctionService, ResourceAssembler assembler) {
         this.auctionService = auctionService;
         this.assembler = assembler;
+    }
+
+    @GetMapping("/category")
+    public List<Category> getCategory(){
+        return auctionService.getCategory();
     }
 
 
