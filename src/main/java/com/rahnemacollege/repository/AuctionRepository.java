@@ -1,6 +1,5 @@
 package com.rahnemacollege.repository;
 
-
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
 import org.springframework.data.domain.Page;
@@ -8,14 +7,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import com.rahnemacollege.model.Category;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import java.util.Optional;
+
 
 
 @Repository

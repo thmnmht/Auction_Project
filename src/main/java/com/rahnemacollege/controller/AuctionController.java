@@ -4,7 +4,6 @@ package com.rahnemacollege.controller;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.service.AuctionService;
-import com.rahnemacollege.service.CategoryService;
 import com.rahnemacollege.util.ResourceAssembler;
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedResourcesAssembler;
