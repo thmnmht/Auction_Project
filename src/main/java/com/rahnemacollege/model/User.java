@@ -19,7 +19,7 @@ public class User {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer id;
-    @Size(min = 4, max = 100, message = "Invalid name")
+    @Size(min = 1, max = 100, message = "Invalid name")
     private String name;
     @Email(message = "Invalid email address.")
     @Size(min = 5,message = "Invalid name")
@@ -31,12 +31,6 @@ public class User {
     @ManyToMany
     @RestResource(exported = false)
     private Set<Auction> bookmarks;
-
-//    @OneToMany
-//    private Set<Bid> bids;
-//
-//    @OneToMany
-//    private Set<LoginInfo> loginInfos;
 
 
     public User(){}

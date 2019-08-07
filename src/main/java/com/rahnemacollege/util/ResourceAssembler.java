@@ -23,13 +23,13 @@ public class ResourceAssembler {
 
     public Resources<Resource<User>> toResourcesUser(List<User> users){
        return new Resources<>(users.stream()
-                .map(u -> toResource(u))
+                .map(this::toResource)
                 .collect(Collectors.toList()),linkTo(methodOn(UserController.class).all()).withSelfRel());
     }
 
     public Resources<Resource<Auction>> toResourcesAuc(List<Auction> auctions){
        return new Resources<>(auctions.stream()
-                .map(u -> toResource(u))
+                .map(this::toResource)
                 .collect(Collectors.toList()),linkTo(methodOn(AuctionController.class).all()).withSelfRel());
     }
 

@@ -15,7 +15,8 @@ CREATE TABLE Users
     email     VARCHAR(40)  NOT NULL,
     password  VARCHAR(100) NOT NULL,
     picture   VARCHAR(100),
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE KEY unique_email (email)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
