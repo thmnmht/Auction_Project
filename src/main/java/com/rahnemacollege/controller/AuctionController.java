@@ -71,9 +71,9 @@ public class AuctionController {
         return assembler.toResourcesAuc(auctions);
     }
 
-    @GetMapping("/filter/{id}")
-    public void filter(){
-
+    @GetMapping("/filter/{category_id}")
+    public Resources<Resource<Auction>> filter(@PathVariable int category_id){
+        return assembler.toResourcesAuc(auctionService.filter(category_id));
     }
 }
 

@@ -76,6 +76,11 @@ public class AuctionService {
 
     }
 
+    public List<Auction> filter(int category_id){
+        List<Auction> auctions = getAll();
+        return auctions.stream().filter(a -> a.getCategory().getId() == category_id).collect(Collectors.toList());
+    }
+
     public Optional<Auction> findById(int id) {
         return auctionRepository.findById(id);
     }

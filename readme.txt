@@ -11,3 +11,6 @@ Auction Project APIs
 
 -/auctions/search/{title} : search by title
         title : String
+
+-/auctions/filter/{category_id} : filter some categories
+        category_id : int
