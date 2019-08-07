@@ -19,9 +19,10 @@ public class    Auction {
     @Min(message = "Price cannot be negative", value = 0)
     private int base_price;
     private Date date;
-
-    @OneToMany
-    private List<Picture> pictures;
+//
+//    @OneToMany
+//    @RestResource(exported = false)
+//    private List<Picture> pictures;
 
     @ManyToOne
     @RestResource(exported = false)
@@ -40,11 +41,11 @@ public class    Auction {
 
 
     public Auction(){}
-    public Auction(String title,String description,int base_price,List pictures,Category category,Date date){
+    public Auction(String title,String description,int base_price,Category category,Date date){
         this.title = title;
         this.description = description;
         this.base_price = base_price;
-        this.pictures = pictures;
+//        this.pictures = pictures;
         this.date = date;
         this.category = category;
         state = 0; //0:soon 1:started 2:finished

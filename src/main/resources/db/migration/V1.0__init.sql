@@ -6,15 +6,6 @@ CREATE TABLE Categories
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
-CREATE TABLE Pictures
-(
-    id       INT          NOT NULL AUTO_INCREMENT,
-    filename VARCHAR(100) NOT NULL,
-    date     DATE         NOT NULL,
-    PRIMARY KEY (id)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
-
 
 
 CREATE TABLE Users
@@ -39,7 +30,6 @@ CREATE TABLE Auctions
     date         DATE        NOT NULL,
     state        INT         NOT NULL,
     winner       INT,
-    picture_id  INT         NOT NULL,
     owner        INT         NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (winner)
@@ -50,12 +40,24 @@ CREATE TABLE Auctions
         ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (category_id)
         REFERENCES Categories (id)
-        ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (picture_id)
-        REFERENCES Pictures (id)
         ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
+
+
+CREATE TABLE Pictures
+(
+    id       INT          NOT NULL AUTO_INCREMENT,
+    filename VARCHAR(100) NOT NULL,
+    auction_id INT         NOT NULL,
+    date     DATE         NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (auction_id)
+        REFERENCES Auctions (id)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
 
 CREATE TABLE Login_infos
 (

@@ -1,6 +1,7 @@
 package com.rahnemacollege.model;
 
 import lombok.Data;
+import org.springframework.data.rest.core.annotation.RestResource;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -20,6 +21,11 @@ public class Picture {
     private String fileName;
     @NotNull(message = "Invalid date.")
     private Date date;
+
+    @RestResource(exported = false)
+    @ManyToOne
+    @JoinColumn(name = "auction_id")
+    private Auction auction;
 
     public Picture(String fileName){
         this.fileName = fileName;
