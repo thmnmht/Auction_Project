@@ -4,7 +4,9 @@ import lombok.Data;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
@@ -21,21 +23,25 @@ public class Auction {
     private String title;
     @Size(min = 1, max = 100, message = "Invalid description")
     private String description;
-    @Min(message = "Price cannot be negative", value = 0)
+    @Min(message = "Price cannot be negative", value = 1)
     private int base_price;
     @ManyToOne
     @JoinColumn(name = "category_id")
     @RestResource(exported = false)
+    @NotNull(message = "category must be selected! -_-")
     private Category category;
+    @NotNull(message = "date must be selected! -_-")
     private Date date;
     private int state;
     @ManyToOne
     @JoinColumn(name = "winner_id")
-//    @NotNull(message = "Who is the owner of this auction?")
     private User winner;
     @ManyToOne
+//    @NotNull(message = "Who is the owner of this auction?")
     @JoinColumn(name = "owner_id")
     private User owner;
+    @Min(message = "Invalid number", value = 2)
+    @Max(message = "Invalid number", value = 15)
     private int max_number;
 
 
