@@ -41,4 +41,17 @@ public class UserService {
     public Optional<com.rahnemacollege.model.User> findById(int id) {
         return repository.findById(id);
     }
+
+    public User addUser(User user) {
+        repository.save(user);
+        return user;
+    }
+
+    public Optional<User> findUserByEmail(String email) {
+        return repository.findByEmail(email);
+    }
+
+    public Optional<User> findUserByResetToken(String token) {
+        return repository.findUserByResetToken(token);
+    }
 }

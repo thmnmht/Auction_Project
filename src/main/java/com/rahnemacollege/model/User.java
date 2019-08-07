@@ -6,6 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.security.PublicKey;
 import java.util.Set;
+import java.util.UUID;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -31,12 +32,10 @@ public class User {
     @ManyToMany
     @RestResource(exported = false)
     private Set<Auction> bookmarks;
+    @Column(name = "reset_token" , unique = true)
+    @Size(min = 36, max = 36, message = "Invalid token set.")
+    private String resetToken;
 
-//    @OneToMany
-//    private Set<Bid> bids;
-//
-//    @OneToMany
-//    private Set<LoginInfo> loginInfos;
 
 
     public User(){}
@@ -46,7 +45,7 @@ public class User {
         this.password = password;
         this.picture = null;
         this.bookmarks = null;
-
+        this.resetToken = UUID.randomUUID().toString();
     }
 
 }

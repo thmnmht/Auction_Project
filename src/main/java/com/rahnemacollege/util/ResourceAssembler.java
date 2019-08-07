@@ -2,6 +2,7 @@ package com.rahnemacollege.util;
 
 import com.rahnemacollege.controller.AuctionController;
 import com.rahnemacollege.controller.UserController;
+import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.User;
 import org.springframework.hateoas.Resource;
@@ -23,13 +24,13 @@ public class ResourceAssembler {
 
     public Resources<Resource<User>> toResourcesUser(List<User> users){
        return new Resources<>(users.stream()
-                .map(u -> toResource(u))
+                .map(this::toResource)
                 .collect(Collectors.toList()),linkTo(methodOn(UserController.class).all()).withSelfRel());
     }
 
     public Resources<Resource<Auction>> toResourcesAuc(List<Auction> auctions){
        return new Resources<>(auctions.stream()
-                .map(u -> toResource(u))
+                .map(this::toResource)
                 .collect(Collectors.toList()),linkTo(methodOn(AuctionController.class).all()).withSelfRel());
     }
 
