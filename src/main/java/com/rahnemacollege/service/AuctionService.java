@@ -65,7 +65,7 @@ public class AuctionService {
     public Auction toAuction(AuctionDomain auctionDomain){
         Category category = categoryRepository.findById(auctionDomain.getCategory_id()).orElseThrow( () ->
             new NotFoundException(auctionDomain.getCategory_id(),Category.class));
-        Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),category,auctionDomain.getDate());
+        Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),category,auctionDomain.getDate(),auctionDomain.getMax_number());
         return auction;
     }
 

@@ -88,7 +88,8 @@ CREATE TABLE Bids
 
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
-ALTER TABLE  Users ADD COLUMN bookmarks INT, ADD
-    FOREIGN KEY (bookmarks)
-    REFERENCES Auctions (id)
+
+  ALTER TABLE  Users ADD COLUMN picture_id INT, ADD
+    FOREIGN KEY (picture_id)
+    REFERENCES User_Pictures (id)
     ON UPDATE CASCADE ON DELETE RESTRICT

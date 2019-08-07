@@ -1,23 +1,26 @@
 package com.rahnemacollege.model;
 
-
 import lombok.Data;
+
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Data
 @Entity
-@Table(name = "Login_infos")
-public class LoginInfo {
+@Table(name = "User_Pictures")
+public class UserPicture {
+
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer id;
-    @ManyToOne
+    private Date date;
+    @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
-    private Date date;
+    public UserPicture(){
+        date = new Date();
+    }
 
 
 }

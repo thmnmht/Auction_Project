@@ -28,8 +28,8 @@ public class User {
     private String email;
     @Size(min = 6, max = 100, message = "Invalid name")
     private String password;
-    private String picture;
-
+    @OneToOne(mappedBy = "user")
+    private UserPicture picture;
     @ManyToMany
     @RestResource(exported = false)
     private Set<Auction> bookmarks;
@@ -46,6 +46,9 @@ public class User {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.picture = null;
+        this.bookmarks = null;
+
     }
 
 }
