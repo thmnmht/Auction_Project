@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AuctionService {
@@ -36,18 +37,18 @@ public class AuctionService {
         Auction auction = toAuction(auctionDomain);
         auctionRepository.save(auction);
         if(images != null)
-            savePictures(auction.getId(),images);
+            savePictures(auction,images);
         return auction;
     }
 
 
-     public void savePictures(int id,MultipartFile[] images) throws IOException {
+     public void savePictures(Auction auction,MultipartFile[] images) throws IOException {
          ArrayList<Picture> pictures = new ArrayList<>();
-         new File("./src/main/resources/image/" + id + "/" ).mkdir();
+         new File("./src/main/resources/image/" + auction.getId() + "/" ).mkdir();
          for (MultipartFile image:
                  images) {
-             String pathName = "./src/main/resources/image/" + id + "/" + new Date().getTime() + ".jpg";
-             Picture picture = new Picture(pathName);
+             String pathName = "./src/main/resources/image/" + auction.getId() + "/" + new Date().getTime() + ".jpg";
+             Picture picture = new Picture(pathName,auction);
              pictureRepository.save(picture);
              pictures.add(picture);
 
@@ -75,8 +76,19 @@ public class AuctionService {
 
     }
 
+    public List<Auction> filter(int category_id){
+        List<Auction> auctions = getAll();
+        return auctions.stream().filter(a -> a.getCategory().getId() == category_id).collect(Collectors.toList());
+    }
+
     public Optional<Auction> findById(int id) {
         return auctionRepository.findById(id);
+    }
+
+    public List<Auction> findByTitle(String title) {
+        List<Auction> auctions = getAll();
+        auctions = auctions.stream().filter(a -> a.getTitle().startsWith(title)).collect(Collectors.toList());
+        return auctions;
     }
 
     public List<Auction> getAll() {

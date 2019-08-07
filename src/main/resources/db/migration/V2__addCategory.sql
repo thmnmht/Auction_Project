@@ -1,3 +1,3 @@
-insert into Categories (name) values ("Sport");
-insert into Categories (name) values ("Home");
-insert into Categories (name) values ("Digital");
+insert into Categories (name) values ("ورزشی");
+insert into Categories (name) values ("خانه");
+insert into Categories (name) values ("دیجیتال");
