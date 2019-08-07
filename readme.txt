@@ -8,3 +8,6 @@ Auction Project APIs
         UserDomain : {
             name, email, password
         }
+
+-/auctions/search/{title} : search by title
+        title : String
