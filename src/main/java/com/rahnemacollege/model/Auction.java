@@ -37,7 +37,6 @@ public class Auction {
     @JoinColumn(name = "winner_id")
     private User winner;
     @ManyToOne
-//    @NotNull(message = "Who is the owner of this auction?")
     @JoinColumn(name = "owner_id")
     private User owner;
     @Min(message = "Invalid number", value = 2)
