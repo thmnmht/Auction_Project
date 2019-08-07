@@ -40,8 +40,8 @@ public class AuctionController {
                                  String description,
                                  int base_price,
                                  String date,
-            int category_id, @RequestPart MultipartFile[] images) throws IOException {
-        AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,new Date(),category_id);
+            int category_id, int maxNumber, @RequestPart MultipartFile[] images) throws IOException {
+        AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,new Date(),category_id, maxNumber);
         return assembler.toResource(auctionService.addAuction(auctionDomain,images));
     }
 

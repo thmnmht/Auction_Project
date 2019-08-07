@@ -1,3 +1,3 @@
-insert into Categories (id, name) values (0, "Sport");
-insert into Categories (id, name) values (2, "Home");
-insert into Categories (id, name) values (4, "Digital");
+insert into Categories (name) values ("Sport");
+insert into Categories (name) values ("Home");
+insert into Categories (name) values ("Digital");
