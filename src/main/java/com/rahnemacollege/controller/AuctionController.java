@@ -6,6 +6,8 @@ import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.util.ResourceAssembler;
+import com.rahnemacollege.util.exceptions.NotFoundException;
+import org.checkerframework.checker.formatter.FormatUtil;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
@@ -55,9 +57,23 @@ public class AuctionController {
         return assembler.toResource(auction);
     }
 
+    @GetMapping("/image/{id}")
+    public void showPic(){}
+
     @GetMapping("/all")
     public Resources<Resource<Auction>> all() {
         return assembler.toResourcesAuc(auctionService.getAll());
+    }
+
+    @GetMapping("/search/{title}")
+    public Resources<Resource<Auction>> search(@PathVariable String title){
+        List<Auction> auctions = auctionService.findByTitle(title);
+        return assembler.toResourcesAuc(auctions);
+    }
+
+    @GetMapping("/filter/{id}")
+    public void filter(){
+
     }
 }
 
