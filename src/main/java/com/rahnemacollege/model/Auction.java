@@ -6,7 +6,6 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import java.util.Date;
-import java.util.List;
 
 
 @Data
