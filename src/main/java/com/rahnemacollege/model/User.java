@@ -2,7 +2,6 @@ package com.rahnemacollege.model;
 
 import lombok.Data;
 import org.springframework.data.rest.core.annotation.RestResource;
-
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.security.PublicKey;
@@ -28,8 +27,7 @@ public class User {
     private String email;
     @Size(min = 6, max = 100, message = "Invalid name")
     private String password;
-    @OneToOne(mappedBy = "user")
-    private UserPicture picture;
+    private String picture;
     @ManyToMany
     @RestResource(exported = false)
     private Set<Auction> bookmarks;

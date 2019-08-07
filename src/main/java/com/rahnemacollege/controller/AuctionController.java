@@ -11,7 +11,6 @@ import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -39,9 +38,9 @@ public class AuctionController {
     public Resource<Auction> add(@RequestPart String title,
                                  String description,
                                  int base_price,
-                                 String date,
-            int category_id, int maxNumber, @RequestPart MultipartFile[] images) throws IOException {
-        AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,new Date(),category_id, maxNumber);
+                                 long date,
+            int category_id,int max_number, @RequestPart MultipartFile[] images) throws IOException {
+        AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,new Date(date),category_id,max_number);
         return assembler.toResource(auctionService.addAuction(auctionDomain,images));
     }
 

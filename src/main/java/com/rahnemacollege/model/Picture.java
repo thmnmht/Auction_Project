@@ -28,7 +28,7 @@ public class Picture {
 
     public Picture(String fileName){
         this.fileName = fileName;
-        date = new Date();
+        date = new Date(new java.util.Date().getTime());
     }
 
 
