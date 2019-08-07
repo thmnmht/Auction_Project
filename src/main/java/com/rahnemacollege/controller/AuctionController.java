@@ -6,14 +6,14 @@ import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.util.ResourceAssembler;
-import org.hibernate.validator.constraints.URL;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.URLConnection;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -34,9 +34,15 @@ public class AuctionController {
     }
 
 
-    @PostMapping("/add")
-    public Resource<Auction> add(@RequestBody AuctionDomain auctionDomain) throws IOException {
-        return assembler.toResource(auctionService.addAuction(auctionDomain));
+    //no date!!!
+    @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Resource<Auction> add(@RequestPart String title,
+                                 String description,
+                                 int base_price,
+                                 String date,
+            int category_id, @RequestPart MultipartFile[] images) throws IOException {
+        AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,new Date(),category_id);
+        return assembler.toResource(auctionService.addAuction(auctionDomain,images));
     }
 
     @GetMapping("/greeting")

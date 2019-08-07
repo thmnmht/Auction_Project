@@ -10,24 +10,14 @@ CREATE TABLE Categories
 
 CREATE TABLE Users
 (
-    id        INT          NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    id        INT          NOT NULL AUTO_INCREMENT,
     name      VARCHAR(40)  NOT NULL,
     email     VARCHAR(40)  NOT NULL,
-    password  VARCHAR(100) NOT NULL
+    password  VARCHAR(100) NOT NULL,
+    picture   VARCHAR(100),
+    PRIMARY KEY (id)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
-
-  CREATE TABLE User_Pictures
-(
-    id       INT          NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    user_id  INT          NOT NULL,
-    date     DATE         NOT NULL,
-    FOREIGN KEY (user_id)
-        REFERENCES Users (id)
-        ON UPDATE CASCADE ON DELETE RESTRICT
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
-
 
 
 CREATE TABLE Auctions
@@ -39,14 +29,13 @@ CREATE TABLE Auctions
     category_id INT         NOT NULL,
     date         DATE        NOT NULL,
     state        INT         NOT NULL,
-    winner_id       INT      NOT NULL,
-    owner_id        INT         NOT NULL,
-    max_number  INT        NOT NULL,
+    winner       INT,
+    owner        INT         NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (winner_id)
+    FOREIGN KEY (winner)
         REFERENCES Users (id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (owner_id)
+    FOREIGN KEY (owner)
         REFERENCES Users (id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (category_id)
@@ -55,17 +44,20 @@ CREATE TABLE Auctions
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
-  CREATE TABLE Auction_Pictures
+
+CREATE TABLE Pictures
 (
     id       INT          NOT NULL AUTO_INCREMENT,
-    Auction_id  INT          NOT NULL,
+    filename VARCHAR(100) NOT NULL,
+    auction_id INT         NOT NULL,
     date     DATE         NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (Auction_id)
+    FOREIGN KEY (auction_id)
         REFERENCES Auctions (id)
         ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
+
 
 CREATE TABLE Login_infos
 (

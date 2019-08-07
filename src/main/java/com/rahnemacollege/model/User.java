@@ -24,6 +24,7 @@ public class User {
     private String name;
     @Email(message = "Invalid email address.")
     @Size(min = 5,message = "Invalid name")
+    @Column(name = "email",unique = true)
     private String email;
     @Size(min = 6, max = 100, message = "Invalid name")
     private String password;
