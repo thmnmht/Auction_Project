@@ -12,13 +12,16 @@ import com.rahnemacollege.repository.CategoryRepository;
 import com.rahnemacollege.repository.PictureRepository;
 import com.rahnemacollege.util.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,6 +42,7 @@ public class AuctionService {
         this.pictureRepository = pictureRepository;
     }
 
+
     public AuctionDomain addAuction(AuctionDomain auctionDomain,MultipartFile[] images) throws IOException {
         Auction auction = toAuction(auctionDomain);
         auctionRepository.save(auction);
@@ -56,8 +60,6 @@ public class AuctionService {
              String pathName = "./images/auction_images/" + auction.getId() + "/" +  fileName;
              Picture picture = new Picture(fileName,auction);
              pictureRepository.save(picture);
-
-             //saving image
              File upl = new File(pathName);
              upl.createNewFile();
              FileOutputStream fout = new FileOutputStream(upl);
@@ -76,14 +78,13 @@ public class AuctionService {
     }
 
 
+
     public AuctionDomain toAuctionDomain(Auction auction){
         AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(),auction.getDescription(),auction.getBase_price(),auction.getDate().getTime(),auction.getCategory().getId(),auction.getMax_number());
         auctionDomain.setState(auction.getState());
         auctionDomain.setId(auction.getId());
-        //add pictures to auctionDomain
         List<Link> auctionPictures = Lists.newArrayList(pictureRepository.findAll()).stream().filter(picture ->
                 picture.getFileName().startsWith(auction.getId() + "_")).map(
-//                        picture -> "/auctions/image/" + auction.getId() + "/" + picture.getFileName()
                 picture -> linkTo(methodOn(AuctionController.class).getImage(auction.getId(),picture.getFileName())).withRel("image")
         ).collect(Collectors.toList());
         auctionDomain.setPictures(auctionPictures);
@@ -91,21 +92,25 @@ public class AuctionService {
         return auctionDomain;
     }
 
+
     public List<Category> getCategory(){
 
         return Lists.newArrayList(categoryRepository.findAll());
 
     }
 
+
     public List<AuctionDomain> filter(int category_id){
         List<AuctionDomain> auctions = getAll();
         return auctions.stream().filter(a -> a.getCategory_id() == category_id).collect(Collectors.toList());
     }
 
+
     public AuctionDomain findById(int id) {
         Auction auction = auctionRepository.findById(id).orElseThrow( () -> new NotFoundException(id,Auction.class));
         return toAuctionDomain(auction);
     }
+
 
     public List<AuctionDomain> findByTitle(String title) {
         List<AuctionDomain> auctions = getAll();
@@ -113,12 +118,29 @@ public class AuctionService {
         return auctions;
     }
 
+
     public List<AuctionDomain> getAll() {
         ArrayList<AuctionDomain> auctions = new ArrayList<>();
         auctionRepository.findAll().forEach(auction ->  {
             auctions.add(toAuctionDomain(auction));
         });
         return auctions;
+    }
+
+
+    //TODO : change exception handling!
+    public Resource imageUpload(int id, String fileName){
+        String path = "./images/auction_images/" + id + "/" + fileName;
+        Path filePath = Paths.get(path).toAbsolutePath().normalize();
+        try {
+            Resource resource = new UrlResource(filePath.toUri());
+            return resource;
+        }catch (IOException e){
+
+            //its not good!!
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 }
 

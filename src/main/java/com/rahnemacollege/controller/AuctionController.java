@@ -5,21 +5,13 @@ import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.util.ResourceAssembler;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -43,15 +35,7 @@ public class AuctionController {
     @RequestMapping(value = "/image/{id}/{picture_fileName}",  method = RequestMethod.GET,
             produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<org.springframework.core.io.Resource> getImage(@PathVariable int id,@PathVariable String picture_fileName){
-        org.springframework.core.io.Resource resource = null;
-        String path = "./images/auction_images/" + id + "/" + picture_fileName;
-        Path filePath = Paths.get(path).toAbsolutePath().normalize();
-        try {
-            resource = new UrlResource(filePath.toUri());
-        }catch (IOException e){
-            //its not good!!
-            System.out.println(e.getMessage());
-        }
+        org.springframework.core.io.Resource resource = auctionService.imageUpload(id,picture_fileName);
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.IMAGE_JPEG)
@@ -59,7 +43,6 @@ public class AuctionController {
     }
 
 
-    //no date!!!
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Resource<AuctionDomain> add(@RequestPart String title,
                                  String description,
