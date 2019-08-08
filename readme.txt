@@ -14,3 +14,8 @@ Auction Project APIs
 
 -/auctions/filter/{category_id} GET : filter some categories
         category_id : int
+
+-/auctions/homepage GET : to receive auctions (number of pages start with zero)
+        @RequestParam("page") int page, @RequestParam("size") int size
+
+-/auctions/homepage GET : to receive all auctions

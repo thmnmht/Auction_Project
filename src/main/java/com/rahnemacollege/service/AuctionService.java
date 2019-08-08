@@ -14,6 +14,9 @@ import com.rahnemacollege.util.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -105,6 +108,11 @@ public class AuctionService {
         return auctions.stream().filter(a -> a.getCategory_id() == category_id).collect(Collectors.toList());
     }
 
+    public List<AuctionDomain> getAll(){
+        return Lists.newArrayList(auctionRepository.findAll()).stream()
+                .map(auction -> toAuctionDomain(auction))
+                .collect(Collectors.toList());
+    }
 
     public AuctionDomain findById(int id) {
         Auction auction = auctionRepository.findById(id).orElseThrow( () -> new NotFoundException(id,Auction.class));
@@ -114,18 +122,20 @@ public class AuctionService {
 
     public List<AuctionDomain> findByTitle(String title) {
         List<AuctionDomain> auctions = getAll();
-        auctions = auctions.stream().filter(a -> a.getTitle().startsWith(title)).collect(Collectors.toList());
+        auctions = auctions.stream()
+                .filter(a -> a.getTitle().startsWith(title))
+                .collect(Collectors.toList());
         return auctions;
     }
 
 
-    public List<AuctionDomain> getAll() {
+    public Page<AuctionDomain> getPage(int page, int size) {
+        Pageable firstPageWithTwoElements = PageRequest.of(page, size);
         ArrayList<AuctionDomain> auctions = new ArrayList<>();
-        auctionRepository.findAll().forEach(auction ->  {
-            auctions.add(toAuctionDomain(auction));
-        });
-        return auctions;
+        return auctionRepository.findAll(firstPageWithTwoElements).map(a -> toAuctionDomain(a));
     }
+
+
 
 
     //TODO : change exception handling!

@@ -2,9 +2,13 @@ package com.rahnemacollege.controller;
 
 
 import com.rahnemacollege.domain.AuctionDomain;
+import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.util.ResourceAssembler;
+import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
@@ -67,6 +71,15 @@ public class AuctionController {
     public Resources<Resource<AuctionDomain>> all() {
         return assembler.toResourcesAuc(auctionService.getAll());
     }
+
+
+    @GetMapping("/homepage")
+    public PagedResources<Resource<AuctionDomain>> getPage(@RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> pageAssembler){
+        Page<AuctionDomain> personPage = auctionService.getPage(page, size);
+        return pageAssembler.toResource(personPage);
+    }
+
+
 
     @GetMapping("/search/{title}")
     public Resources<Resource<AuctionDomain>> search(@PathVariable String title){
