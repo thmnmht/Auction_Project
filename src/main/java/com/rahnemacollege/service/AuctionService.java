@@ -2,6 +2,7 @@ package com.rahnemacollege.service;
 
 
 import com.google.common.collect.Lists;
+import com.rahnemacollege.controller.AuctionController;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
@@ -11,6 +12,8 @@ import com.rahnemacollege.repository.CategoryRepository;
 import com.rahnemacollege.repository.PictureRepository;
 import com.rahnemacollege.util.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
@@ -18,6 +21,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Service
 public class AuctionService {
@@ -43,14 +49,13 @@ public class AuctionService {
 
 
      public void savePictures(Auction auction,MultipartFile[] images) throws IOException {
-         ArrayList<Picture> pictures = new ArrayList<>();
-         new File("./src/main/resources/image/" + auction.getId() + "/" ).mkdir();
+         new File("./images/auction_images/" + auction.getId() + "/" ).mkdir();
          for (MultipartFile image:
                  images) {
-             String pathName = "./src/main/resources/image/" + auction.getId() + "/" + new Date().getTime() + ".jpg";
-             Picture picture = new Picture(pathName,auction);
+             String fileName = auction.getId() + "_" + new Date().getTime() + ".jpg";
+             String pathName = "./images/auction_images/" + auction.getId() + "/" +  fileName;
+             Picture picture = new Picture(fileName,auction);
              pictureRepository.save(picture);
-             pictures.add(picture);
 
              //saving image
              File upl = new File(pathName);
@@ -75,7 +80,14 @@ public class AuctionService {
         AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(),auction.getDescription(),auction.getBase_price(),auction.getDate().getTime(),auction.getCategory().getId(),auction.getMax_number());
         auctionDomain.setState(auction.getState());
         auctionDomain.setId(auction.getId());
-        //TODO : add pictures to auctionDomain
+        //add pictures to auctionDomain
+        List<Link> auctionPictures = Lists.newArrayList(pictureRepository.findAll()).stream().filter(picture ->
+                picture.getFileName().startsWith(auction.getId() + "_")).map(
+//                        picture -> "/auctions/image/" + auction.getId() + "/" + picture.getFileName()
+                picture -> linkTo(methodOn(AuctionController.class).getImage(auction.getId(),picture.getFileName())).withRel("image")
+        ).collect(Collectors.toList());
+        auctionDomain.setPictures(auctionPictures);
+
         return auctionDomain;
     }
 
@@ -101,7 +113,6 @@ public class AuctionService {
         return auctions;
     }
 
-
     public List<AuctionDomain> getAll() {
         ArrayList<AuctionDomain> auctions = new ArrayList<>();
         auctionRepository.findAll().forEach(auction ->  {
@@ -110,3 +121,4 @@ public class AuctionService {
         return auctions;
     }
 }
+

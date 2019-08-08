@@ -2,6 +2,8 @@ package com.rahnemacollege.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.Link;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -28,7 +30,7 @@ public class AuctionDomain {
     @JsonIgnore
     private int id;
 
-    private List<String> pictures;
+    private List<Link> pictures;
     private int state;
 
     public AuctionDomain(String title,

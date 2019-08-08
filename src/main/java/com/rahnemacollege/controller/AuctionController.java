@@ -5,12 +5,21 @@ import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.util.ResourceAssembler;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -28,6 +37,25 @@ public class AuctionController {
     @GetMapping("/category")
     public List<Category> getCategory(){
         return auctionService.getCategory();
+    }
+
+
+    @RequestMapping(value = "/image/{id}/{picture_fileName}",  method = RequestMethod.GET,
+            produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<org.springframework.core.io.Resource> getImage(@PathVariable int id,@PathVariable String picture_fileName){
+        org.springframework.core.io.Resource resource = null;
+        String path = "./images/auction_images/" + id + "/" + picture_fileName;
+        Path filePath = Paths.get(path).toAbsolutePath().normalize();
+        try {
+            resource = new UrlResource(filePath.toUri());
+        }catch (IOException e){
+            //its not good!!
+            System.out.println(e.getMessage());
+        }
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(resource);
     }
 
 
@@ -52,14 +80,8 @@ public class AuctionController {
         return assembler.toResource(auctionService.findById(id));
     }
 
-    @GetMapping("/image/{id}")
-    public void showPic(){}
-
     @GetMapping("/all")
     public Resources<Resource<AuctionDomain>> all() {
-
-       // System.out.println(new ClassPathResource("image/sid.jpg").toString());
-
         return assembler.toResourcesAuc(auctionService.getAll());
     }
 
