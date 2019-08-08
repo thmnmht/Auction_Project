@@ -33,12 +33,12 @@ public class AuctionService {
         this.pictureRepository = pictureRepository;
     }
 
-    public Auction addAuction(AuctionDomain auctionDomain,MultipartFile[] images) throws IOException {
+    public AuctionDomain addAuction(AuctionDomain auctionDomain,MultipartFile[] images) throws IOException {
         Auction auction = toAuction(auctionDomain);
         auctionRepository.save(auction);
         if(images != null)
             savePictures(auction,images);
-        return auction;
+        return toAuctionDomain(auction);
     }
 
 
@@ -66,8 +66,17 @@ public class AuctionService {
     public Auction toAuction(AuctionDomain auctionDomain){
         Category category = categoryRepository.findById(auctionDomain.getCategory_id()).orElseThrow( () ->
             new NotFoundException(auctionDomain.getCategory_id(),Category.class));
-        Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),category,auctionDomain.getDate(),auctionDomain.getMax_number());
+        Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),category,new Date(auctionDomain.getDate()),auctionDomain.getMax_number());
         return auction;
+    }
+
+
+    public AuctionDomain toAuctionDomain(Auction auction){
+        AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(),auction.getDescription(),auction.getBase_price(),auction.getDate().getTime(),auction.getCategory().getId(),auction.getMax_number());
+        auctionDomain.setState(auction.getState());
+        auctionDomain.setId(auction.getId());
+        //TODO : add pictures to auctionDomain
+        return auctionDomain;
     }
 
     public List<Category> getCategory(){
@@ -76,24 +85,28 @@ public class AuctionService {
 
     }
 
-    public List<Auction> filter(int category_id){
-        List<Auction> auctions = getAll();
-        return auctions.stream().filter(a -> a.getCategory().getId() == category_id).collect(Collectors.toList());
+    public List<AuctionDomain> filter(int category_id){
+        List<AuctionDomain> auctions = getAll();
+        return auctions.stream().filter(a -> a.getCategory_id() == category_id).collect(Collectors.toList());
     }
 
-    public Optional<Auction> findById(int id) {
-        return auctionRepository.findById(id);
+    public AuctionDomain findById(int id) {
+        Auction auction = auctionRepository.findById(id).orElseThrow( () -> new NotFoundException(id,Auction.class));
+        return toAuctionDomain(auction);
     }
 
-    public List<Auction> findByTitle(String title) {
-        List<Auction> auctions = getAll();
+    public List<AuctionDomain> findByTitle(String title) {
+        List<AuctionDomain> auctions = getAll();
         auctions = auctions.stream().filter(a -> a.getTitle().startsWith(title)).collect(Collectors.toList());
         return auctions;
     }
 
-    public List<Auction> getAll() {
-        ArrayList<Auction> auctions = new ArrayList<>();
-        auctionRepository.findAll().forEach(auctions::add);
+
+    public List<AuctionDomain> getAll() {
+        ArrayList<AuctionDomain> auctions = new ArrayList<>();
+        auctionRepository.findAll().forEach(auction ->  {
+            auctions.add(toAuctionDomain(auction));
+        });
         return auctions;
     }
 }

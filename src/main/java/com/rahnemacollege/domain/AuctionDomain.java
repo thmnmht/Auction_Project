@@ -1,11 +1,13 @@
 package com.rahnemacollege.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 import java.util.Date;
+import java.util.List;
 
 
 @Data
@@ -16,16 +18,23 @@ public class AuctionDomain {
     private String description;
     @Min(message = "Price cannot be negative", value = 0)
     private int base_price;
-    private Date date;
+    private long date;
     private int category_id;
     @Min(message = "Invalid number", value = 2)
     @Max(message = "Invalid number", value = 15)
     private int max_number;
 
+
+    @JsonIgnore
+    private int id;
+
+    private List<String> pictures;
+    private int state;
+
     public AuctionDomain(String title,
                          String description,
                          int base_price,
-                         Date date,
+                         long date,
                          int category_id,
                          int max_number){
         this.title = title;
