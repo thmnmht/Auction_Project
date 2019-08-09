@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,50 +37,50 @@ public class AuctionService {
         this.pictureRepository = pictureRepository;
     }
 
-    public Auction addAuction(AuctionDomain auctionDomain,MultipartFile[] images) throws IOException {
+    public Auction addAuction(AuctionDomain auctionDomain, MultipartFile[] images) throws IOException {
         Auction auction = toAuction(auctionDomain);
         auctionRepository.save(auction);
-        if(images != null)
-            savePictures(auction,images);
+        if (images != null)
+            savePictures(auction, images);
         return auction;
     }
 
 
-     public void savePictures(Auction auction,MultipartFile[] images) throws IOException {
-         ArrayList<Picture> pictures = new ArrayList<>();
-         new File("./src/main/resources/image/" + auction.getId() + "/" ).mkdir();
-         for (MultipartFile image:
-                 images) {
-             String pathName = "./src/main/resources/image/" + auction.getId() + "/" + new Date().getTime() + ".jpg";
-             Picture picture = new Picture(pathName,auction);
-             pictureRepository.save(picture);
-             pictures.add(picture);
+    public void savePictures(Auction auction, MultipartFile[] images) throws IOException {
+        ArrayList<Picture> pictures = new ArrayList<>();
+        new File("./src/main/resources/image/" + auction.getId() + "/").mkdir();
+        for (MultipartFile image :
+                images) {
+            String pathName = "./src/main/resources/image/" + auction.getId() + "/" + new Date().getTime() + ".jpg";
+            Picture picture = new Picture(pathName, auction);
+            pictureRepository.save(picture);
+            pictures.add(picture);
 
-             //saving image
-             File upl = new File(pathName);
-             upl.createNewFile();
-             FileOutputStream fout = new FileOutputStream(upl);
-             fout.write(image.getBytes());
-             fout.close();
+            //saving image
+            File upl = new File(pathName);
+            upl.createNewFile();
+            FileOutputStream fout = new FileOutputStream(upl);
+            fout.write(image.getBytes());
+            fout.close();
 
-         }
-     }
-    
-    
-    public Auction toAuction(AuctionDomain auctionDomain){
-        Category category = categoryRepository.findById(auctionDomain.getCategory().getId()).orElseThrow( () ->
-            new NotFoundException(auctionDomain.getCategory().getId(),Category.class));
-        Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),category,auctionDomain.getDate(),auctionDomain.getMax_number());
+        }
+    }
+
+
+    public Auction toAuction(AuctionDomain auctionDomain) {
+        Category category = categoryRepository.findById(auctionDomain.getCategory().getId()).orElseThrow(() ->
+                new NotFoundException(auctionDomain.getCategory().getId(), Category.class));
+        Auction auction = new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(), auctionDomain.getBase_price(), category, auctionDomain.getDate(), auctionDomain.getMax_number());
         return auction;
     }
 
-    public List<Category> getCategory(){
+    public List<Category> getCategory() {
 
         return Lists.newArrayList(categoryRepository.findAll());
 
     }
 
-    public List<Auction> filter(int category_id){
+    public List<Auction> filter(int category_id) {
         List<Auction> auctions = getAll();
         return auctions.stream().filter(a -> a.getCategory().getId() == category_id).collect(Collectors.toList());
     }
@@ -105,12 +106,18 @@ public class AuctionService {
     }
 
     public Page<AuctionDomain> findByTitle(String title, PageRequest pageRequest) {
-        return toAuctionDomainPage(auctionRepository.findByTitle(title,pageRequest));
+        return toAuctionDomainPage(auctionRepository.findByTitle(title, pageRequest));
     }
 
-    private Page<AuctionDomain> toAuctionDomainPage(Page<Auction> auctionPage){
+    private Page<AuctionDomain> toAuctionDomainPage(Page<Auction> auctionPage) {
         List<AuctionDomain> auctionDomainList = new ArrayList<>();
         auctionPage.forEach(auction -> auctionDomainList.add(auction.toAuctionDomain()));
         return new PageImpl<>(auctionDomainList);
+    }
+
+    public Page<AuctionDomain> findByCategory(String categoryName, PageRequest pageRequest) {
+        if (categoryRepository.findByCategoryName(categoryName).isPresent())
+            return toAuctionDomainPage(auctionRepository.findByCategory(categoryRepository.findByCategoryName(categoryName).get(), pageRequest));
+        throw new NotFoundException(categoryName,Category.class);
     }
 }

@@ -36,4 +36,13 @@ public class HomePageController {
         return assembler.toResource(foundAuctions);
     }
 
+    @GetMapping("/search")
+    PagedResources<Resource<AuctionDomain>> find(@RequestParam("category") String categoryName,
+                                                   @RequestParam("page") int page,
+                                                   @RequestParam(value="size", defaultValue="10") int size,
+                                                   PagedResourcesAssembler<AuctionDomain> assembler) {
+        Page<AuctionDomain> foundAuctions = service.findByCategory(categoryName,PageRequest.of(page, size));
+        return assembler.toResource(foundAuctions);
+    }
+
 }

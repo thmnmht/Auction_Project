@@ -2,6 +2,7 @@ package com.rahnemacollege.repository;
 
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
+import com.rahnemacollege.model.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +29,8 @@ public interface AuctionRepository extends CrudRepository<Auction, Integer> {
             "    auctions.id\n " +
             "ORDER BY number_of_bookmarks DESC")
     Page<Auction> findHottest(Pageable pageable);
+
+    Page<Auction> findByCategory(Category category,PageRequest request);
 
 
 }
