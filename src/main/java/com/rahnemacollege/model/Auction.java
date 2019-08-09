@@ -1,5 +1,6 @@
 package com.rahnemacollege.model;
 
+import com.rahnemacollege.domain.AuctionDomain;
 import lombok.Data;
 import org.springframework.data.rest.core.annotation.RestResource;
 
@@ -54,6 +55,10 @@ public class Auction {
         this.state = 0; //0:soon 1:started 2:finished
         this.winner = null;
         this.max_number = max_number;
+    }
+
+    public AuctionDomain toAuctionDomain(){
+        return new AuctionDomain(this.title,this.description,this.base_price,this.date,this.category,this.max_number);
     }
 
 

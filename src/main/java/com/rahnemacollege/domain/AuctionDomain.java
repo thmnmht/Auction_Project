@@ -1,5 +1,6 @@
 package com.rahnemacollege.domain;
 
+import com.rahnemacollege.model.Category;
 import lombok.Data;
 
 import javax.validation.constraints.Max;
@@ -17,7 +18,7 @@ public class AuctionDomain {
     @Min(message = "Price cannot be negative", value = 0)
     private int base_price;
     private Date date;
-    private int category_id;
+    private Category category;
     @Min(message = "Invalid number", value = 2)
     @Max(message = "Invalid number", value = 15)
     private int max_number;
@@ -26,13 +27,13 @@ public class AuctionDomain {
                          String description,
                          int base_price,
                          Date date,
-                         int category_id,
-                         int max_number){
+                         Category category,
+                         int max_number) {
         this.title = title;
         this.description = description;
         this.base_price = base_price;
         this.date = date;
-        this.category_id = category_id;
+        this.category = category;
         this.max_number = max_number;
     }
 

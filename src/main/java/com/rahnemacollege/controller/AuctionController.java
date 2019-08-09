@@ -5,9 +5,9 @@ import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.service.AuctionService;
+import com.rahnemacollege.service.CategoryService;
 import com.rahnemacollege.util.ResourceAssembler;
 import com.rahnemacollege.util.exceptions.NotFoundException;
-import org.checkerframework.checker.formatter.FormatUtil;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/auctions")
@@ -23,10 +24,12 @@ public class AuctionController {
 
     private final AuctionService auctionService;
     private final ResourceAssembler assembler;
+    private final CategoryService categoryService;
 
-    public AuctionController(AuctionService auctionService, ResourceAssembler assembler) {
+    public AuctionController(AuctionService auctionService, ResourceAssembler assembler, CategoryService categoryService) {
         this.auctionService = auctionService;
         this.assembler = assembler;
+        this.categoryService = categoryService;
     }
 
     @GetMapping("/category")
@@ -42,8 +45,12 @@ public class AuctionController {
                                  int base_price,
                                  long date,
             int category_id,int max_number, @RequestPart MultipartFile[] images) throws IOException {
-        AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,new Date(date),category_id,max_number);
-        return assembler.toResource(auctionService.addAuction(auctionDomain,images));
+        Optional<Category> category = categoryService.findById(category_id);
+        if (category.isPresent()){
+            AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,new Date(date),category.get(),max_number);
+            return assembler.toResource(auctionService.addAuction(auctionDomain,images));
+        }
+        throw new NotFoundException(category_id,Category.class);
     }
 
     @GetMapping("/greeting")

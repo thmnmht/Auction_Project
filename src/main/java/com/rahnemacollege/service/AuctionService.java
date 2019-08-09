@@ -11,6 +11,9 @@ import com.rahnemacollege.repository.CategoryRepository;
 import com.rahnemacollege.repository.PictureRepository;
 import com.rahnemacollege.util.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
@@ -64,8 +67,8 @@ public class AuctionService {
     
     
     public Auction toAuction(AuctionDomain auctionDomain){
-        Category category = categoryRepository.findById(auctionDomain.getCategory_id()).orElseThrow( () ->
-            new NotFoundException(auctionDomain.getCategory_id(),Category.class));
+        Category category = categoryRepository.findById(auctionDomain.getCategory().getId()).orElseThrow( () ->
+            new NotFoundException(auctionDomain.getCategory().getId(),Category.class));
         Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),category,auctionDomain.getDate(),auctionDomain.getMax_number());
         return auction;
     }
@@ -95,5 +98,19 @@ public class AuctionService {
         ArrayList<Auction> auctions = new ArrayList<>();
         auctionRepository.findAll().forEach(auctions::add);
         return auctions;
+    }
+
+    public Page<AuctionDomain> getHottest(PageRequest request) {
+        return toAuctionDomainPage(auctionRepository.findHottest(request));
+    }
+
+    public Page<AuctionDomain> findByTitle(String title, PageRequest pageRequest) {
+        return toAuctionDomainPage(auctionRepository.findByTitle(title,pageRequest));
+    }
+
+    private Page<AuctionDomain> toAuctionDomainPage(Page<Auction> auctionPage){
+        List<AuctionDomain> auctionDomainList = new ArrayList<>();
+        auctionPage.forEach(auction -> auctionDomainList.add(auction.toAuctionDomain()));
+        return new PageImpl<>(auctionDomainList);
     }
 }
