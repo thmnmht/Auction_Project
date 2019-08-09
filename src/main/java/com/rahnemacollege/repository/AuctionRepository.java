@@ -21,6 +21,8 @@ public interface AuctionRepository extends CrudRepository<Auction, Integer> {
 
     Page<Auction> findByTitle(String title, PageRequest pageRequest);
 
+
+    //todo: consider limit for the hottest cards
     @Query("SELECT * ,COUNT(bookmarks_id) AS number_of_bookmarks \n" +
             "FROM auctions\n" +
             "left join users_bookmarks\n" +
