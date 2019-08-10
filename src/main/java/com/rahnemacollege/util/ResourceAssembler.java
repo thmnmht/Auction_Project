@@ -2,6 +2,8 @@ package com.rahnemacollege.util;
 
 import com.rahnemacollege.controller.AuctionController;
 import com.rahnemacollege.controller.UserController;
+import com.rahnemacollege.domain.AuctionDomain;
+import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.User;
 import org.springframework.hateoas.Link;
@@ -31,23 +33,15 @@ public class ResourceAssembler {
                 .collect(Collectors.toList()),linkTo(methodOn(UserController.class).all()).withSelfRel());
     }
 
-    public Resources<Resource<Auction>> toResourcesAuc(List<Auction> auctions){
+    public Resources<Resource<AuctionDomain>> toResourcesAuc(List<AuctionDomain> auctions){
        return new Resources<>(auctions.stream()
                 .map(this::toResource)
                 .collect(Collectors.toList()),linkTo(methodOn(AuctionController.class).all()).withSelfRel());
     }
 
-    public Resource<Auction> toResource(Auction auction){
+
+    public Resource<AuctionDomain> toResource(AuctionDomain auction){
         List<Link> links = new ArrayList<>();
-//        File dir = new File("./src/main/resources/image/" + auction.getId() + "/");
-//        File[] directoryListing = dir.listFiles();
-//        if (directoryListing != null) {
-//            int counter = 1;
-//            for (File child : directoryListing) {
-//                links.add(linkTo("???" + child.getName()).withRel("image " + counter));
-//                counter++;
-//            }
-//        }
         links.add(linkTo(methodOn(AuctionController.class).all()).withRel("all"));
         links.add( linkTo(methodOn(AuctionController.class).one(auction.getId())).withRel("self"));
         return new Resource<>(auction,links);

@@ -24,19 +24,18 @@ public class UserService {
 
     public User addUser(UserDomain userDomain){
         User user = toUser(userDomain);
-        user.setPassword(encoder.encode(user.getPassword()));
         repository.save(user);
         return user;
     }
 
     public List<User> getAll() {
         ArrayList<User> users = new ArrayList<>();
-        repository.findAll().forEach(u -> users.add(u));
+        repository.findAll().forEach(users::add);
         return users;
     }
 
     public User toUser(UserDomain userDomain){
-        return new User(userDomain.getName(),userDomain.getEmail(),userDomain.getPassword());
+        return new User(userDomain.getName(),userDomain.getEmail(),encoder.encode(userDomain.getPassword()));
     }
     public Optional<com.rahnemacollege.model.User> findById(int id) {
         return repository.findById(id);
@@ -44,5 +43,18 @@ public class UserService {
 
     public User getByEmail(String email) {
         return repository.getByEmail(email);
+    }
+
+    public User addUser(User user) {
+        repository.save(user);
+        return user;
+    }
+
+    public Optional<User> findUserByEmail(String email) {
+        return repository.findByEmail(email);
+    }
+
+    public Optional<User> findUserByResetToken(String token) {
+        return repository.findUserByResetToken(token);
     }
 }
