@@ -72,7 +72,6 @@ public class AuctionController {
         return assembler.toResourcesAuc(auctionService.getAll());
     }
 
-
     @GetMapping("/homepage")
     public PagedResources<Resource<AuctionDomain>> getPage(@RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> pageAssembler){
         Page<AuctionDomain> personPage = auctionService.getPage(page, size);

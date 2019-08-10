@@ -18,4 +18,4 @@ Auction Project APIs
 -/auctions/homepage GET : to receive auctions (number of pages start with zero)
         @RequestParam("page") int page, @RequestParam("size") int size
 
--/auctions/homepage GET : to receive all auctions
+-/auctions/all GET : to receive all auctions
