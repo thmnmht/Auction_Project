@@ -56,6 +56,7 @@ public class AuctionService {
 
 
     public AuctionDomain addAuction(AuctionDomain auctionDomain,MultipartFile[] images) throws IOException {
+        validation(auctionDomain);
         Auction auction = toAuction(auctionDomain);
         auctionRepository.save(auction);
         if(images != null)

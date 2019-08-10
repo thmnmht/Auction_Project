@@ -2,16 +2,13 @@ package com.rahnemacollege.controller;
 
 
 import com.rahnemacollege.domain.AuctionDomain;
-import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.service.CategoryService;
 import com.rahnemacollege.util.ResourceAssembler;
-import com.rahnemacollege.util.exceptions.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedResources;
-import com.rahnemacollege.util.exceptions.NotFoundException;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
@@ -19,9 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auctions")
@@ -61,13 +56,7 @@ public class AuctionController {
                                  long date,
             int category_id,int max_number, @RequestPart MultipartFile[] images) throws IOException {
         AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,date,categoryService.findById(category_id),max_number);
-        auctionService.validation(auctionDomain);
         return assembler.toResource(auctionService.addAuction(auctionDomain,images));
-    }
-
-    @GetMapping("/greeting")
-    public String greeting() {
-        return "hello world :)";
     }
 
     @GetMapping("/find/{id}")

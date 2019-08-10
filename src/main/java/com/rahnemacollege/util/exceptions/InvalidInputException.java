@@ -13,7 +13,6 @@ public class InvalidInputException extends RuntimeException{
     }
     public InvalidInputException(Message message) {
         this.message = message;
-//        super(message);
     }
 
     public Message getMessageStatus() {

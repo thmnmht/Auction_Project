@@ -24,7 +24,16 @@ public class UserService {
         this.encoder = encoder;
     }
 
+
+
+    public boolean isExist(String user_email){
+        if(repository.findByEmail(user_email).isPresent())
+            return true;
+        return false;
+    }
+
     public User addUser(UserDomain userDomain){
+        validation(userDomain);
         if(repository.findByEmail(userDomain.getEmail()).isPresent())
             throw new InvalidInputException(Message.EMAIL_DUPLICATED);
         User user = toUser(userDomain);
@@ -37,7 +46,7 @@ public class UserService {
             throw new InvalidInputException(Message.NAME_NULL);
         if(userDomain.getEmail() == null || userDomain.getEmail().length() < 5)
             throw new InvalidInputException(Message.EMAIL_NULL);
-        if(userDomain.getEmail().matches("^\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,3}$"))
+        if(!userDomain.getEmail().matches("^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$"))
             throw new InvalidInputException(Message.EMAIL_INVALID);
         if(userDomain.getPassword() == null || userDomain.getPassword().length() < 6)
             throw new InvalidInputException(Message.PASSWORD_TOO_LOW);

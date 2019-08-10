@@ -25,9 +25,10 @@ public class UserController {
 
 
     @PostMapping("/signup")
-    public Resource<User> add(@RequestBody @Valid UserDomain userDomain) {
-        userService.validation(userDomain);
+    public Resource<User> add(@RequestBody UserDomain userDomain) {
+        System.out.println("salm");
         User user = userService.addUser(userDomain);
+        System.out.println("hale");
         return assembler.toResource(user);
     }
 

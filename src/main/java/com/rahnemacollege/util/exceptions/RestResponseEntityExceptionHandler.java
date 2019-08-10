@@ -3,16 +3,14 @@ package com.rahnemacollege.util.exceptions;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {InvalidInputException.class})
-    protected void handleConflict(InvalidInputException ex,
-                                  HttpServletResponse response,
-                                  HttpServletRequest request) {
+    protected void handler(InvalidInputException ex,
+                                  HttpServletResponse response) {
         if(ex.getMessageStatus().equals(Message.TITLE_NULL))
             response.setStatus(430);
         if(ex.getMessageStatus().equals(Message.BASE_PRICE_NULL))
@@ -29,6 +27,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
             response.setStatus(437);
         if(ex.getMessageStatus().equals(Message.DATE_NULL))
             response.setStatus(438);
+
+        //sign up
         if(ex.getMessageStatus().equals(Message.EMAIL_NULL))
             response.setStatus(439);
         if(ex.getMessageStatus().equals(Message.NAME_NULL))
@@ -42,5 +42,10 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         if(ex.getMessageStatus().equals(Message.EMAIL_DUPLICATED))
             response.setStatus(444);
 
+        //login
+        if(ex.getMessageStatus().equals(Message.PASSWORD_INCORRECT))
+            response.setStatus(445);
+        if(ex.getMessageStatus().equals(Message.EMAIL_INCORRECT))
+            response.setStatus(446);
     }
 }
