@@ -1,11 +1,11 @@
 package com.rahnemacollege.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.rahnemacollege.model.Category;
 import lombok.Data;
 import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
-
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -21,7 +21,7 @@ public class AuctionDomain {
     private String description;
     private int base_price = -1;
     private long date = -1;
-    private int category_id = -1;
+    private Category category;
     private int max_number = -1;
 
 
@@ -35,13 +35,13 @@ public class AuctionDomain {
                          String description,
                          int base_price,
                          long date,
-                         int category_id,
-                         int max_number){
+                         Category category,
+                         int max_number) {
         this.title = title;
         this.description = description;
         this.base_price = base_price;
         this.date = date;
-        this.category_id = category_id;
+        this.category = category;
         this.max_number = max_number;
     }
 

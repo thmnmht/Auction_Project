@@ -1,11 +1,20 @@
 Auction Project APIs
 
-auction state : 0->soon 1->started 2->finished
 
+
+
+header "Auth" : "Bearer 'Token'"
+
+
+-/login : login  POST
+        email : String
+        password : String
 
 -/users/signup  POST : sign up
         UserDomain : {
-            name, email, password
+            name,
+            email,
+            password
         }
 
         if password < 6 || password > 100 : "status": 400 Bad Request

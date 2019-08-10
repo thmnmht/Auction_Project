@@ -16,19 +16,18 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserRepository repository;
-    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    public UserService(UserRepository repository, PasswordEncoder passwordEncoder) {
+    private PasswordEncoder encoder;
+
+    public UserService(UserRepository repository, PasswordEncoder encoder) {
         this.repository = repository;
-        this.passwordEncoder = passwordEncoder;
+        this.encoder = encoder;
     }
 
     public User addUser(UserDomain userDomain){
         if(repository.findByEmail(userDomain.getEmail()).isPresent())
             throw new InvalidInputException(Message.EMAIL_DUPLICATED);
         User user = toUser(userDomain);
-        user.setPassword(passwordEncoder.encode(userDomain.getPassword()));
         repository.save(user);
         return user;
     }
@@ -53,10 +52,14 @@ public class UserService {
     }
 
     public User toUser(UserDomain userDomain){
-        return new User(userDomain.getName(),userDomain.getEmail(),passwordEncoder.encode(userDomain.getPassword()));
+        return new User(userDomain.getName(),userDomain.getEmail(),encoder.encode(userDomain.getPassword()));
     }
     public Optional<com.rahnemacollege.model.User> findById(int id) {
         return repository.findById(id);
+    }
+
+    public User getByEmail(String email) {
+        return repository.getByEmail(email);
     }
 
     public User addUser(User user) {
