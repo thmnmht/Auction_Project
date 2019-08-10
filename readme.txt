@@ -1,13 +1,24 @@
 Auction Project APIs
 
--/auctions/add : add a new Auction
-        String title, String description, int base_price, long date, int category_id, int max_number, MultipartFile[] images
-
+-/login : login
+        email : String
+        password : String
 
 -/users/signup : sign up
         UserDomain : {
-            name, email, password
+            name, 
+            email,
+            password
         }
+
+-/auctions/add : add a new Auction
+        String title,
+        String description,
+        int base_price,
+        long date, int category_id,
+        int max_number,
+        MultipartFile[] images
+
 
 -/auctions/search/{title} : search by title
         title : String
