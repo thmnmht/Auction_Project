@@ -59,7 +59,7 @@ public class AuctionService {
 
 
      public void savePictures(Auction auction,MultipartFile[] images) throws IOException {
-         new File("./images/auction_images/" + auction.getId() + "/" ).mkdir();
+         new File("./images/auction_images/" + auction.getId() + "/" ).mkdirs();
          for (MultipartFile image:
                  images) {
              String fileName = auction.getId() + "_" + new Date().getTime() + ".jpg";
