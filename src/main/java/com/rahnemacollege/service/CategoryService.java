@@ -2,6 +2,8 @@ package com.rahnemacollege.service;
 
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.repository.CategoryRepository;
+import com.rahnemacollege.util.exceptions.InvalidInputException;
+import com.rahnemacollege.util.exceptions.Message;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -13,11 +15,8 @@ public class CategoryService {
     public CategoryService(CategoryRepository repository) {
         this.repository = repository;
     }
-    public Optional<Category> findByCategoryName(String categoryName){
-        return repository.findByCategoryName(categoryName);
-    }
 
-    public Optional<Category> findById(Integer id){
-        return repository.findById(id);
+    public Category findById(Integer id){
+        return repository.findById(id).orElseThrow(() -> new InvalidInputException(Message.CATEGORY_INVALID));
     }
 }

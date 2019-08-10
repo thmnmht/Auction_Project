@@ -60,7 +60,7 @@ public class AuctionController {
                                  int base_price,
                                  long date,
             int category_id,int max_number, @RequestPart MultipartFile[] images) throws IOException {
-        AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,date,category_id,max_number);
+        AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,date,categoryService.findById(category_id),max_number);
         auctionService.validation(auctionDomain);
         return assembler.toResource(auctionService.addAuction(auctionDomain,images));
     }

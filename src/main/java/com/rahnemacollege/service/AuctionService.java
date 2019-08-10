@@ -69,8 +69,6 @@ public class AuctionService {
             throw new InvalidInputException(Message.TITLE_NULL);
         if(auctionDomain.getBase_price() < 1)
             throw new InvalidInputException(Message.BASE_PRICE_NULL);
-//        if (auctionDomain.getCategory() < 0)
-//            throw new InvalidInputException(Message.CATEGORY_NULL);
         if(auctionDomain.getDate() < 1)
             throw new InvalidInputException(Message.DATE_NULL);
         if(auctionDomain.getMax_number() < 2)
@@ -99,19 +97,17 @@ public class AuctionService {
     
     
     public Auction toAuction(AuctionDomain auctionDomain){
-        Category category = categoryRepository.findById(auctionDomain.getCategory()).orElseThrow( () ->
-            new InvalidInputException(Message.CATEGORY_INVALID));
         Date date = new Date(auctionDomain.getDate());
         if(auctionDomain.getDate() - new Date().getTime() < 1800000L)
             throw new InvalidInputException(Message.DATE_INVALID);
-        Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),category,date,auctionDomain.getMax_number());
+        Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),auctionDomain.getCategory(),date,userDetailsService.getUser(),auctionDomain.getMax_number());
         return auction;
     }
 
 
 
     public AuctionDomain toAuctionDomain(Auction auction){
-        AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(),auction.getDescription(),auction.getBase_price(),auction.getDate().getTime(),auction.getCategory().getId(),auction.getMax_number());
+        AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(),auction.getDescription(),auction.getBase_price(),auction.getDate().getTime(),auction.getCategory(),auction.getMax_number());
         auctionDomain.setState(auction.getState());
         auctionDomain.setId(auction.getId());
         List<Link> auctionPictures = Lists.newArrayList(pictureRepository.findAll()).stream().filter(picture ->
@@ -194,11 +190,5 @@ public class AuctionService {
         List<AuctionDomain> auctionDomainList = new ArrayList<>();
         auctionPage.forEach(auction -> auctionDomainList.add(auction.toAuctionDomain()));
         return new PageImpl<>(auctionDomainList);
-    }
-
-    public Page<AuctionDomain> findByCategory(String categoryName, PageRequest pageRequest) {
-        if (categoryRepository.findByCategoryName(categoryName).isPresent())
-            return toAuctionDomainPage(auctionRepository.findByCategory(categoryRepository.findByCategoryName(categoryName).get(), pageRequest));
-        throw new NotFoundException(categoryName,Category.class);
     }
 }

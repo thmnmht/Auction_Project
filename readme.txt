@@ -1,8 +1,6 @@
 Auction Project APIs
 
 
-
-
 header "Auth" : "Bearer 'Token'"
 
 
