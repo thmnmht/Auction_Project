@@ -3,13 +3,11 @@ package com.rahnemacollege.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.rahnemacollege.model.Category;
 import lombok.Data;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
-import java.util.Date;
 import java.util.List;
 
 

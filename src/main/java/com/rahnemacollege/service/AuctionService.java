@@ -17,8 +17,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
@@ -83,20 +81,23 @@ public class AuctionService {
     public Auction toAuction(AuctionDomain auctionDomain) {
         Category category = categoryRepository.findById(auctionDomain.getCategory().getId()).orElseThrow(() ->
                 new NotFoundException(auctionDomain.getCategory().getId(), Category.class));
-        Auction auction = new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(), auctionDomain.getBase_price(), category, new Date(auctionDomain.getDate()), userDetailsService.getUser(),
-                auctionDomain.getMax_number());
+        Auction auction = new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(),
+                auctionDomain.getBase_price(), category, new Date(auctionDomain.getDate()),
+                userDetailsService.getUser(), auctionDomain.getMax_number());
         return auction;
     }
 
 
 
     public AuctionDomain toAuctionDomain(Auction auction){
-        AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(),auction.getDescription(),auction.getBase_price(),auction.getDate().getTime(),auction.getCategory(),auction.getMax_number());
+        AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(),auction.getDescription(),
+                auction.getBase_price(),auction.getDate().getTime(),auction.getCategory(),auction.getMax_number());
         auctionDomain.setState(auction.getState());
         auctionDomain.setId(auction.getId());
         List<Link> auctionPictures = Lists.newArrayList(pictureRepository.findAll()).stream().filter(picture ->
                 picture.getFileName().startsWith(auction.getId() + "_")).map(
-                picture -> linkTo(methodOn(AuctionController.class).getImage(auction.getId(),picture.getFileName())).withRel("image")
+                picture -> linkTo(methodOn(AuctionController.class)
+                        .getImage(auction.getId(),picture.getFileName())).withRel("image")
         ).collect(Collectors.toList());
         auctionDomain.setPictures(auctionPictures);
 

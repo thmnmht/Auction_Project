@@ -3,7 +3,6 @@ package com.rahnemacollege.service;
 import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
@@ -54,7 +53,5 @@ public class UserService {
         return repository.findByEmail(email);
     }
 
-    public Optional<User> findUserByResetToken(String token) {
-        return repository.findUserByResetToken(token);
-    }
+
 }
