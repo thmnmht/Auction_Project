@@ -1,10 +1,10 @@
 package com.rahnemacollege.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.data.rest.core.annotation.RestResource;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
-import java.security.PublicKey;
 import java.util.Set;
 import java.util.UUID;
 import javax.persistence.Entity;
@@ -20,13 +20,11 @@ public class User {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer id;
-    @Size(min = 4, max = 100, message = "Invalid name")
     private String name;
-    @Email(message = "Invalid email address.")
-    @Size(min = 5,message = "Invalid name")
+//    @Email(message = "Invalid email address.")
     @Column(name = "email",unique = true)
     private String email;
-    @Size(min = 6, max = 100, message = "Invalid name")
+    @JsonIgnore
     private String password;
     private String picture;
     @ManyToMany

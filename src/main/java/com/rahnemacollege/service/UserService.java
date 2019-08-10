@@ -3,6 +3,8 @@ package com.rahnemacollege.service;
 import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.UserRepository;
+import com.rahnemacollege.util.exceptions.InvalidInputException;
+import com.rahnemacollege.util.exceptions.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,10 +25,25 @@ public class UserService {
     }
 
     public User addUser(UserDomain userDomain){
+        if(repository.findByEmail(userDomain.getEmail()).isPresent())
+            throw new InvalidInputException(Message.EMAIL_DUPLICATED);
         User user = toUser(userDomain);
         user.setPassword(passwordEncoder.encode(userDomain.getPassword()));
         repository.save(user);
         return user;
+    }
+
+    public void validation(UserDomain userDomain){
+        if(userDomain.getName() == null || userDomain.getName().length() < 1)
+            throw new InvalidInputException(Message.NAME_NULL);
+        if(userDomain.getEmail() == null || userDomain.getEmail().length() < 5)
+            throw new InvalidInputException(Message.EMAIL_NULL);
+        if(userDomain.getEmail().matches("^\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,3}$"))
+            throw new InvalidInputException(Message.EMAIL_INVALID);
+        if(userDomain.getPassword() == null || userDomain.getPassword().length() < 6)
+            throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
+        if (userDomain.getPassword().length() > 100)
+            throw new InvalidInputException(Message.PASSWORD_TOO_HIGH);
     }
 
     public List<User> getAll() {

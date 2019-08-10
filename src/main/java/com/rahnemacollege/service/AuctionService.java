@@ -10,6 +10,8 @@ import com.rahnemacollege.model.Picture;
 import com.rahnemacollege.repository.AuctionRepository;
 import com.rahnemacollege.repository.CategoryRepository;
 import com.rahnemacollege.repository.PictureRepository;
+import com.rahnemacollege.util.exceptions.InvalidInputException;
+import com.rahnemacollege.util.exceptions.Message;
 import com.rahnemacollege.util.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -55,8 +57,24 @@ public class AuctionService {
     }
 
 
+    public void validation(AuctionDomain auctionDomain){
+        if(auctionDomain.getTitle() == null || auctionDomain.getTitle().length() < 1)
+            throw new InvalidInputException(Message.TITLE_NULL);
+        if(auctionDomain.getBase_price() < 1)
+            throw new InvalidInputException(Message.BASE_PRICE_NULL);
+        if (auctionDomain.getCategory_id() < 0)
+            throw new InvalidInputException(Message.CATEGORY_NULL);
+        if(auctionDomain.getDate() < 1)
+            throw new InvalidInputException(Message.DATE_NULL);
+        if(auctionDomain.getMax_number() < 2)
+            throw new InvalidInputException(Message.MAX_NUMBER_TOO_LOW);
+        if(auctionDomain.getMax_number() > 15)
+            throw new InvalidInputException(Message.MAX_NUMBER_TOO_HIGH);
+    }
+
+
      public void savePictures(Auction auction,MultipartFile[] images) throws IOException {
-         new File("./images/auction_images/" + auction.getId() + "/" ).mkdir();
+         new File("./images/auction_images/" + auction.getId() + "/" ).mkdirs();
          for (MultipartFile image:
                  images) {
              String fileName = auction.getId() + "_" + new Date().getTime() + ".jpg";
@@ -75,8 +93,11 @@ public class AuctionService {
     
     public Auction toAuction(AuctionDomain auctionDomain){
         Category category = categoryRepository.findById(auctionDomain.getCategory_id()).orElseThrow( () ->
-            new NotFoundException(auctionDomain.getCategory_id(),Category.class));
-        Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),category,new Date(auctionDomain.getDate()),auctionDomain.getMax_number());
+            new InvalidInputException(Message.CATEGORY_INVALID));
+        Date date = new Date(auctionDomain.getDate());
+        if(auctionDomain.getDate() - new Date().getTime() < 1800000L)
+            throw new InvalidInputException(Message.DATE_INVALID);
+        Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),category,date,auctionDomain.getMax_number());
         return auction;
     }
 

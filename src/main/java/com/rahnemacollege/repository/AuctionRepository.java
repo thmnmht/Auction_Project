@@ -12,10 +12,10 @@ import java.util.Optional;
 @Repository
 public interface AuctionRepository  extends PagingAndSortingRepository<Auction, Integer> {
 
-    @Override
-    Optional<Auction> findById(Integer integer);
+//    @Override
+//    Optional<Auction> findById(Integer integer);
 
     Optional<Auction> findByTitle(String title);
 
-    Page<Auction> findAll(Pageable firstPageWithTwoElements);
+//    Page<Auction> findAll(Pageable firstPageWithTwoElements);
 }

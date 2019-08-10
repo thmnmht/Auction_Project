@@ -1,0 +1,19 @@
+package com.rahnemacollege.util.exceptions;
+
+public enum Message{
+    TITLE_NULL,
+    BASE_PRICE_NULL,
+    CATEGORY_NULL,
+    CATEGORY_INVALID,
+    DATE_NULL,
+    MAX_NUMBER_TOO_LOW,
+    MAX_NUMBER_TOO_HIGH,
+    DATE_INVALID,
+
+    EMAIL_INVALID,
+    PASSWORD_TOO_LOW,
+    PASSWORD_TOO_HIGH,
+    NAME_NULL,
+    EMAIL_NULL,
+    EMAIL_DUPLICATED
+}

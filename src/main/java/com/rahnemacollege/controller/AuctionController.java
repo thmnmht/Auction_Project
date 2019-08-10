@@ -2,10 +2,11 @@ package com.rahnemacollege.controller;
 
 
 import com.rahnemacollege.domain.AuctionDomain;
-import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.util.ResourceAssembler;
+import com.rahnemacollege.util.exceptions.InvalidInputException;
+import com.rahnemacollege.util.exceptions.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedResources;
@@ -48,12 +49,14 @@ public class AuctionController {
 
 
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Resource<AuctionDomain> add(@RequestPart String title,
+    public Resource<AuctionDomain> add(String title,
                                  String description,
                                  int base_price,
                                  long date,
             int category_id,int max_number, @RequestPart MultipartFile[] images) throws IOException {
+        System.out.println(title);
         AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,date,category_id,max_number);
+        auctionService.validation(auctionDomain);
         return assembler.toResource(auctionService.addAuction(auctionDomain,images));
     }
 
@@ -77,7 +80,6 @@ public class AuctionController {
         Page<AuctionDomain> personPage = auctionService.getPage(page, size);
         return pageAssembler.toResource(personPage);
     }
-
 
 
     @GetMapping("/search/{title}")
