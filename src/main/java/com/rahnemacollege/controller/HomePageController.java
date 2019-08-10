@@ -28,25 +28,5 @@ public class HomePageController {
         Page<AuctionDomain> hotAuctions = service.getHottest(PageRequest.of(page, size));
         return assembler.toResource(hotAuctions);
     }
-    /*
-
-    @GetMapping("/search")
-    PagedResources<Resource<AuctionDomain>> search(@RequestParam("title") String title,
-                                                   @RequestParam("page") int page,
-                                                   @RequestParam(value="size", defaultValue="10") int size,
-                                                   PagedResourcesAssembler<AuctionDomain> assembler) {
-        Page<AuctionDomain> foundAuctions = service.findByTitle(title,PageRequest.of(page, size));
-        return assembler.toResource(foundAuctions);
-    }
-
-    @GetMapping("/searchCat")
-    PagedResources<Resource<AuctionDomain>> find(@RequestParam("category") String categoryName,
-                                                   @RequestParam("page") int page,
-                                                   @RequestParam(value="size", defaultValue="10") int size,
-                                                   PagedResourcesAssembler<AuctionDomain> assembler) {
-        Page<AuctionDomain> foundAuctions = service.findByCategory(categoryName,PageRequest.of(page, size));
-        return assembler.toResource(foundAuctions);
-    }
-     */
 
 }

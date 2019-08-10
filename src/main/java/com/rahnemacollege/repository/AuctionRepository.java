@@ -21,8 +21,8 @@ import java.util.Optional;
 @Repository
 public interface AuctionRepository  extends PagingAndSortingRepository<Auction, Integer> {
 
-    @Override
-    Optional<Auction> findById(Integer integer);
+//    @Override
+//    Optional<Auction> findById(Integer integer);
 
     Page<Auction> findByTitle(String title, PageRequest pageRequest);
 
@@ -40,5 +40,5 @@ public interface AuctionRepository  extends PagingAndSortingRepository<Auction, 
     Page<Auction> findByCategory(Category category, PageRequest request);
 
 
-    Page<Auction> findAll(Pageable firstPageWithTwoElements);
+//    Page<Auction> findAll(Pageable firstPageWithTwoElements);
 }
