@@ -19,6 +19,11 @@ apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
+bootJar {
+    baseName = 'gs-securing-web'
+    version =  '0.1.0'
+}
+
 
 //plugins {
 //    // Apply the java plugin to add support for Java
@@ -85,6 +90,22 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
     testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.1.6.RELEASE'
+    testCompile("org.springframework.security:spring-security-test")
+
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-mail
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '2.1.3.RELEASE'
+
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-core
+    compile group: 'org.springframework.security', name: 'spring-security-core', version: '5.1.2.RELEASE'
+
+//// https://mvnrepository.com/artifact/org.springframework.security/spring-security-config
+//    compile group: 'org.springframework.security', name: 'spring-security-config', version: '5.1.5.RELEASE'
+
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-web
+    compile group: 'org.springframework.security', name: 'spring-security-web', version: '4.2.3.RELEASE'
+
+
+
 
 
 }

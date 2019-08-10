@@ -3,6 +3,7 @@ package com.rahnemacollege.util;
 import com.rahnemacollege.controller.AuctionController;
 import com.rahnemacollege.controller.UserController;
 import com.rahnemacollege.domain.AuctionDomain;
+import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.User;
 import org.springframework.hateoas.Link;
