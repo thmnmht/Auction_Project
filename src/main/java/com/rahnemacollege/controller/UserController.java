@@ -23,6 +23,7 @@ public class UserController {
     }
 
 
+
     @PostMapping("/signup")
     public Resource<User> add(@RequestBody @Valid UserDomain userDomain) {
         User user = userService.addUser(userDomain);
@@ -40,6 +41,5 @@ public class UserController {
         @Valid User user = userService.findById(id).orElseThrow(() -> new NotFoundException(id ,User.class));
         return assembler.toResource(user);
     }
-
 
 }

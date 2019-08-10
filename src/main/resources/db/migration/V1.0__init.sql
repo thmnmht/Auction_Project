@@ -30,13 +30,13 @@ CREATE TABLE Auctions
     category_id INT         NOT NULL,
     date         DATE        NOT NULL,
     state        INT         NOT NULL,
-    winner       INT,
-    owner        INT         NOT NULL,
+    winner_id       INT,
+    owner_id        INT         NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (winner)
+    FOREIGN KEY (winner_id)
         REFERENCES Users (id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (owner)
+    FOREIGN KEY (owner_id)
         REFERENCES Users (id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (category_id)
