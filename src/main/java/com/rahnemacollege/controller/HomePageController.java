@@ -8,10 +8,12 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/home")
 public class HomePageController {
     private final AuctionService service;
 
@@ -26,6 +28,7 @@ public class HomePageController {
         Page<AuctionDomain> hotAuctions = service.getHottest(PageRequest.of(page, size));
         return assembler.toResource(hotAuctions);
     }
+    /*
 
     @GetMapping("/search")
     PagedResources<Resource<AuctionDomain>> search(@RequestParam("title") String title,
@@ -36,7 +39,7 @@ public class HomePageController {
         return assembler.toResource(foundAuctions);
     }
 
-    @GetMapping("/search")
+    @GetMapping("/searchCat")
     PagedResources<Resource<AuctionDomain>> find(@RequestParam("category") String categoryName,
                                                    @RequestParam("page") int page,
                                                    @RequestParam(value="size", defaultValue="10") int size,
@@ -44,5 +47,6 @@ public class HomePageController {
         Page<AuctionDomain> foundAuctions = service.findByCategory(categoryName,PageRequest.of(page, size));
         return assembler.toResource(foundAuctions);
     }
+     */
 
 }
