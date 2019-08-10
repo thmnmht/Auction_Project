@@ -25,12 +25,15 @@ public class AuctionService {
     private final AuctionRepository auctionRepository;
     private final CategoryRepository categoryRepository;
     private final PictureRepository pictureRepository;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Autowired
-    public AuctionService(AuctionRepository auctionRepository, CategoryRepository categoryRepository, PictureRepository pictureRepository) {
+    public AuctionService(AuctionRepository auctionRepository, CategoryRepository categoryRepository,
+                          PictureRepository pictureRepository, UserDetailsServiceImpl userDetailsService) {
         this.auctionRepository = auctionRepository;
         this.categoryRepository = categoryRepository;
         this.pictureRepository = pictureRepository;
+        this.userDetailsService = userDetailsService;
     }
 
     public Auction addAuction(AuctionDomain auctionDomain,MultipartFile[] images) throws IOException {
@@ -66,7 +69,9 @@ public class AuctionService {
     public Auction toAuction(AuctionDomain auctionDomain){
         Category category = categoryRepository.findById(auctionDomain.getCategory_id()).orElseThrow( () ->
             new NotFoundException(auctionDomain.getCategory_id(),Category.class));
-        Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),category,auctionDomain.getDate(),auctionDomain.getMax_number());
+        Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),
+                auctionDomain.getBase_price(),category,auctionDomain.getDate(), userDetailsService.getUser(),
+                auctionDomain.getMax_number());
         return auction;
     }
 

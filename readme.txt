@@ -1,12 +1,14 @@
 Auction Project APIs
 
+header "Auth" : "Bearer 'Token'"
+
 -/login : login
         email : String
         password : String
 
 -/users/signup : sign up
         UserDomain : {
-            name, 
+            name,
             email,
             password
         }
