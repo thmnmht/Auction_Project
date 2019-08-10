@@ -62,7 +62,7 @@ public class AuctionController {
             int category_id,int max_number, @RequestPart MultipartFile[] images) throws IOException {
         Optional<Category> category = categoryService.findById(category_id);
         if (category.isPresent()){
-            AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,new Date(date),category.get(),max_number);
+            AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,date,category.get(),max_number);
             return assembler.toResource(auctionService.addAuction(auctionDomain,images));
         }
         throw new NotFoundException(category_id,Category.class);
@@ -74,9 +74,8 @@ public class AuctionController {
     }
 
     @GetMapping("/find/{id}")
-    public Resource<Auction> one(@PathVariable int id) {
-        Auction auction = auctionService.findById(id).orElseThrow(() -> new IllegalArgumentException(id+ " was not found!"));
-        return assembler.toResource(auction);
+    public Resource<AuctionDomain> one(@PathVariable int id) {
+        return assembler.toResource(auctionService.findById(id));
     }
 
     @GetMapping("/all")

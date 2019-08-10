@@ -61,7 +61,7 @@ public class Auction {
     }
 
     public AuctionDomain toAuctionDomain(){
-        return new AuctionDomain(this.title,this.description,this.base_price,this.date,this.category,this.max_number);
+        return new AuctionDomain(this.title,this.description,this.base_price,date.getTime(),this.category,this.max_number);
     }
 
 
