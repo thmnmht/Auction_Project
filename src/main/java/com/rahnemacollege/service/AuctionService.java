@@ -80,7 +80,7 @@ public class AuctionService {
         Category category = categoryRepository.findById(auctionDomain.getCategory_id()).orElseThrow( () ->
             new NotFoundException(auctionDomain.getCategory_id(),Category.class));
         Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),
-                auctionDomain.getBase_price(),category,auctionDomain.getDate(), userDetailsService.getUser(),
+                auctionDomain.getBase_price(),category ,new Date(auctionDomain.getDate()), userDetailsService.getUser(),
                 auctionDomain.getMax_number());
         return auction;
     }
