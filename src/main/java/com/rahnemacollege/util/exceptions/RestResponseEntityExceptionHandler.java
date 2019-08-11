@@ -1,13 +1,18 @@
 package com.rahnemacollege.util.exceptions;
 
+import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
 import javax.servlet.http.HttpServletResponse;
 
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+
+
+    Logger logger = LoggerFactory.getLogger(RestResponseEntityExceptionHandler.class);
 
     @ExceptionHandler(value = {InvalidInputException.class})
     protected void handler(InvalidInputException ex,
@@ -81,5 +86,6 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 response.setStatus(450);
                 break;
         }
+        logger.error(ex.getMessageStatus().toString());
     }
 }
