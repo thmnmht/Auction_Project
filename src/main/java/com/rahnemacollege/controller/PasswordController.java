@@ -1,3 +1,5 @@
+
+
 package com.rahnemacollege.controller;
 
 import com.rahnemacollege.domain.UserDomain;
@@ -7,7 +9,6 @@ import com.rahnemacollege.service.*;
 import com.rahnemacollege.util.ResourceAssembler;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
-import com.rahnemacollege.util.exceptions.InvalidInputException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -79,11 +80,11 @@ public class PasswordController {
         }
     }
 
+
+
     //     Display form to reset password
     @RequestMapping(value = "/reset", method = RequestMethod.GET)
     public Resource<UserDomain> displayResetPasswordPage(@RequestParam("token") String token) {
-
-    public Resource<User> displayResetPasswordPage(@RequestParam("token") String token) {
         Optional<ResetRequest> request = requestService.findByToken(token);
         if (request.isPresent()) { // Token found in DB
 //            todo: redirect to password reset page
@@ -123,7 +124,7 @@ public class PasswordController {
 
         } else {
             System.err.println("errorMessage : Oops!  This is an invalid password reset link.");
-            throw new InvalidInputException(Message.NOT_RECORDED_REQUEST);
+            throw new  InvalidInputException(Message.NOT_RECORDED_REQUEST);
         }
     }
 

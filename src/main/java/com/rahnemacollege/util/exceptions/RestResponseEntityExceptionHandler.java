@@ -68,8 +68,9 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
             case EMAIL_INVALID:
                 response.setStatus(443);
                 break;
+                //it change
             case EMAIL_DUPLICATED:
-                response.setStatus(444);
+                response.setStatus(454);
                 break;
 
             //login

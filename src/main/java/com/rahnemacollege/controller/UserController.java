@@ -23,11 +23,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.validation.Valid;
 import javax.websocket.server.PathParam;
 
 @RestController
@@ -111,7 +108,7 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<UserDomain> one(){
-        UserDomain user = userService.getUser();
+        UserDomain user = userService.toUserDomain(detailsService.getUser());
         System.out.println(user.getEmail());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }

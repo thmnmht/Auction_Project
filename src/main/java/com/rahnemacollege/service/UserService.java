@@ -6,6 +6,7 @@ import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.UserRepository;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,12 +23,14 @@ public class UserService {
     private final UserRepository repository;
     private final UserDetailsServiceImpl userDetailsService;
     private final PictureService pictureService;
+    private final PasswordEncoder encoder;
 
 
-    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService, PictureService pictureService) {
+    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService, PictureService pictureService, PasswordEncoder encoder) {
         this.repository = repository;
         this.userDetailsService = userDetailsService;
         this.pictureService = pictureService;
+        this.encoder = encoder;
     }
 
 
@@ -40,7 +43,7 @@ public class UserService {
 
     public UserDomain addUser(String name,String email,String password){
         validation(name,email,password);
-        User user = new User(name,email,password);
+        User user = new User(name,email,encoder.encode(password));
         repository.save(user);
         return toUserDomain(user);
     }
@@ -82,7 +85,7 @@ public class UserService {
 
     public UserDomain edit(String name,String email) throws InvalidInputException{
         if(email == null || email.length() < 1)
-            email = getUser().getEmail();
+            email = userDetailsService.getUser().getEmail();
         else {
             if(!email.matches("^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$"))
                 throw new InvalidInputException(Message.EMAIL_INVALID);
@@ -90,15 +93,11 @@ public class UserService {
                 throw new InvalidInputException(Message.EMAIL_DUPLICATED);
         }
         if(name == null || name.length() < 1)
-            name = getUser().getName();
+            name = userDetailsService.getUser().getName();
         User user = userDetailsService.getUser();
         user.setName(name);
         user.setEmail(email);
-        return toUserDomain(user);
-    }
-
-    public UserDomain getUser(){
-        User user = userDetailsService.getUser();
+        repository.save(user);
         return toUserDomain(user);
     }
 
