@@ -50,3 +50,23 @@ header "Auth" : "Bearer 'Token'"
         @RequestParam("page") int page, @RequestParam("size") int size
 
 -/auctions/all GET : to receive all auctions
+
+-/forgot POST:
+    @Param ("email") : string
+
+    out : Resource<User>
+    407 if not found email address
+
+-/reset GET:
+     @Param ("token") String
+
+     out : Resource<User>
+     448 if reset link is invalid
+
+-/reset POST:
+    @Param ("token") String
+    @Param ("password") String
+
+    out : Resource<User>
+    449 if token not found
+    450 if request hasn't been recorded
