@@ -21,13 +21,13 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @Component
 public class ResourceAssembler {
 
-    public Resource<User> toResource(User user){
+    public Resource<UserDomain> toResource(UserDomain user){
         return new Resource<>(user,
 //                linkTo(methodOn(UserController.class).one()).withSelfRel(),
                 linkTo(methodOn(UserController.class).all()).withRel("all"));
     }
 
-    public Resources<Resource<User>> toResourcesUser(List<User> users){
+    public Resources<Resource<UserDomain>> toResourcesUser(List<UserDomain> users){
        return new Resources<>(users.stream()
                 .map(this::toResource)
                 .collect(Collectors.toList()),linkTo(methodOn(UserController.class).all()).withSelfRel());

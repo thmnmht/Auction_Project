@@ -11,6 +11,7 @@ import com.rahnemacollege.service.UserService;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
+import org.apache.catalina.loader.ResourceEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
@@ -23,6 +24,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
+
+import javax.websocket.server.PathParam;
 
 @RestController
 @RequestMapping("/users")
@@ -65,31 +68,29 @@ public class UserController {
     }
 
     @PostMapping("/edit")
-    public Resource<User> edit(@PathVariable String name, @PathVariable String email){
-        User user = userService.edit(name,email);
-        return assembler.toResource(user);
+    public ResponseEntity<UserDomain> edit(String name,String email){
+        UserDomain userDomain = userService.edit(name,email);
+        return new ResponseEntity<>(userDomain,HttpStatus.OK);
     }
 
     @PostMapping("/signup")
-    public Resource<User> add(@RequestBody UserDomain userDomain) {
-        System.out.println("salm");
-        User user = userService.addUser(userDomain);
-        System.out.println("hale");
+    public Resource<UserDomain> add(@PathParam("name") String name,@PathParam("emil") String email,@PathParam("password") String password) {
+        UserDomain user = userService.addUser(name,email,password);
         return assembler.toResource(user);
     }
 
     @GetMapping("/all")
-    public Resources<Resource<User>> all() {
+    public Resources<Resource<UserDomain>> all() {
         return assembler.toResourcesUser(userService.getAll());
     }
 
 
     @GetMapping("/me")
     public ResponseEntity<UserDomain> one(){
-        User user = userService.getUser();
-        UserDomain userDomain = userService.toUserDomain(user);
+        UserDomain user = userService.getUser();
         System.out.println(user.getEmail());
-        return new ResponseEntity<>(userDomain, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
+
 
 }

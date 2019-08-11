@@ -40,7 +40,7 @@ AuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        final String requestTokenHeader = request.getHeader("Auth");
+        final String requestTokenHeader = request.getHeader("auth");
         String email = null;
         String jwtToken = null;
         // JWT Token is in the form "Bearer token". Remove Bearer word and get

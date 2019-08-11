@@ -1,11 +1,11 @@
 package com.rahnemacollege.service;
 
+import com.google.common.collect.Lists;
 import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.UserRepository;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +17,10 @@ public class UserService {
     private final UserRepository repository;
     private final UserDetailsServiceImpl userDetailsService;
 
-    private PasswordEncoder encoder;
 
-    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService, PasswordEncoder encoder) {
+    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService) {
         this.repository = repository;
         this.userDetailsService = userDetailsService;
-        this.encoder = encoder;
     }
 
 
@@ -33,36 +31,32 @@ public class UserService {
         return false;
     }
 
-    public User addUser(UserDomain userDomain){
-        validation(userDomain);
-        if(repository.findByEmail(userDomain.getEmail()).isPresent())
+    public UserDomain addUser(String name,String email,String password){
+        validation(name,email,password);
+        if(repository.findByEmail(email).isPresent())
             throw new InvalidInputException(Message.EMAIL_DUPLICATED);
-        User user = toUser(userDomain);
+        User user = new User(name,email,password);
         repository.save(user);
-        return user;
+        return toUserDomain(user);
     }
 
-    public void validation(UserDomain userDomain){
-        if(userDomain.getName() == null || userDomain.getName().length() < 1)
+    public void validation(String name,String email,String password){
+        if(name == null || name.length() < 1)
             throw new InvalidInputException(Message.NAME_NULL);
-        if(userDomain.getEmail() == null || userDomain.getEmail().length() < 5)
+        if(email == null || email.length() < 5)
             throw new InvalidInputException(Message.EMAIL_NULL);
-        if(!userDomain.getEmail().matches("^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$"))
+        if(!email.matches("^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$"))
             throw new InvalidInputException(Message.EMAIL_INVALID);
-        if(userDomain.getPassword() == null || userDomain.getPassword().length() < 6)
+        if(password == null || password.length() < 6)
             throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
-        if (userDomain.getPassword().length() > 100)
+        if (password.length() > 100)
             throw new InvalidInputException(Message.PASSWORD_TOO_HIGH);
     }
 
-    public List<User> getAll() {
-        ArrayList<User> users = new ArrayList<>();
-        repository.findAll().forEach(users::add);
+    public List<UserDomain> getAll() {
+        ArrayList<UserDomain> users = new ArrayList<>();
+        Lists.newArrayList(repository.findAll()).stream().map(user -> toUserDomain(user)).forEach(users::add);
         return users;
-    }
-
-    public User toUser(UserDomain userDomain){
-        return new User(userDomain.getName(),userDomain.getEmail(),encoder.encode(userDomain.getPassword()));
     }
 
 
@@ -79,11 +73,11 @@ public class UserService {
         return repository.findByEmail(email);
     }
 
-    public User edit(String name,String email) throws InvalidInputException{
+    public UserDomain edit(String name,String email) throws InvalidInputException{
         if(email == null || email.length() < 1)
             email = getUser().getEmail();
         else {
-            if(email.matches("^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$"))
+            if(!email.matches("^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$"))
                 throw new InvalidInputException(Message.EMAIL_INVALID);
             if(getByEmail(email).isPresent())
                 throw new InvalidInputException(Message.EMAIL_DUPLICATED);
@@ -93,18 +87,16 @@ public class UserService {
         User user = userDetailsService.getUser();
         user.setName(name);
         user.setEmail(email);
-        return user;
+        return toUserDomain(user);
     }
 
-    public User getUser(){
+    public UserDomain getUser(){
         User user = userDetailsService.getUser();
-        return user;
+        return toUserDomain(user);
     }
 
     public UserDomain toUserDomain(User user){
-        UserDomain userDomain = new UserDomain();
-        userDomain.setName(user.getName());
-        userDomain.setEmail(user.getEmail());
+        UserDomain userDomain = new UserDomain(user.getName(),user.getEmail(),user.getId(),user.getPicture());
         return userDomain;
     }
 

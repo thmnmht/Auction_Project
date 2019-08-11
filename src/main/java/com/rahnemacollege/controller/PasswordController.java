@@ -1,5 +1,6 @@
 package com.rahnemacollege.controller;
 
+import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.ResetRequest;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.*;
@@ -38,7 +39,7 @@ public class PasswordController {
 
     // Process form submission from forgotPassword page
     @RequestMapping(value = "/forgot", method = RequestMethod.POST)
-    public Resource<User> processForgotPasswordForm(@RequestParam("email") String userEmail, HttpServletRequest request) {
+    public Resource<UserDomain> processForgotPasswordForm(@RequestParam("email") String userEmail, HttpServletRequest request) {
         Optional<User> optional = service.findUserByEmail(userEmail);
         if (!optional.isPresent()) {
             System.err.println("errorMessage" + " Could not find an account for that e-mail address.");
@@ -69,14 +70,14 @@ public class PasswordController {
             // Add success message to view
             System.err.println("successMessage" + " A password reset link has been sent to " + userEmail + " @"+
                     new Date());
-            return assembler.toResource(optional.get());
+            return assembler.toResource(service.toUserDomain(optional.get()));
         }
         return null;
     }
 
 //     Display form to reset password
     @RequestMapping(value = "/reset", method = RequestMethod.GET)
-    public Resource<User> displayResetPasswordPage(@RequestParam("token") String token) {
+    public Resource<UserDomain> displayResetPasswordPage(@RequestParam("token") String token) {
 
         Optional<ResetRequest> request = requestService.findByToken(token);
 
@@ -85,7 +86,7 @@ public class PasswordController {
         if (request.isPresent()) { // Token found in DB
 //            todo: redirect to password reset page
             System.err.println("redirecting to pass reset screen");
-            return assembler.toResource(request.get().getUser());
+            return assembler.toResource(service.toUserDomain(request.get().getUser()));
         } else { // Token not found in DB
             System.err.println("errorMessage : Oops!  This is an invalid password reset link.");
             return null;
@@ -94,7 +95,7 @@ public class PasswordController {
 
 //     Process reset password form
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
-    public Resource<User> setNewPassword(@RequestParam Map<String, String> requestParams) {
+    public Resource<UserDomain> setNewPassword(@RequestParam Map<String, String> requestParams) {
 
         // Find the user associated with the reset token
         ResetRequest request = requestService.findByToken(requestParams.get("token")).orElseThrow(()-> new RuntimeException("token is not valid!"));
@@ -116,7 +117,7 @@ public class PasswordController {
 
             //TODO : redirect:login
 
-            return assembler.toResource(resetUser);
+            return assembler.toResource(service.toUserDomain(resetUser));
 
         } else {
             System.err.println("errorMessage : Oops!  This is an invalid password reset link.");
