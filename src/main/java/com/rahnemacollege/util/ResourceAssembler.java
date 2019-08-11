@@ -24,6 +24,10 @@ public class ResourceAssembler {
                 linkTo(methodOn(UserController.class).all()).withRel("all"));
     }
 
+    public Resource<UserDomain> toResource(UserDomain userDomain){
+        return new Resource<>(userDomain, (linkTo(methodOn(UserController.class).all()).withRel("all")));
+    }
+
     public Resources<Resource<User>> toResourcesUser(List<User> users){
        return new Resources<>(users.stream()
                 .map(this::toResource)
