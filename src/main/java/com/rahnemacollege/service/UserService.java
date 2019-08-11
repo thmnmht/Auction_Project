@@ -15,11 +15,13 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserRepository repository;
+    private final UserDetailsServiceImpl userDetailsService;
 
     private PasswordEncoder encoder;
 
-    public UserService(UserRepository repository, PasswordEncoder encoder) {
+    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService, PasswordEncoder encoder) {
         this.repository = repository;
+        this.userDetailsService = userDetailsService;
         this.encoder = encoder;
     }
 
@@ -45,7 +47,7 @@ public class UserService {
             throw new InvalidInputException(Message.NAME_NULL);
         if(userDomain.getEmail() == null || userDomain.getEmail().length() < 5)
             throw new InvalidInputException(Message.EMAIL_NULL);
-        if(!userDomain.getEmail().matches("^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$"))
+        if(!userDomain.getEmail().matches("^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$"))
             throw new InvalidInputException(Message.EMAIL_INVALID);
         if(userDomain.getPassword() == null || userDomain.getPassword().length() < 6)
             throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
@@ -62,11 +64,9 @@ public class UserService {
     public User toUser(UserDomain userDomain){
         return new User(userDomain.getName(),userDomain.getEmail(),encoder.encode(userDomain.getPassword()));
     }
-    public Optional<com.rahnemacollege.model.User> findById(int id) {
-        return repository.findById(id);
-    }
 
-    public User getByEmail(String email) {
+
+    public Optional<User> getByEmail(String email) {
         return repository.getByEmail(email);
     }
 
@@ -77,6 +77,35 @@ public class UserService {
 
     public Optional<User> findUserByEmail(String email) {
         return repository.findByEmail(email);
+    }
+
+    public User edit(String name,String email) throws InvalidInputException{
+        if(email == null || email.length() < 1)
+            email = getUser().getEmail();
+        else {
+            if(email.matches("^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$"))
+                throw new InvalidInputException(Message.EMAIL_INVALID);
+            if(getByEmail(email).isPresent())
+                throw new InvalidInputException(Message.EMAIL_DUPLICATED);
+        }
+        if(name == null || name.length() < 1)
+            name = getUser().getName();
+        User user = userDetailsService.getUser();
+        user.setName(name);
+        user.setEmail(email);
+        return user;
+    }
+
+    public User getUser(){
+        User user = userDetailsService.getUser();
+        return user;
+    }
+
+    public UserDomain toUserDomain(User user){
+        UserDomain userDomain = new UserDomain();
+        userDomain.setName(user.getName());
+        userDomain.setEmail(user.getEmail());
+        return userDomain;
     }
 
 

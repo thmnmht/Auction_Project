@@ -11,9 +11,11 @@ import com.rahnemacollege.service.UserService;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
-import com.rahnemacollege.util.exceptions.NotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -21,7 +23,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/users")
@@ -29,9 +30,9 @@ public class UserController {
 
     private final UserService userService;
     private final ResourceAssembler assembler;
-    private AuthenticationManager authenticationManager;
-    private TokenUtil tokenUtil;
-    private UserDetailsService userDetailsService;
+    private final AuthenticationManager authenticationManager;
+    private final TokenUtil tokenUtil;
+    private final UserDetailsService userDetailsService;
 
     public UserController(UserService userService, ResourceAssembler assembler, AuthenticationManager authenticationManager,
                           JwtTokenUtil tokenUtil,
@@ -42,9 +43,6 @@ public class UserController {
         this.tokenUtil = tokenUtil;
         this.userDetailsService = userDetailService;
     }
-
-
-
 
     @PostMapping("/login")
     public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws InvalidInputException {
@@ -66,6 +64,11 @@ public class UserController {
         }
     }
 
+    @PostMapping("/edit")
+    public Resource<User> edit(@PathVariable String name, @PathVariable String email){
+        User user = userService.edit(name,email);
+        return assembler.toResource(user);
+    }
 
     @PostMapping("/signup")
     public Resource<User> add(@RequestBody UserDomain userDomain) {
@@ -81,10 +84,12 @@ public class UserController {
     }
 
 
-    @GetMapping("/find/{id}")
-    public Resource<User> one(@PathVariable int id) {
-        @Valid User user = userService.findById(id).orElseThrow(() -> new NotFoundException(id ,User.class));
-        return assembler.toResource(user);
+    @GetMapping("/me")
+    public ResponseEntity<UserDomain> one(){
+        User user = userService.getUser();
+        UserDomain userDomain = userService.toUserDomain(user);
+        System.out.println(user.getEmail());
+        return new ResponseEntity<>(userDomain, HttpStatus.ACCEPTED);
     }
 
 }

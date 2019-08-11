@@ -48,11 +48,13 @@ public class AuctionController {
 
 
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Resource<AuctionDomain> add(String title,
-                                 String description,
-                                 int base_price,
-                                 long date,
-            int category_id,int max_number, @RequestPart MultipartFile[] images) throws IOException {
+    public Resource<AuctionDomain> add(@PathVariable String title,
+                                       @PathVariable String description,
+                                       @PathVariable int base_price,
+                                       @PathVariable long date,
+                                       @PathVariable int category_id,
+                                       @PathVariable int max_number,
+                                       @RequestPart MultipartFile[] images) throws IOException {
         AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,date,category_id,max_number);
         return assembler.toResource(auctionService.addAuction(auctionDomain,images));
     }
@@ -67,23 +69,6 @@ public class AuctionController {
         return assembler.toResourcesAuc(auctionService.getAll());
     }
 
-    @GetMapping("/homepage")
-    public PagedResources<Resource<AuctionDomain>> getPage(@RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> pageAssembler){
-        Page<AuctionDomain> personPage = auctionService.getPage(page, size);
-        return pageAssembler.toResource(personPage);
-    }
-
-
-    @GetMapping("/search/{title}")
-    public Resources<Resource<AuctionDomain>> search(@PathVariable String title){
-        List<AuctionDomain> auctions = auctionService.findByTitle(title);
-        return assembler.toResourcesAuc(auctions);
-    }
-
-    @GetMapping("/filter/{category_id}")
-    public Resources<Resource<AuctionDomain>> filter(@PathVariable int category_id){
-        return assembler.toResourcesAuc(auctionService.filter(category_id));
-    }
 }
 
 
