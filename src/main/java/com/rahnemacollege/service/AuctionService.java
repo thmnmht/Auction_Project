@@ -65,7 +65,7 @@ public class AuctionService {
     }
 
 
-    public void validation(AuctionDomain auctionDomain){
+    private void validation(AuctionDomain auctionDomain){
         if(auctionDomain.getTitle() == null || auctionDomain.getTitle().length() < 1)
             throw new InvalidInputException(Message.TITLE_NULL);
         if(auctionDomain.getBase_price() < 1)
@@ -79,7 +79,7 @@ public class AuctionService {
     }
 
 
-     public void savePictures(Auction auction,MultipartFile[] images) throws IOException {
+     private void savePictures(Auction auction,MultipartFile[] images) throws IOException {
          new File("./images/auction_images/" + auction.getId() + "/" ).mkdirs();
          for (MultipartFile image:
                  images) {
@@ -181,10 +181,6 @@ public class AuctionService {
 
     public Page<AuctionDomain> getHottest(PageRequest request) {
         return toAuctionDomainPage(auctionRepository.findHottest(request));
-    }
-
-    public Page<AuctionDomain> findByTitle(String title, PageRequest pageRequest) {
-        return toAuctionDomainPage(auctionRepository.findByTitle(title, pageRequest));
     }
 
     private Page<AuctionDomain> toAuctionDomainPage(Page<Auction> auctionPage) {
