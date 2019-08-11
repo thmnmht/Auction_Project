@@ -42,14 +42,16 @@ public class AuctionService {
     private final CategoryRepository categoryRepository;
     private final PictureRepository pictureRepository;
     private final UserDetailsServiceImpl userDetailsService;
+    private final PictureService pictureService;
 
     @Autowired
     public AuctionService(AuctionRepository auctionRepository, CategoryRepository categoryRepository,
-                          PictureRepository pictureRepository, UserDetailsServiceImpl userDetailsService) {
+                          PictureRepository pictureRepository, UserDetailsServiceImpl userDetailsService, PictureService pictureService) {
         this.auctionRepository = auctionRepository;
         this.categoryRepository = categoryRepository;
         this.pictureRepository = pictureRepository;
         this.userDetailsService = userDetailsService;
+        this.pictureService = pictureService;
     }
 
 
@@ -85,12 +87,7 @@ public class AuctionService {
              String pathName = "./images/auction_images/" + auction.getId() + "/" +  fileName;
              Picture picture = new Picture(fileName,auction);
              pictureRepository.save(picture);
-             File upl = new File(pathName);
-             upl.createNewFile();
-             FileOutputStream fout = new FileOutputStream(upl);
-             fout.write(image.getBytes());
-             fout.close();
-
+             pictureService.save(image,pathName);
          }
      }
 
@@ -108,7 +105,6 @@ public class AuctionService {
 
     public AuctionDomain toAuctionDomain(Auction auction){
         AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(),auction.getDescription(),auction.getBase_price(),auction.getDate().getTime(),auction.getCategory().getId(),auction.getMax_number());
-        auctionDomain.setState(auction.getState());
         auctionDomain.setId(auction.getId());
         List<Link> auctionPictures = Lists.newArrayList(pictureRepository.findAll()).stream().filter(picture ->
                 picture.getFileName().startsWith(auction.getId() + "_")).map(

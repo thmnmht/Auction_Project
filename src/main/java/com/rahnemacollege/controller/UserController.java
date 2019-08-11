@@ -24,6 +24,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.websocket.server.PathParam;
 
@@ -71,6 +72,12 @@ public class UserController {
     public ResponseEntity<UserDomain> edit(String name,String email){
         UserDomain userDomain = userService.edit(name,email);
         return new ResponseEntity<>(userDomain,HttpStatus.OK);
+    }
+
+    //TODO
+    @PostMapping("/profilepic")
+    public Resource setPicture(@PathParam("picture") MultipartFile picture){
+        return null;
     }
 
     @PostMapping("/signup")

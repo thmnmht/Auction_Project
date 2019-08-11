@@ -15,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.websocket.server.PathParam;
 import java.io.IOException;
 import java.util.List;
 
@@ -48,13 +50,14 @@ public class AuctionController {
 
 
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Resource<AuctionDomain> add(@PathVariable String title,
-                                       @PathVariable String description,
-                                       @PathVariable int base_price,
-                                       @PathVariable long date,
-                                       @PathVariable int category_id,
-                                       @PathVariable int max_number,
+    public Resource<AuctionDomain> add(@PathParam("title") String title,
+                                       @PathParam("description") String description,
+                                       @PathParam("base_price") int base_price,
+                                       @PathParam("date") long date,
+                                       @PathParam("category_id") int category_id,
+                                       @PathParam("max_number") int max_number,
                                        @RequestPart MultipartFile[] images) throws IOException {
+        System.out.println("salam");
         AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,date,category_id,max_number);
         return assembler.toResource(auctionService.addAuction(auctionDomain,images));
     }
@@ -68,6 +71,8 @@ public class AuctionController {
     public Resources<Resource<AuctionDomain>> all() {
         return assembler.toResourcesAuc(auctionService.getAll());
     }
+
+
 
 }
 

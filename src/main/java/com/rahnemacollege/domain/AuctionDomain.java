@@ -23,12 +23,9 @@ public class AuctionDomain {
     private int category_id;
     private int max_number = -1;
 
-
-    @JsonIgnore
     private int id;
 
     private List<Link> pictures;
-    private int state;
 
     public AuctionDomain(String title,
                          String description,

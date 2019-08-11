@@ -7,7 +7,12 @@ import com.rahnemacollege.repository.UserRepository;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,11 +21,13 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository repository;
     private final UserDetailsServiceImpl userDetailsService;
+    private final PictureService pictureService;
 
 
-    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService) {
+    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService, PictureService pictureService) {
         this.repository = repository;
         this.userDetailsService = userDetailsService;
+        this.pictureService = pictureService;
     }
 
 
@@ -33,8 +40,6 @@ public class UserService {
 
     public UserDomain addUser(String name,String email,String password){
         validation(name,email,password);
-        if(repository.findByEmail(email).isPresent())
-            throw new InvalidInputException(Message.EMAIL_DUPLICATED);
         User user = new User(name,email,password);
         repository.save(user);
         return toUserDomain(user);
@@ -51,6 +56,8 @@ public class UserService {
             throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
         if (password.length() > 100)
             throw new InvalidInputException(Message.PASSWORD_TOO_HIGH);
+        if(repository.findByEmail(email).isPresent())
+            throw new InvalidInputException(Message.EMAIL_DUPLICATED);
     }
 
     public List<UserDomain> getAll() {
@@ -98,6 +105,21 @@ public class UserService {
     public UserDomain toUserDomain(User user){
         UserDomain userDomain = new UserDomain(user.getName(),user.getEmail(),user.getId(),user.getPicture());
         return userDomain;
+    }
+
+    public String savePicture(MultipartFile picture) throws IOException {
+
+        int userId = userDetailsService.getUser().getId();
+        new File("./images/profile_images/" + userId + "/" ).mkdirs();
+            String fileName = userId + "_" + new Date().getTime() + ".jpg";
+            String pathName = "./images/auction_images/" + userId + "/" +  fileName;
+            pictureService.save(picture,pathName);
+        return pathName;
+    }
+
+    //TODO
+    public void setPicture(MultipartFile picture){
+
     }
 
 
