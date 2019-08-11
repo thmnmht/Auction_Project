@@ -1,6 +1,5 @@
 package com.rahnemacollege.util.exceptions;
 
-import org.apache.commons.logging.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
 
-    Logger logger = LoggerFactory.getLogger(RestResponseEntityExceptionHandler.class);
+    private Logger logger = LoggerFactory.getLogger(RestResponseEntityExceptionHandler.class);
 
     @ExceptionHandler(value = {InvalidInputException.class})
     protected void handler(InvalidInputException ex,
@@ -21,6 +20,12 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
             //add auction
             case TITLE_NULL:
                 response.setStatus(430);
+                break;
+            case TITLE_TOO_LONG:
+                response.setStatus(451);
+                break;
+            case DESCRIPTION_TOO_LONG:
+                response.setStatus(452);
                 break;
             case BASE_PRICE_NULL:
                 response.setStatus(432);
@@ -42,6 +47,9 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 break;
             case DATE_NULL:
                 response.setStatus(438);
+                break;
+            case MAX_SIZE_EXCEEDED:
+                response.setStatus(453);
                 break;
 
             //sign up

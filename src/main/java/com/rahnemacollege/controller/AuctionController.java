@@ -5,6 +5,8 @@ import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.util.ResourceAssembler;
+import com.rahnemacollege.util.exceptions.InvalidInputException;
+import com.rahnemacollege.util.exceptions.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedResources;
@@ -13,7 +15,11 @@ import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
@@ -82,6 +88,14 @@ public class AuctionController {
     @GetMapping("/filter/{category_id}")
     public Resources<Resource<AuctionDomain>> filter(@PathVariable int category_id){
         return assembler.toResourcesAuc(auctionService.filter(category_id));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public void handleMaxSizeException(
+            MaxUploadSizeExceededException exc,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        throw new InvalidInputException(Message.MAX_SIZE_EXCEEDED);
     }
 }
 
