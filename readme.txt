@@ -15,10 +15,11 @@ header "Auth" : "Bearer 'Token'"
             password
         }
 
-        if password < 6 || password > 100 : "status": 400 Bad Request
-        if name < 1 || name > 100 :   "status": 400 Bad Request
-        if email isn't valid : "status": 400 Bad Request
-        if email duplicated :  "status": 500 Internal Server Error
+        441 : if password < 6
+        442 : if password > 100
+        440 : if name < 1
+        443 : if email isn't valid
+        444 : if email is duplicated
 
         response => Resource<User> : User {
                 name,email,picture,bookmarkes
@@ -28,13 +29,17 @@ header "Auth" : "Bearer 'Token'"
 -/auctions/add  POST : add a new Auction
         String title, String description, int base_price, long date, int category_id, int max_number, MultipartFile[] images
 
-        if title.length < 1 || title.length > 100 : "status": 400 Bad Request
-        if base_price < 1 : "status": 400 Bad Request
-        if description > 2000 : "status": 500 Internal Server Error
-        if category_id doesn't exist :  "status": 500 Internal Server Error
-        if date == null : "status": 400 Bad Request
-        if max_number  < 2 || max_number > 15 : "status": 400 Bad Request
-        if size of image is too high : "status": 500 Internal Server Error
+
+        430 : if title.length < 1 || title==null
+        451 : if title.length > 50
+        432 : if base_price < 0
+        452 : if description > 1000
+        436 : if category doesn't exist
+        438 : if date contains unsupported value
+        437 : if date is too soon (less than half an hour)
+        434 : if max_number  < 2
+        435 : if max_number > 15
+        453 : if size of image is too high (>300MB)
 
         response => Resource<AuctionDomain> : AuctionDomain{
                    title,description,base_price,date,category_id,max_number,pictures,state
@@ -50,3 +55,32 @@ header "Auth" : "Bearer 'Token'"
         @RequestParam("page") int page, @RequestParam("size") int size
 
 -/auctions/all GET : to receive all auctions
+
+#// Password Recovery
+
+-/forgot POST:
+    @Param ("email") : string
+
+    out : Resource<User>
+    407 if not found email address
+
+-/reset GET:
+     @Param ("token") String
+
+     out : Resource<User>
+     448 if reset link is invalid
+
+-/reset POST:
+    @Param ("token") String
+    @Param ("password") String
+
+    out : Resource<User>
+    449 if token not found
+    450 if request hasn't been recorded
+
+
+-users/reset POST:
+    @Param ("password") String
+
+    out : Resource<UserDomain>
+    445 if password = null | !(5<password.length<100)

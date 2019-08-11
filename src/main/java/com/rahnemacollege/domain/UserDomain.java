@@ -2,6 +2,7 @@ package com.rahnemacollege.domain;
 
 import lombok.Data;
 import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.data.rest.core.annotation.RestResource;
 
 import java.io.Serializable;
 

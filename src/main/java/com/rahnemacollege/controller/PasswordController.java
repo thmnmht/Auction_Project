@@ -5,9 +5,13 @@ import com.rahnemacollege.model.ResetRequest;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.*;
 import com.rahnemacollege.util.ResourceAssembler;
+import com.rahnemacollege.util.exceptions.InvalidInputException;
+import com.rahnemacollege.util.exceptions.Message;
+import com.rahnemacollege.util.exceptions.InvalidInputException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.util.Date;
@@ -42,7 +46,8 @@ public class PasswordController {
     public Resource<UserDomain> processForgotPasswordForm(@RequestParam("email") String userEmail, HttpServletRequest request) {
         Optional<User> optional = service.findUserByEmail(userEmail);
         if (!optional.isPresent()) {
-            System.err.println("errorMessage" + " Could not find an account for that e-mail address.");
+            System.err.println("email not found on DB");
+            throw new InvalidInputException(Message.EMAIL_NOT_FOUND);
         } else {
             String token;
             ResetRequest resetRequest;
@@ -57,7 +62,7 @@ public class PasswordController {
                 }
             } else {
                 token = UUID.randomUUID().toString();
-                resetRequest = new ResetRequest(optional.get(),new Date(),token);
+                resetRequest = new ResetRequest(optional.get(), new Date(), token);
                 requestService.addRequest(resetRequest);
             }
 
@@ -68,41 +73,38 @@ public class PasswordController {
                 e.printStackTrace();
             }
             // Add success message to view
-            System.err.println("successMessage" + " A password reset link has been sent to " + userEmail + " @"+
+            System.err.println("successMessage" + " A password reset link has been sent to " + userEmail + " @" +
                     new Date());
             return assembler.toResource(service.toUserDomain(optional.get()));
         }
-        return null;
     }
 
-//     Display form to reset password
+    //     Display form to reset password
     @RequestMapping(value = "/reset", method = RequestMethod.GET)
     public Resource<UserDomain> displayResetPasswordPage(@RequestParam("token") String token) {
 
+    public Resource<User> displayResetPasswordPage(@RequestParam("token") String token) {
         Optional<ResetRequest> request = requestService.findByToken(token);
-
-
-
         if (request.isPresent()) { // Token found in DB
 //            todo: redirect to password reset page
             System.err.println("redirecting to pass reset screen");
             return assembler.toResource(service.toUserDomain(request.get().getUser()));
         } else { // Token not found in DB
             System.err.println("errorMessage : Oops!  This is an invalid password reset link.");
-            return null;
+            throw new InvalidInputException(Message.INVALID_RESET_LINK);
         }
     }
 
-//     Process reset password form
+    //     Process reset password form
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
     public Resource<UserDomain> setNewPassword(@RequestParam Map<String, String> requestParams) {
 
         // Find the user associated with the reset token
-        ResetRequest request = requestService.findByToken(requestParams.get("token")).orElseThrow(()-> new RuntimeException("token is not valid!"));
+        ResetRequest request = requestService.findByToken(requestParams.get("token")).orElseThrow(() -> new  InvalidInputException(Message.TOKEN_NOT_FOUND));
         User resetUser = request.getUser();
 
         // This should always be non-null but we check just in case
-        if (resetUser!= null) {
+        if (resetUser != null) {
 
             // Set new password
             resetUser.setPassword(passwordService.getPasswordEncoder().encode(requestParams.get("password")));
@@ -121,9 +123,8 @@ public class PasswordController {
 
         } else {
             System.err.println("errorMessage : Oops!  This is an invalid password reset link.");
+            throw new InvalidInputException(Message.NOT_RECORDED_REQUEST);
         }
-
-        return null;
     }
 
     // Going to reset page without a token redirects to login page

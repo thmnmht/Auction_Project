@@ -4,6 +4,7 @@ import com.rahnemacollege.domain.AuthenticationRequest;
 import com.rahnemacollege.domain.AuthenticationResponse;
 import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.User;
+import com.rahnemacollege.service.PasswordService;
 import com.rahnemacollege.service.UserDetailsServiceImpl;
 import com.rahnemacollege.util.JwtTokenUtil;
 import com.rahnemacollege.util.ResourceAssembler;
@@ -26,6 +27,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import javax.websocket.server.PathParam;
 
 @RestController
@@ -34,31 +36,35 @@ public class UserController {
 
     private final UserService userService;
     private final ResourceAssembler assembler;
-    private final AuthenticationManager authenticationManager;
-    private final TokenUtil tokenUtil;
-    private final UserDetailsService userDetailsService;
-
-    public UserController(UserService userService, ResourceAssembler assembler, AuthenticationManager authenticationManager,
+    private final PasswordService passwordService;
+    private AuthenticationManager authenticationManager;
+    private TokenUtil tokenUtil;
+    private UserDetailsServiceImpl detailsService;
+    public UserController(UserService userService, ResourceAssembler assembler, PasswordService passwordService, AuthenticationManager authenticationManager,
                           JwtTokenUtil tokenUtil,
-                          UserDetailsServiceImpl userDetailService) {
+                          UserDetailsServiceImpl userDetailService, UserDetailsServiceImpl detailsService) {
         this.userService = userService;
         this.assembler = assembler;
+        this.passwordService = passwordService;
         this.authenticationManager = authenticationManager;
         this.tokenUtil = tokenUtil;
-        this.userDetailsService = userDetailService;
+        this.detailsService = userDetailService;
+        this.detailsService = detailsService;
     }
+
+
 
     @PostMapping("/login")
     public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws InvalidInputException {
-        if(!userService.isExist(authenticationRequest.getEmail()))
+        if (!userService.isExist(authenticationRequest.getEmail()))
             throw new InvalidInputException(Message.EMAIL_INCORRECT);
         authenticate(authenticationRequest.getEmail(), authenticationRequest.getPassword());
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
+        final UserDetails userDetails = detailsService.loadUserByUsername(authenticationRequest.getEmail());
         final String token = tokenUtil.generateToken(userDetails);
         return new AuthenticationResponse(token);
     }
 
-    private void authenticate(String email, String password) throws InvalidInputException{
+    private void authenticate(String email, String password) throws InvalidInputException {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
         } catch (DisabledException e) {
@@ -79,6 +85,18 @@ public class UserController {
     public Resource setPicture(@PathParam("picture") MultipartFile picture){
         return null;
     }
+    @RequestMapping(value = "/reset", method = RequestMethod.POST)
+    public Resource<UserDomain> setNewPassword(@RequestParam("password") String password) {
+        User user = detailsService.getUser();
+        if (password != null && password.length() > 5 && password.length() < 100) {
+            user.setPassword(passwordService.getPasswordEncoder().encode(password));
+            UserDomain userDomain = userService.addUser(user.getName(), user.getEmail(), user.getPassword());
+
+            return assembler.toResource(userDomain);
+        }
+        throw new InvalidInputException(Message.PASSWORD_INCORRECT);
+    }
+
 
     @PostMapping("/signup")
     public Resource<UserDomain> add(@PathParam("name") String name,@PathParam("emil") String email,@PathParam("password") String password) {
@@ -90,7 +108,6 @@ public class UserController {
     public Resources<Resource<UserDomain>> all() {
         return assembler.toResourcesUser(userService.getAll());
     }
-
 
     @GetMapping("/me")
     public ResponseEntity<UserDomain> one(){

@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -68,7 +69,11 @@ public class AuctionService {
     private void validation(AuctionDomain auctionDomain){
         if(auctionDomain.getTitle() == null || auctionDomain.getTitle().length() < 1)
             throw new InvalidInputException(Message.TITLE_NULL);
-        if(auctionDomain.getBase_price() < 1)
+        if (auctionDomain.getTitle().length()>50)
+            throw new InvalidInputException(Message.TITLE_TOO_LONG);
+        if (auctionDomain.getDescription().length()>1000)
+            throw new InvalidInputException(Message.DESCRIPTION_TOO_LONG);
+        if(auctionDomain.getBase_price() < 0)
             throw new InvalidInputException(Message.BASE_PRICE_NULL);
         if(auctionDomain.getDate() < 1)
             throw new InvalidInputException(Message.DATE_NULL);
