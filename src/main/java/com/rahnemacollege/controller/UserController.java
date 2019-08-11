@@ -73,7 +73,7 @@ public class UserController {
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
     public Resource<UserDomain> setNewPassword(@RequestParam("password") String password) {
         User user = detailsService.getUser();
-        if (password != null && password.length() > 5) {
+        if (password != null && password.length() > 5 && password.length()<100) {
             user.setPassword(passwordService.getPasswordEncoder().encode(password));
             userService.addUser(user);
             return assembler.toResource(new UserDomain(user.getName(),user.getEmail(),password));

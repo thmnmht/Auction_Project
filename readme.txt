@@ -77,3 +77,10 @@ header "Auth" : "Bearer 'Token'"
     out : Resource<User>
     449 if token not found
     450 if request hasn't been recorded
+
+
+-users/reset POST:
+    @Param ("password") String
+
+    out : Resource<UserDomain>
+    445 if password = null | !(5<password.length<100)
