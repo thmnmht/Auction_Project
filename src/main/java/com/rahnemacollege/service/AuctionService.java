@@ -101,14 +101,15 @@ public class AuctionService {
         Date date = new Date(auctionDomain.getDate());
         if(auctionDomain.getDate() - new Date().getTime() < 1800000L)
             throw new InvalidInputException(Message.DATE_INVALID);
-        Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),auctionDomain.getCategory(),date,userDetailsService.getUser(),auctionDomain.getMax_number());
+        Category category = categoryRepository.findById(auctionDomain.getCategory_id()).orElseThrow( () -> new InvalidInputException(Message.CATEGORY_INVALID));
+        Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),category,date,userDetailsService.getUser(),auctionDomain.getMax_number());
         return auction;
     }
 
 
 
     public AuctionDomain toAuctionDomain(Auction auction){
-        AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(),auction.getDescription(),auction.getBase_price(),auction.getDate().getTime(),auction.getCategory(),auction.getMax_number());
+        AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(),auction.getDescription(),auction.getBase_price(),auction.getDate().getTime(),auction.getCategory().getId(),auction.getMax_number());
         auctionDomain.setState(auction.getState());
         auctionDomain.setId(auction.getId());
         List<Link> auctionPictures = Lists.newArrayList(pictureRepository.findAll()).stream().filter(picture ->
@@ -130,7 +131,7 @@ public class AuctionService {
 
     public List<AuctionDomain> filter(int category_id) {
         List<AuctionDomain> auctions = this.getAll();
-        return auctions.stream().filter(a -> a.getCategory().getId() == category_id).collect(Collectors.toList());
+        return auctions.stream().filter(a -> a.getCategory_id() == category_id).collect(Collectors.toList());
     }
 
     public List<AuctionDomain> getAll(){
@@ -185,7 +186,7 @@ public class AuctionService {
 
     private Page<AuctionDomain> toAuctionDomainPage(Page<Auction> auctionPage) {
         List<AuctionDomain> auctionDomainList = new ArrayList<>();
-        auctionPage.forEach(auction -> auctionDomainList.add(auction.toAuctionDomain()));
+        auctionPage.forEach(auction -> auctionDomainList.add(toAuctionDomain(auction)));
         return new PageImpl<>(auctionDomainList);
     }
 }
