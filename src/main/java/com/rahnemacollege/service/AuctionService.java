@@ -19,8 +19,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
@@ -95,8 +93,8 @@ public class AuctionService {
 
          }
      }
-    
-    
+
+
     public Auction toAuction(AuctionDomain auctionDomain){
         Date date = new Date(auctionDomain.getDate());
         if(auctionDomain.getDate() - new Date().getTime() < 1800000L)
@@ -114,7 +112,8 @@ public class AuctionService {
         auctionDomain.setId(auction.getId());
         List<Link> auctionPictures = Lists.newArrayList(pictureRepository.findAll()).stream().filter(picture ->
                 picture.getFileName().startsWith(auction.getId() + "_")).map(
-                picture -> linkTo(methodOn(AuctionController.class).getImage(auction.getId(),picture.getFileName())).withRel("image")
+                picture -> linkTo(methodOn(AuctionController.class)
+                        .getImage(auction.getId(),picture.getFileName())).withRel("image")
         ).collect(Collectors.toList());
         auctionDomain.setPictures(auctionPictures);
 

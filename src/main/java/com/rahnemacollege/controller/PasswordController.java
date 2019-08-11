@@ -1,121 +1,112 @@
 package com.rahnemacollege.controller;
 
-import com.rahnemacollege.domain.UserDomain;
+import com.rahnemacollege.model.ResetRequest;
 import com.rahnemacollege.model.User;
-import com.rahnemacollege.service.EmailService;
-import com.rahnemacollege.service.PasswordService;
-import com.rahnemacollege.service.UserService;
+import com.rahnemacollege.service.*;
 import com.rahnemacollege.util.ResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 @RestController
+@Transactional
 public class PasswordController {
 
-    private final JavaMailSender sender;
     private final UserService service;
     private final PasswordService passwordService;
     private final EmailService emailService;
     private final ResourceAssembler assembler;
+    private final ResetRequestService requestService;
 
     @Autowired
-    public PasswordController(JavaMailSender sender, UserService service, PasswordService passwordService, EmailService emailService, ResourceAssembler assembler) {
-        this.sender = sender;
+    public PasswordController(UserService service, PasswordService passwordService,
+                              EmailService emailService, ResourceAssembler assembler,
+                              ResetRequestService requestService) {
         this.service = service;
         this.passwordService = passwordService;
         this.emailService = emailService;
         this.assembler = assembler;
+        this.requestService = requestService;
     }
 
-    @RequestMapping("/sendMailTest")
-    public String sendMail() {
-        MimeMessage message = sender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message);
-
-        try {
-            helper.setTo("sobhanebrahimi36@yahoo.com");
-            helper.setText("Greetings :)");
-            helper.setSubject("Mail From Spring Boot");
-//            helper.addAttachment("document.PNG", file); //for attaching a file
-        } catch (MessagingException e) {
-            e.printStackTrace();
-            return "Error while sending mail ..";
-        }
-        sender.send(message);
-        return "Mail Sent Success!";
-    }
 
     // Process form submission from forgotPassword page
     @RequestMapping(value = "/forgot", method = RequestMethod.POST)
     public Resource<User> processForgotPasswordForm(@RequestParam("email") String userEmail, HttpServletRequest request) {
-        User user ;
         Optional<User> optional = service.findUserByEmail(userEmail);
         if (!optional.isPresent()) {
-            System.err.println("errorMessage"+ " Could not find an account for that e-mail address.");
+            System.err.println("errorMessage" + " Could not find an account for that e-mail address.");
         } else {
-            // Generate random 36-character string token for reset password
-             user = optional.get();
-            user.setResetToken(UUID.randomUUID().toString());
-            service.addUser(user);
-            String appUrl = request.getScheme() + "://" + request.getServerName()+":"+request.getServerPort();
+            String token;
+            ResetRequest resetRequest;
+            if (requestService.findByUser(optional.get()).isPresent()) {
+                if (new Date().getTime() - requestService.findByUser(optional.get()).get().getDate().getTime() < 10800000) {
+                    token = requestService.findByUser(optional.get()).get().getToken();
+                } else {
+                    resetRequest = requestService.findByUser(optional.get()).get();
+                    token = UUID.randomUUID().toString();
+                    resetRequest.setToken(token);
+                    requestService.addRequest(resetRequest);
+                }
+            } else {
+                token = UUID.randomUUID().toString();
+                resetRequest = new ResetRequest(optional.get(),new Date(),token);
+                requestService.addRequest(resetRequest);
+            }
+
+            String appUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
             try {
-                emailService.sendPassRecoveryMail(user, appUrl);
+                emailService.sendPassRecoveryMail(userEmail, appUrl, token);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             // Add success message to view
-            System.err.println("successMessage" +  " A password reset link has been sent to " + userEmail);
-            return assembler.toResource(user);
+            System.err.println("successMessage" + " A password reset link has been sent to " + userEmail + " @"+
+                    new Date());
+            return assembler.toResource(optional.get());
         }
         return null;
     }
 
-    // Display form to reset password
+//     Display form to reset password
     @RequestMapping(value = "/reset", method = RequestMethod.GET)
     public Resource<User> displayResetPasswordPage(@RequestParam("token") String token) {
 
-        Optional<User> user = service.findUserByResetToken(token);
+        Optional<ResetRequest> request = requestService.findByToken(token);
 
-        if (user.isPresent()) { // Token found in DB
+
+
+        if (request.isPresent()) { // Token found in DB
 //            todo: redirect to password reset page
             System.err.println("redirecting to pass reset screen");
-            return assembler.toResource(user.get());
+            return assembler.toResource(request.get().getUser());
         } else { // Token not found in DB
             System.err.println("errorMessage : Oops!  This is an invalid password reset link.");
             return null;
         }
     }
 
-    // Process reset password form
+//     Process reset password form
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
     public Resource<User> setNewPassword(@RequestParam Map<String, String> requestParams) {
 
         // Find the user associated with the reset token
-        Optional<User> user = service.findUserByResetToken(requestParams.get("token"));
+        ResetRequest request = requestService.findByToken(requestParams.get("token")).orElseThrow(()-> new RuntimeException("token is not valid!"));
+        User resetUser = request.getUser();
 
         // This should always be non-null but we check just in case
-        if (user.isPresent()) {
-
-            User resetUser = user.get();
+        if (resetUser!= null) {
 
             // Set new password
             resetUser.setPassword(passwordService.getPasswordEncoder().encode(requestParams.get("password")));
             // Set the reset token to null so it cannot be used again
-            resetUser.setResetToken(null);
-
+            requestService.removeRequest(request);
 
             service.addUser(resetUser);
 
@@ -125,7 +116,7 @@ public class PasswordController {
 
             //TODO : redirect:login
 
-            return assembler.toResource(user.get());
+            return assembler.toResource(resetUser);
 
         } else {
             System.err.println("errorMessage : Oops!  This is an invalid password reset link.");
