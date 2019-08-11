@@ -43,6 +43,7 @@ public class AuctionService {
     private final PictureRepository pictureRepository;
     private final UserDetailsServiceImpl userDetailsService;
 
+
     @Autowired
     public AuctionService(AuctionRepository auctionRepository, CategoryRepository categoryRepository,
                           PictureRepository pictureRepository, UserDetailsServiceImpl userDetailsService) {
@@ -109,7 +110,7 @@ public class AuctionService {
 
     public AuctionDomain toAuctionDomain(Auction auction){
         AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(),auction.getDescription(),
-                auction.getBase_price(),auction.getDate().getTime(),auction.getCategory(),auction.getMax_number());
+                auction.getBase_price(),auction.getDate().getTime(),auction.getCategory().getId(),auction.getMax_number());
         auctionDomain.setState(auction.getState());
         auctionDomain.setId(auction.getId());
         List<Link> auctionPictures = Lists.newArrayList(pictureRepository.findAll()).stream().filter(picture ->
@@ -132,7 +133,7 @@ public class AuctionService {
 
     public List<AuctionDomain> filter(int category_id) {
         List<AuctionDomain> auctions = this.getAll();
-        return auctions.stream().filter(a -> a.getCategory().getId() == category_id).collect(Collectors.toList());
+        return auctions.stream().filter(a -> a.getCategory_id() == category_id).collect(Collectors.toList());
     }
 
     public List<AuctionDomain> getAll(){
@@ -187,7 +188,7 @@ public class AuctionService {
 
     private Page<AuctionDomain> toAuctionDomainPage(Page<Auction> auctionPage) {
         List<AuctionDomain> auctionDomainList = new ArrayList<>();
-        auctionPage.forEach(auction -> auctionDomainList.add(auction.toAuctionDomain()));
+        auctionPage.forEach(auction -> auctionDomainList.add(toAuctionDomain(auction)));
         return new PageImpl<>(auctionDomainList);
     }
 }
