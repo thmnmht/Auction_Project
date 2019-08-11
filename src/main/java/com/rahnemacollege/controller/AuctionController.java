@@ -24,10 +24,12 @@ public class AuctionController {
 
     private final AuctionService auctionService;
     private final ResourceAssembler assembler;
+    private final CategoryService categoryService;
 
-    public AuctionController(AuctionService auctionService, ResourceAssembler assembler) {
+    public AuctionController(AuctionService auctionService, ResourceAssembler assembler, CategoryService categoryService) {
         this.auctionService = auctionService;
         this.assembler = assembler;
+        this.categoryService = categoryService;
     }
 
     @GetMapping("/category")
@@ -53,7 +55,8 @@ public class AuctionController {
                                  int base_price,
                                  long date,
             int category_id,int max_number, @RequestPart MultipartFile[] images) throws IOException {
-        AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,date,category_id,max_number);
+        Category category = categoryService.findById(category_id);
+        AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,date,category,max_number);
         return assembler.toResource(auctionService.addAuction(auctionDomain,images));
     }
 

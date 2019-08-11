@@ -43,7 +43,6 @@ public class AuctionService {
     private final PictureRepository pictureRepository;
     private final UserDetailsServiceImpl userDetailsService;
 
-
     @Autowired
     public AuctionService(AuctionRepository auctionRepository, CategoryRepository categoryRepository,
                           PictureRepository pictureRepository, UserDetailsServiceImpl userDetailsService) {
@@ -99,10 +98,9 @@ public class AuctionService {
     public Auction toAuction(AuctionDomain auctionDomain){
         Date date = new Date(auctionDomain.getDate());
         if(auctionDomain.getDate() - new Date().getTime() < 1800000L)
-            throw new InvalidInputException(Message.DATE_INVALID);
-        Auction auction = new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(),
-                auctionDomain.getBase_price(), auctionDomain.getCategory(),date,
-                userDetailsService.getUser(), auctionDomain.getMax_number());
+            throw new InvalidInputException(Message.DATE_INVALID);  
+        Category category = categoryRepository.findById(auctionDomain.getCategory_id()).orElseThrow( () -> new InvalidInputException(Message.CATEGORY_INVALID));
+        Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),category,date,userDetailsService.getUser(),auctionDomain.getMax_number());
         return auction;
     }
 

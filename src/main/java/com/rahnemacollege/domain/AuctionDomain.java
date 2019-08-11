@@ -34,7 +34,7 @@ public class AuctionDomain {
                          String description,
                          int base_price,
                          long date,
-                         Category category_id,
+                         Category category,
                          int max_number) {
         this.title = title;
         this.description = description;
