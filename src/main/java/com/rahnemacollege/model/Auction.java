@@ -48,9 +48,6 @@ public class Auction {
         this.max_number = max_number;
     }
 
-    public AuctionDomain toAuctionDomain(){
-        return new AuctionDomain(this.title,this.description,this.base_price,date.getTime(),this.category,this.max_number);
-    }
 
 
 

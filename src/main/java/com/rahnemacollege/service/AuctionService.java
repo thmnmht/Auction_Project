@@ -93,8 +93,8 @@ public class AuctionService {
 
          }
      }
-
-
+    
+    
     public Auction toAuction(AuctionDomain auctionDomain){
         Date date = new Date(auctionDomain.getDate());
         if(auctionDomain.getDate() - new Date().getTime() < 1800000L)
