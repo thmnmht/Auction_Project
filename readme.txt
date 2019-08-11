@@ -51,6 +51,8 @@ header "Auth" : "Bearer 'Token'"
 
 -/auctions/all GET : to receive all auctions
 
+#// Password Recovery
+
 -/forgot POST:
     @Param ("email") : string
 
