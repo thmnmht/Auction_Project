@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
 import javax.servlet.http.HttpServletResponse;
 
 @ControllerAdvice
@@ -92,6 +93,17 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 break;
             case NOT_RECORDED_REQUEST:
                 response.setStatus(450);
+                break;
+
+            //addBookmark
+            case INVALID_ID:
+                response.setStatus(454);
+                break;
+            case AUCTION_NOT_FOUND:
+                response.setStatus(455);
+                break;
+            case REALLY_BAD_SITUATION:
+                response.setStatus(456);
                 break;
         }
         logger.error(ex.getMessageStatus().toString());

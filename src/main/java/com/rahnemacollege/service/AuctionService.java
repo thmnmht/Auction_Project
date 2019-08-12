@@ -7,6 +7,7 @@ import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.model.Picture;
+import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.AuctionRepository;
 import com.rahnemacollege.repository.CategoryRepository;
 import com.rahnemacollege.repository.PictureRepository;
@@ -140,13 +141,16 @@ public class AuctionService {
 
     public List<AuctionDomain> getAll(){
         return Lists.newArrayList(auctionRepository.findAll()).stream()
-                .map(auction -> toAuctionDomain(auction))
+                .map(this::toAuctionDomain)
                 .collect(Collectors.toList());
     }
 
     public AuctionDomain findById(int id) {
-        Auction auction = auctionRepository.findById(id).orElseThrow( () -> new NotFoundException(id,Auction.class));
+        Auction auction = auctionRepository.findById(id).orElseThrow( () ->  new InvalidInputException(Message.AUCTION_NOT_FOUND));
         return toAuctionDomain(auction);
+    }
+    public Auction findAuctionById(int id){
+        return auctionRepository.findById(id).orElseThrow( () ->  new InvalidInputException(Message.AUCTION_NOT_FOUND));
     }
 
 
@@ -193,4 +197,5 @@ public class AuctionService {
         auctionPage.forEach(auction -> auctionDomainList.add(toAuctionDomain(auction)));
         return new PageImpl<>(auctionDomainList);
     }
+
 }

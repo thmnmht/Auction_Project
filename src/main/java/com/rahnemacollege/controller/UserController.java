@@ -1,5 +1,6 @@
 package com.rahnemacollege.controller;
 
+import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.domain.AuthenticationRequest;
 import com.rahnemacollege.domain.AuthenticationResponse;
 import com.rahnemacollege.domain.UserDomain;
@@ -80,6 +81,9 @@ public class UserController {
         }
         throw new InvalidInputException(Message.PASSWORD_INCORRECT);
     }
+
+
+
 
 
     @PostMapping("/signup")
