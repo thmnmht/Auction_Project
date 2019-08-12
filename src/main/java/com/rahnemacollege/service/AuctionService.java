@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
@@ -41,16 +40,14 @@ public class AuctionService {
 
     private final AuctionRepository auctionRepository;
     private final CategoryRepository categoryRepository;
-    private final PictureRepository pictureRepository;
     private final UserDetailsServiceImpl userDetailsService;
     private final PictureService pictureService;
 
     @Autowired
     public AuctionService(AuctionRepository auctionRepository, CategoryRepository categoryRepository,
-                          PictureRepository pictureRepository, UserDetailsServiceImpl userDetailsService, PictureService pictureService) {
+                          UserDetailsServiceImpl userDetailsService, PictureService pictureService) {
         this.auctionRepository = auctionRepository;
         this.categoryRepository = categoryRepository;
-        this.pictureRepository = pictureRepository;
         this.userDetailsService = userDetailsService;
         this.pictureService = pictureService;
     }
@@ -88,9 +85,7 @@ public class AuctionService {
                  images) {
              String fileName = auction.getId() + "_" + new Date().getTime() + ".jpg";
              String pathName = "./images/auction_images/" + auction.getId() + "/" +  fileName;
-             Picture picture = new Picture(fileName,auction);
-             pictureRepository.save(picture);
-             pictureService.save(image,pathName);
+             pictureService.save(image,pathName,auction);
          }
      }
 
@@ -106,8 +101,8 @@ public class AuctionService {
     public AuctionDomain toAuctionDomain(Auction auction){
         AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(),auction.getDescription(),auction.getBase_price(),auction.getDate().getTime(),auction.getCategory().getId(),auction.getMax_number());
         auctionDomain.setId(auction.getId());
-        List<Link> auctionPictures = Lists.newArrayList(pictureRepository.findAll()).stream().filter(picture ->
-                picture.getFileName().startsWith(auction.getId() + "_")).map(
+        List<Link> auctionPictures = pictureService.getAll().stream().filter(picture ->
+                picture.getFileName().contains("/" + auction.getId() + "/")).map(
                 picture -> linkTo(methodOn(AuctionController.class)
                         .getImage(auction.getId(),picture.getFileName())).withRel("image")
         ).collect(Collectors.toList());
@@ -169,8 +164,6 @@ public class AuctionService {
         }
         return resource;
     }
-
-
 
 
 
