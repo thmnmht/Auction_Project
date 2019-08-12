@@ -14,9 +14,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AuctionRepository  extends PagingAndSortingRepository<Auction, Integer> {
 
-//    @Override
-//    Optional<Auction> findById(Integer integer);
-
     Page<Auction> findByTitle(String title, PageRequest pageRequest);
 
 
@@ -31,7 +28,4 @@ public interface AuctionRepository  extends PagingAndSortingRepository<Auction, 
     Page<Auction> findHottest(Pageable pageable);
 
     Page<Auction> findByCategory(Category category, PageRequest request);
-
-
-//    Page<Auction> findAll(Pageable firstPageWithTwoElements);
 }
