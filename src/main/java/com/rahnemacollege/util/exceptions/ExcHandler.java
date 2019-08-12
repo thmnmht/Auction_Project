@@ -16,7 +16,7 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {InvalidInputException.class})
     protected void inputInvalid(InvalidInputException ex,
-                           HttpServletResponse response) {
+                                HttpServletResponse response) {
         switch (ex.getMessageStatus()) {
             //add auction
             case TITLE_NULL:
@@ -69,7 +69,7 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
             case EMAIL_INVALID:
                 response.setStatus(443);
                 break;
-                //it change
+            //it change
             case EMAIL_DUPLICATED:
                 response.setStatus(454);
                 break;
@@ -109,15 +109,15 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {IllegalStateException.class})
     protected void fileUpload(IllegalStateException ex,
-                              HttpServletResponse response){
-        if(ex.getMessage().contains("SizeLimitExceededException"))
-             response.setStatus(455);
+                              HttpServletResponse response) {
+        if (ex.getMessage().contains("SizeLimitExceededException"))
+            response.setStatus(455);
         logger.error(ex.getMessage());
     }
 
     @ExceptionHandler(value = {NotFoundException.class})
     protected void notFound(NotFoundException ex,
-                              HttpServletResponse response){
+                            HttpServletResponse response) {
         response.setStatus(446);
         logger.error(ex.getMessage());
     }

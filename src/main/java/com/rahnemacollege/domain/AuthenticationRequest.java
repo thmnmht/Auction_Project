@@ -11,6 +11,6 @@ public class AuthenticationRequest {
 
     @Email(message = "Invalid email address.")
     private String email;
-    @Size(min = 6,max = 100,message = "Invalid validPassword")
+    @Size(min = 6, max = 100, message = "Invalid validPassword")
     private String password;
 }

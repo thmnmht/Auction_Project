@@ -1,6 +1,6 @@
 package com.rahnemacollege.util.exceptions;
 
-public enum Message{
+public enum Message {
     TITLE_NULL,
     TITLE_TOO_LONG,
     DESCRIPTION_TOO_LONG,

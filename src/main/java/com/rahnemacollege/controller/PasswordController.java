@@ -81,7 +81,6 @@ public class PasswordController {
     }
 
 
-
     //     Display form to reset validPassword
     @RequestMapping(value = "/reset", method = RequestMethod.GET)
     public Resource<UserDomain> displayResetPasswordPage(@RequestParam("token") String token) {
@@ -101,7 +100,7 @@ public class PasswordController {
     public Resource<UserDomain> setNewPassword(@RequestParam Map<String, String> requestParams) {
 
         // Find the user associated with the reset token
-        ResetRequest request = requestService.findByToken(requestParams.get("token")).orElseThrow(() -> new  InvalidInputException(Message.TOKEN_NOT_FOUND));
+        ResetRequest request = requestService.findByToken(requestParams.get("token")).orElseThrow(() -> new InvalidInputException(Message.TOKEN_NOT_FOUND));
         User resetUser = request.getUser();
 
         // This should always be non-null but we check just in case
@@ -124,7 +123,7 @@ public class PasswordController {
 
         } else {
             System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");
-            throw new  InvalidInputException(Message.NOT_RECORDED_REQUEST);
+            throw new InvalidInputException(Message.NOT_RECORDED_REQUEST);
         }
     }
 

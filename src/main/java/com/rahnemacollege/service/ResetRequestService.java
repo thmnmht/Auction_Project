@@ -17,11 +17,11 @@ public class ResetRequestService {
         this.repository = repository;
     }
 
-    public Optional<ResetRequest> findByUser(User user){
+    public Optional<ResetRequest> findByUser(User user) {
         return repository.findByUser(user);
     }
 
-    public void addRequest(ResetRequest request){
+    public void addRequest(ResetRequest request) {
         this.repository.save(request);
     }
 

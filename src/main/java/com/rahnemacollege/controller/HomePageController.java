@@ -28,26 +28,25 @@ public class HomePageController {
 
     @GetMapping("/hottest")
     PagedResources<Resource<AuctionDomain>> paged(@RequestParam("page") int page,
-                                                  @RequestParam(value="size", defaultValue="10") int size,
+                                                  @RequestParam(value = "size", defaultValue = "10") int size,
                                                   PagedResourcesAssembler<AuctionDomain> assembler) {
         Page<AuctionDomain> hotAuctions = auctionService.getHottest(PageRequest.of(page, size));
         return assembler.toResource(hotAuctions);
     }
 
 
-
     @GetMapping("/search/{title}")
-    public PagedResources<Resource<AuctionDomain>> search(@PathVariable String title,@RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler){
-        return assembler.toResource(auctionService.findByTitle(title,page,size));
+    public PagedResources<Resource<AuctionDomain>> search(@PathVariable String title, @RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler) {
+        return assembler.toResource(auctionService.findByTitle(title, page, size));
     }
 
     @GetMapping("/filter/{category_id}")
-    public Resources<Resource<AuctionDomain>> filter(@PathVariable int category_id,@RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler){
-        return assembler.toResource(auctionService.filter(category_id,page,size));
+    public Resources<Resource<AuctionDomain>> filter(@PathVariable int category_id, @RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler) {
+        return assembler.toResource(auctionService.filter(category_id, page, size));
     }
 
     @GetMapping("/all")
-    public PagedResources<Resource<AuctionDomain>> getPage(@RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler){
+    public PagedResources<Resource<AuctionDomain>> getPage(@RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler) {
         Page<AuctionDomain> personPage = auctionService.getAllAuctions(page, size);
         return assembler.toResource(personPage);
     }

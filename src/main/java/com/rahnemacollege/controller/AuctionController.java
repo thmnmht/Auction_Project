@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import javax.websocket.server.PathParam;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 
 @RestController
@@ -64,8 +63,8 @@ public class AuctionController {
                                        @PathParam("max_number") int max_number,
                                        @RequestPart MultipartFile[] images) throws IOException {
         System.out.println("salam");
-        AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,date,category_id,max_number);
-        return assembler.toResource(auctionService.addAuction(auctionDomain,images));
+        AuctionDomain auctionDomain = new AuctionDomain(title, description, base_price, date, category_id, max_number);
+        return assembler.toResource(auctionService.addAuction(auctionDomain, images));
     }
 
     @GetMapping("/find/{id}")
