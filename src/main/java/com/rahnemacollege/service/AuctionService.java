@@ -92,7 +92,7 @@ public class AuctionService {
         List<Link> auctionPictures = pictureService.getAll().stream().filter(picture ->
                 picture.getFileName().contains("/" + auction.getId() + "/")).map(
                 picture -> linkTo(methodOn(AuctionController.class)
-                        .getImage(auction.getId(), picture.getFileName())).withRel("image")
+                        .getImage(auction.getId(), picture.getFileName().substring(28))).withRel("image")
         ).collect(Collectors.toList());
         auctionDomain.setPictures(auctionPictures);
 
