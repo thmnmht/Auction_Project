@@ -125,3 +125,4 @@ header "auth" : "Bearer 'Token'"
 
     out : Resource<UserDomain>
     445 if password = null | !(5<password.length<100)
+
