@@ -6,6 +6,9 @@ import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.UserRepository;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -69,6 +72,16 @@ public class UserService {
         return users;
     }
 
+
+    public void authenticate(String email, String password) throws InvalidInputException {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+        } catch (DisabledException e) {
+            //???
+        } catch (BadCredentialsException e) {
+            throw new InvalidInputException(Message.PASSWORD_INCORRECT);
+        }
+    }
 
     public Optional<User> getByEmail(String email) {
         return repository.getByEmail(email);

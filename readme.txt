@@ -1,33 +1,22 @@
 Auction Project APIs
 
 
-header "Auth" : "Bearer 'Token'"
+header "auth" : "Bearer 'Token'"
 
 
--/users/login : login  POST
-        email : String
-        password : String
+************************************************************************************************************************
 
--/users/signup  POST : sign up
-        UserDomain : {
-            name,
-            email,
-            password
-        }
+-/auctions/all GET : to receive all auctions
 
-        441 : if password < 6
-        442 : if password > 100
-        440 : if name < 1
-        443 : if email isn't valid
-        454 : if email is duplicated
-
-        response => Resource<User> : User {
-                name,email,picture,bookmarkes
-        }
+************************************************************************************************************************
 
 -/auctions/category   GET   : get categories
 
+************************************************************************************************************************
 
+-/auctions/find/{id}    GET : get an auction
+
+************************************************************************************************************************
 
 -/auctions/add  POST : add a new Auction
         String title, String description, int base_price, long date, int category_id, int max_number, MultipartFile[] images
@@ -48,16 +37,65 @@ header "Auth" : "Bearer 'Token'"
                    title,description,base_price,date,category_id,max_number,pictures,state
         }
 
+************************************************************************************************************************
+************************************************************************************************************************
+
+-/users/login : login  POST
+        email : String
+        password : String
+
+************************************************************************************************************************
+
+-/users/signup  POST : sign up
+        UserDomain : {
+            name,
+            email,
+            password
+        }
+
+        441 : if password < 6
+        442 : if password > 100
+        440 : if name < 1
+        443 : if email isn't valid
+        454 : if email is duplicated
+
+        response => Resource<User> : User {
+                name,email,picture,bookmarkes
+        }
+
+************************************************************************************************************************
+
+-/users/edit  POST : edit name and email
+              name : String     email : String
+
+************************************************************************************************************************
+
+-/users/me  GET : get details of current user
+                  name,email,id,picture
+
+************************************************************************************************************************
+************************************************************************************************************************
+
 -/home/search/{title} GET : search by title
         title : String
+
+************************************************************************************************************************
 
 -/home/filter/{category_id} GET : filter some categories
         category_id : int
 
+************************************************************************************************************************
+
 -/home/all GET : to receive auctions (number of pages start with zero)
         @RequestParam("page") int page, @RequestParam("size") int size
 
--/auctions/all GET : to receive all auctions
+************************************************************************************************************************
+
+-/home/hottest  GET : to receive sorted auctions (number of pages start with zero)
+                             @RequestParam("page") int page, @RequestParam("size") int size
+
+************************************************************************************************************************
+************************************************************************************************************************
 
 #// Password Recovery
 

@@ -12,16 +12,11 @@ import com.rahnemacollege.service.UserService;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
-import org.apache.catalina.loader.ResourceEntry;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,20 +50,10 @@ public class UserController {
     public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws InvalidInputException {
         if (!userService.isExist(authenticationRequest.getEmail()))
             throw new InvalidInputException(Message.EMAIL_INCORRECT);
-        authenticate(authenticationRequest.getEmail(), authenticationRequest.getPassword());
+        userService.authenticate(authenticationRequest.getEmail(), authenticationRequest.getPassword());
         final UserDetails userDetails = detailsService.loadUserByUsername(authenticationRequest.getEmail());
         final String token = tokenUtil.generateToken(userDetails);
         return new AuthenticationResponse(token);
-    }
-
-    private void authenticate(String email, String password) throws InvalidInputException {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-        } catch (DisabledException e) {
-            //???
-        } catch (BadCredentialsException e) {
-            throw new InvalidInputException(Message.PASSWORD_INCORRECT);
-        }
     }
 
     @PostMapping("/edit")
@@ -82,6 +67,7 @@ public class UserController {
     public Resource setPicture(@PathParam("picture") MultipartFile picture){
         return null;
     }
+
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
     public Resource<UserDomain> setNewPassword(@RequestParam("password") String password) {
         User user = detailsService.getUser();
@@ -101,6 +87,8 @@ public class UserController {
         return assembler.toResource(user);
     }
 
+
+    //TODO : remove it! it's just for test
     @GetMapping("/all")
     public Resources<Resource<UserDomain>> all() {
         return assembler.toResourcesUser(userService.getAll());
