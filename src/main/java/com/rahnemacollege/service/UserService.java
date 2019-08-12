@@ -6,6 +6,7 @@ import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.UserRepository;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,13 +28,16 @@ public class UserService {
     private final UserDetailsServiceImpl userDetailsService;
     private final PictureService pictureService;
     private final PasswordEncoder encoder;
+    private final AuthenticationManager authenticationManager;
 
 
-    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService, PictureService pictureService, PasswordEncoder encoder) {
+
+    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService, PictureService pictureService, PasswordEncoder encoder, AuthenticationManager authenticationManager) {
         this.repository = repository;
         this.userDetailsService = userDetailsService;
         this.pictureService = pictureService;
         this.encoder = encoder;
+        this.authenticationManager = authenticationManager;
     }
 
 

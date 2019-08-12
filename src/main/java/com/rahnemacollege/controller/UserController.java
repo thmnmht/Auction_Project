@@ -29,16 +29,14 @@ public class UserController {
     private final UserService userService;
     private final ResourceAssembler assembler;
     private final PasswordService passwordService;
-    private AuthenticationManager authenticationManager;
     private TokenUtil tokenUtil;
     private UserDetailsServiceImpl detailsService;
-    public UserController(UserService userService, ResourceAssembler assembler, PasswordService passwordService, AuthenticationManager authenticationManager,
+    public UserController(UserService userService, ResourceAssembler assembler, PasswordService passwordService,
                           JwtTokenUtil tokenUtil,
                           UserDetailsServiceImpl userDetailService, UserDetailsServiceImpl detailsService) {
         this.userService = userService;
         this.assembler = assembler;
         this.passwordService = passwordService;
-        this.authenticationManager = authenticationManager;
         this.tokenUtil = tokenUtil;
         this.detailsService = userDetailService;
         this.detailsService = detailsService;
