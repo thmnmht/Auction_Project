@@ -14,9 +14,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AuctionRepository  extends PagingAndSortingRepository<Auction, Integer> {
 
-    Page<Auction> findByTitle(String title, PageRequest pageRequest);
-
-
     //todo: consider limit for the hottest cards
     @Query(value = "SELECT * ,COUNT(bookmarks_id) AS number_of_bookmarks \n" +
             "FROM auctions\n" +
@@ -26,6 +23,4 @@ public interface AuctionRepository  extends PagingAndSortingRepository<Auction, 
             "    auctions.id\n " +
             "ORDER BY number_of_bookmarks DESC",nativeQuery = true)
     Page<Auction> findHottest(Pageable pageable);
-
-    Page<Auction> findByCategory(Category category, PageRequest request);
 }
