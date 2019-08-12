@@ -24,14 +24,18 @@ public class PictureService {
     public void save(MultipartFile pic, String path, Auction auction) throws IOException {
         Picture picture = new Picture(path,auction);
         repository.save(picture);
+        save(pic,path);
+    }
+
+    public List<Picture> getAll(){
+        return Lists.newArrayList(repository.findAll());
+    }
+
+    public void save(MultipartFile pic, String path) throws IOException {
         File upl = new File(path);
         upl.createNewFile();
         FileOutputStream fout = new FileOutputStream(upl);
         fout.write(pic.getBytes());
         fout.close();
-    }
-
-    public List<Picture> getAll(){
-        return Lists.newArrayList(repository.findAll());
     }
 }

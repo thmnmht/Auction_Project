@@ -55,7 +55,7 @@ public class UserService {
         return toUserDomain(user);
     }
 
-    public void validation(String name,String email,String password){
+    private void validation(String name,String email,String password){
         if(name == null || name.length() < 1)
             throw new InvalidInputException(Message.NAME_NULL);
         if(email == null || email.length() < 5)
@@ -87,10 +87,11 @@ public class UserService {
         }
     }
 
-    public Optional<User> getByEmail(String email) {
+    private Optional<User> getByEmail(String email) {
         return repository.getByEmail(email);
     }
 
+    //??
     public User addUser(User user) {
         repository.save(user);
         return user;
@@ -123,8 +124,9 @@ public class UserService {
         return userDomain;
     }
 
-    public String savePicture(MultipartFile picture) throws IOException {
 
+
+    private String savePicture(MultipartFile picture) throws IOException {
         int userId = userDetailsService.getUser().getId();
         new File("./images/profile_images/" + userId + "/" ).mkdirs();
             String fileName = userId + "_" + new Date().getTime() + ".jpg";
