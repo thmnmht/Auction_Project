@@ -4,7 +4,7 @@ Auction Project APIs
 header "Auth" : "Bearer 'Token'"
 
 
--/login : login  POST
+-/users/login : login  POST
         email : String
         password : String
 
@@ -19,7 +19,7 @@ header "Auth" : "Bearer 'Token'"
         442 : if password > 100
         440 : if name < 1
         443 : if email isn't valid
-        444 : if email is duplicated
+        454 : if email is duplicated
 
         response => Resource<User> : User {
                 name,email,picture,bookmarkes
@@ -45,13 +45,13 @@ header "Auth" : "Bearer 'Token'"
                    title,description,base_price,date,category_id,max_number,pictures,state
         }
 
--/auctions/search/{title} GET : search by title
+-/home/search/{title} GET : search by title
         title : String
 
--/auctions/filter/{category_id} GET : filter some categories
+-/home/filter/{category_id} GET : filter some categories
         category_id : int
 
--/auctions/homepage GET : to receive auctions (number of pages start with zero)
+-/home/all GET : to receive auctions (number of pages start with zero)
         @RequestParam("page") int page, @RequestParam("size") int size
 
 -/auctions/all GET : to receive all auctions

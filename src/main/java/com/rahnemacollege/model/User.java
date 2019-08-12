@@ -5,6 +5,7 @@ import lombok.Data;
 import org.springframework.data.rest.core.annotation.RestResource;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import java.io.Serializable;
 import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,8 +16,7 @@ import javax.validation.constraints.Size;
 @Data
 @Entity
 @Table(name = "users")
-@Embeddable
-public class User{
+public class User {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer id;
@@ -45,5 +45,7 @@ public class User{
         this.picture = null;
         this.bookmarks = null;
     }
+
+
 
 }

@@ -13,18 +13,20 @@ import com.rahnemacollege.service.UserService;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
-import com.rahnemacollege.util.exceptions.NotFoundException;
+import org.apache.catalina.loader.ResourceEntry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
+import org.springframework.web.multipart.MultipartFile;
+import javax.websocket.server.PathParam;
 
 @RestController
 @RequestMapping("/users")
@@ -35,9 +37,7 @@ public class UserController {
     private final PasswordService passwordService;
     private AuthenticationManager authenticationManager;
     private TokenUtil tokenUtil;
-    private UserDetailsService userDetailsService;
     private UserDetailsServiceImpl detailsService;
-
     public UserController(UserService userService, ResourceAssembler assembler, PasswordService passwordService, AuthenticationManager authenticationManager,
                           JwtTokenUtil tokenUtil,
                           UserDetailsServiceImpl userDetailService, UserDetailsServiceImpl detailsService) {
@@ -46,9 +46,10 @@ public class UserController {
         this.passwordService = passwordService;
         this.authenticationManager = authenticationManager;
         this.tokenUtil = tokenUtil;
-        this.userDetailsService = userDetailService;
+        this.detailsService = userDetailService;
         this.detailsService = detailsService;
     }
+
 
 
     @PostMapping("/login")
@@ -56,7 +57,7 @@ public class UserController {
         if (!userService.isExist(authenticationRequest.getEmail()))
             throw new InvalidInputException(Message.EMAIL_INCORRECT);
         authenticate(authenticationRequest.getEmail(), authenticationRequest.getPassword());
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
+        final UserDetails userDetails = detailsService.loadUserByUsername(authenticationRequest.getEmail());
         final String token = tokenUtil.generateToken(userDetails);
         return new AuthenticationResponse(token);
     }
@@ -71,13 +72,25 @@ public class UserController {
         }
     }
 
+    @PostMapping("/edit")
+    public ResponseEntity<UserDomain> edit(String name,String email){
+        UserDomain userDomain = userService.edit(name,email);
+        return new ResponseEntity<>(userDomain,HttpStatus.OK);
+    }
+
+    //TODO
+    @PostMapping("/profilepic")
+    public Resource setPicture(@PathParam("picture") MultipartFile picture){
+        return null;
+    }
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
     public Resource<UserDomain> setNewPassword(@RequestParam("password") String password) {
         User user = detailsService.getUser();
-        if (password != null && password.length() > 5 && password.length()<100) {
+        if (password != null && password.length() > 5 && password.length() < 100) {
             user.setPassword(passwordService.getPasswordEncoder().encode(password));
-            userService.addUser(user);
-            return assembler.toResource(new UserDomain(user.getName(),user.getEmail(),password));
+            UserDomain userDomain = userService.addUser(user.getName(), user.getEmail(), user.getPassword());
+
+            return assembler.toResource(userDomain);
         }
         throw new InvalidInputException(Message.PASSWORD_INCORRECT);
     }
@@ -87,21 +100,22 @@ public class UserController {
 
 
     @PostMapping("/signup")
-    public Resource<User> add(@RequestBody UserDomain userDomain) {
-        User user = userService.addUser(userDomain);
+    public Resource<UserDomain> add(@PathParam("name") String name,@PathParam("emil") String email,@PathParam("password") String password) {
+        UserDomain user = userService.addUser(name,email,password);
         return assembler.toResource(user);
     }
 
     @GetMapping("/all")
-    public Resources<Resource<User>> all() {
+    public Resources<Resource<UserDomain>> all() {
         return assembler.toResourcesUser(userService.getAll());
     }
 
-
-    @GetMapping("/find/{id}")
-    public Resource<User> one(@PathVariable int id) {
-        @Valid User user = userService.findById(id).orElseThrow(() -> new NotFoundException(id, User.class));
-        return assembler.toResource(user);
+    @GetMapping("/me")
+    public ResponseEntity<UserDomain> one(){
+        UserDomain user = userService.toUserDomain(detailsService.getUser());
+        System.out.println(user.getEmail());
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
+
 
 }

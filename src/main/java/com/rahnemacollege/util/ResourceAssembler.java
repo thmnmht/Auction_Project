@@ -4,12 +4,14 @@ import com.rahnemacollege.controller.AuctionController;
 import com.rahnemacollege.controller.UserController;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.domain.UserDomain;
+import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.User;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,17 +21,13 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @Component
 public class ResourceAssembler {
 
-    public Resource<User> toResource(User user){
+    public Resource<UserDomain> toResource(UserDomain user){
         return new Resource<>(user,
-                linkTo(methodOn(UserController.class).one(user.getId())).withSelfRel(),
+//                linkTo(methodOn(UserController.class).one()).withSelfRel(),
                 linkTo(methodOn(UserController.class).all()).withRel("all"));
     }
 
-    public Resource<UserDomain> toResource(UserDomain userDomain){
-        return new Resource<>(userDomain, (linkTo(methodOn(UserController.class).all()).withRel("all")));
-    }
-
-    public Resources<Resource<User>> toResourcesUser(List<User> users){
+    public Resources<Resource<UserDomain>> toResourcesUser(List<UserDomain> users){
        return new Resources<>(users.stream()
                 .map(this::toResource)
                 .collect(Collectors.toList()),linkTo(methodOn(UserController.class).all()).withSelfRel());
