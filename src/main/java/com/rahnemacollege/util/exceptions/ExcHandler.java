@@ -8,13 +8,13 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import javax.servlet.http.HttpServletResponse;
 
 @ControllerAdvice
-public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+public class ExcHandler extends ResponseEntityExceptionHandler {
 
 
-    private Logger logger = LoggerFactory.getLogger(RestResponseEntityExceptionHandler.class);
+    private Logger logger = LoggerFactory.getLogger(ExcHandler.class);
 
     @ExceptionHandler(value = {InvalidInputException.class})
-    protected void handler(InvalidInputException ex,
+    protected void inputInvalid(InvalidInputException ex,
                            HttpServletResponse response) {
         switch (ex.getMessageStatus()) {
             //add auction
@@ -96,5 +96,20 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 break;
         }
         logger.error(ex.getMessageStatus().toString());
+    }
+
+    @ExceptionHandler(value = {IllegalStateException.class})
+    protected void fileUpload(IllegalStateException ex,
+                              HttpServletResponse response){
+        if(ex.getMessage().contains("SizeLimitExceededException"))
+             response.setStatus(455);
+        logger.error(ex.getMessage());
+    }
+
+    @ExceptionHandler(value = {NotFoundException.class})
+    protected void notFound(NotFoundException ex,
+                              HttpServletResponse response){
+        response.setStatus(456);
+        logger.error(ex.getMessage());
     }
 }
