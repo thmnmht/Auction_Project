@@ -78,6 +78,7 @@ header "auth" : "Bearer 'Token'"
 
 -/home/search/{title} GET : search by title
         String title, @PathParam("category") int[] categories_id, @RequestParam("page") int page, @RequestParam("size") int size
+        if category was empty it search with all categories :)
 
 ************************************************************************************************************************
 
