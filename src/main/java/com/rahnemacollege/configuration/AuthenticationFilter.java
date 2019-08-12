@@ -43,7 +43,7 @@ AuthenticationFilter extends OncePerRequestFilter {
         final String requestTokenHeader = request.getHeader("auth");
         String email = null;
         String jwtToken = null;
-        if(requestTokenHeader == null){
+        if (requestTokenHeader == null) {
             logger.error("no header!!!!! -_-");
         }
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {

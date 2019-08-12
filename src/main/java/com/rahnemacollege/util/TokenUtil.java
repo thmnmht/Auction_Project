@@ -10,6 +10,7 @@ public interface TokenUtil extends Serializable {
 
     /**
      * retrieve username from given token
+     *
      * @param token
      * @return
      */
@@ -17,6 +18,7 @@ public interface TokenUtil extends Serializable {
 
     /**
      * retrieve expiration date from token
+     *
      * @param token
      * @return
      */
@@ -24,6 +26,7 @@ public interface TokenUtil extends Serializable {
 
     /**
      * generate token for user
+     *
      * @param userDetails
      * @return
      */
@@ -31,6 +34,7 @@ public interface TokenUtil extends Serializable {
 
     /**
      * validate token
+     *
      * @param token
      * @param userDetails
      * @return

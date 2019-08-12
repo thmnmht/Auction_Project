@@ -32,7 +32,6 @@ public class UserService {
     private final Validator validator;
 
 
-
     public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService, PictureService pictureService, PasswordEncoder encoder, AuthenticationManager authenticationManager, Validator validator) {
         this.repository = repository;
         this.userDetailsService = userDetailsService;
@@ -43,21 +42,20 @@ public class UserService {
     }
 
 
-
-    public boolean isExist(String user_email){
-        if(repository.findByEmail(user_email).isPresent())
+    public boolean isExist(String user_email) {
+        if (repository.findByEmail(user_email).isPresent())
             return true;
         return false;
     }
 
-    public UserDomain addUser(String name,String email,String password){
-        validation(name,email,password);
-        User user = new User(name,email,encoder.encode(password));
+    public UserDomain addUser(String name, String email, String password) {
+        validation(name, email, password);
+        User user = new User(name, email, encoder.encode(password));
         repository.save(user);
         return toUserDomain(user);
     }
 
-    private void validation(String name,String email,String password){
+    private void validation(String name, String email, String password) {
         validator.validName(name);
         validator.validPassword(password);
         validator.validEmail(email);
@@ -95,12 +93,12 @@ public class UserService {
         return repository.findByEmail(email);
     }
 
-    public UserDomain edit(String name,String email) throws InvalidInputException{
-        if(validator.isEmpty(email))
+    public UserDomain edit(String name, String email) throws InvalidInputException {
+        if (validator.isEmpty(email))
             email = userDetailsService.getUser().getEmail();
         else
             validator.validEmail(email);
-        if(validator.isEmpty(name))
+        if (validator.isEmpty(name))
             name = userDetailsService.getUser().getName();
         User user = userDetailsService.getUser();
         user.setName(name);
@@ -109,24 +107,23 @@ public class UserService {
         return toUserDomain(user);
     }
 
-    public UserDomain toUserDomain(User user){
-        UserDomain userDomain = new UserDomain(user.getName(),user.getEmail(),user.getId(),user.getPicture());
+    public UserDomain toUserDomain(User user) {
+        UserDomain userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), user.getPicture());
         return userDomain;
     }
 
 
-
     private String savePicture(MultipartFile picture) throws IOException {
         int userId = userDetailsService.getUser().getId();
-        new File("./images/profile_images/" + userId + "/" ).mkdirs();
-            String fileName = userId + "_" + new Date().getTime() + ".jpg";
-            String pathName = "./images/auction_images/" + userId + "/" +  fileName;
-            pictureService.save(picture,pathName);
+        new File("./images/profile_images/" + userId + "/").mkdirs();
+        String fileName = userId + "_" + new Date().getTime() + ".jpg";
+        String pathName = "./images/auction_images/" + userId + "/" + fileName;
+        pictureService.save(picture, pathName);
         return pathName;
     }
 
     //TODO
-    public void setPicture(MultipartFile picture){
+    public void setPicture(MultipartFile picture) {
 
     }
 

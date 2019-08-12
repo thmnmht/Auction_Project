@@ -20,6 +20,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import javax.websocket.server.PathParam;
 
 @RestController
@@ -31,6 +32,7 @@ public class UserController {
     private final PasswordService passwordService;
     private TokenUtil tokenUtil;
     private UserDetailsServiceImpl detailsService;
+
     public UserController(UserService userService, ResourceAssembler assembler, PasswordService passwordService,
                           JwtTokenUtil tokenUtil,
                           UserDetailsServiceImpl userDetailService, UserDetailsServiceImpl detailsService) {
@@ -41,7 +43,6 @@ public class UserController {
         this.detailsService = userDetailService;
         this.detailsService = detailsService;
     }
-
 
 
     @PostMapping("/login")
@@ -55,14 +56,14 @@ public class UserController {
     }
 
     @PostMapping("/edit")
-    public ResponseEntity<UserDomain> edit(String name,String email){
-        UserDomain userDomain = userService.edit(name,email);
-        return new ResponseEntity<>(userDomain,HttpStatus.OK);
+    public ResponseEntity<UserDomain> edit(String name, String email) {
+        UserDomain userDomain = userService.edit(name, email);
+        return new ResponseEntity<>(userDomain, HttpStatus.OK);
     }
 
     //TODO
     @PostMapping("/profilepic")
-    public Resource setPicture(@PathParam("picture") MultipartFile picture){
+    public Resource setPicture(@PathParam("picture") MultipartFile picture) {
         return null;
     }
 
@@ -80,8 +81,8 @@ public class UserController {
 
 
     @PostMapping("/signup")
-    public Resource<UserDomain> add(@PathParam("name") String name,@PathParam("emil") String email,@PathParam("validPassword") String password) {
-        UserDomain user = userService.addUser(name,email,password);
+    public Resource<UserDomain> add(@PathParam("name") String name, @PathParam("emil") String email, @PathParam("validPassword") String password) {
+        UserDomain user = userService.addUser(name, email, password);
         return assembler.toResource(user);
     }
 
@@ -93,7 +94,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDomain> one(){
+    public ResponseEntity<UserDomain> one() {
         UserDomain user = userService.toUserDomain(detailsService.getUser());
         System.out.println(user.getEmail());
         return new ResponseEntity<>(user, HttpStatus.OK);

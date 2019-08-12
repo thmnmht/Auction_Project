@@ -11,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 
 
@@ -22,12 +21,12 @@ public class PictureService {
     private PictureRepository repository;
 
     public void save(MultipartFile pic, String path, Auction auction) throws IOException {
-        Picture picture = new Picture(path,auction);
+        Picture picture = new Picture(path, auction);
         repository.save(picture);
-        save(pic,path);
+        save(pic, path);
     }
 
-    public List<Picture> getAll(){
+    public List<Picture> getAll() {
         return Lists.newArrayList(repository.findAll());
     }
 
