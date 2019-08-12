@@ -77,12 +77,12 @@ header "auth" : "Bearer 'Token'"
 ************************************************************************************************************************
 
 -/home/search/{title} GET : search by title
-        String title,@RequestParam("page") int page, @RequestParam("size") int size
+        String title, @PathParam("category") int[] categories_id, @RequestParam("page") int page, @RequestParam("size") int size
 
 ************************************************************************************************************************
 
--/home/filter/{category_id} GET : filter some categories
-        int category_id, @RequestParam("page") int page, @RequestParam("size") int size
+-/home/filter GET : filter some categories
+        @PathParam("category") int[] categories_id, @RequestParam("page") int page, @RequestParam("size") int size
 
 ************************************************************************************************************************
 
