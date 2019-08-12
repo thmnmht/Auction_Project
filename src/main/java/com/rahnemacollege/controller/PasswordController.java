@@ -130,7 +130,7 @@ public class PasswordController {
 
     // Going to reset page without a token redirects to login page
     /* TODO: redirect to login page
-    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ExcHandler(MissingServletRequestParameterException.class)
     public ModelAndView handleMissingParams(MissingServletRequestParameterException ex) {
         return new ModelAndView("redirect:login");
     }

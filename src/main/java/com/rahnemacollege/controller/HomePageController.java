@@ -16,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/home")
 public class HomePageController {
+
     private final AuctionService service;
     private final AuctionService auctionService;
     private final ResourceAssembler assembler;

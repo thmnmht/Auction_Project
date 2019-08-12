@@ -23,7 +23,7 @@ public class ResourceAssembler {
 
     public Resource<UserDomain> toResource(UserDomain user){
         return new Resource<>(user,
-//                linkTo(methodOn(UserController.class).one()).withSelfRel(),
+                linkTo(methodOn(UserController.class).one()).withSelfRel(),
                 linkTo(methodOn(UserController.class).all()).withRel("all"));
     }
 
