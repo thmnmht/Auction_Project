@@ -105,8 +105,11 @@ public class AuctionService {
         return Lists.newArrayList(categoryRepository.findAll());
     }
 
-    public Page<AuctionDomain> filter(int category_id, int page, int size) {
-        List<AuctionDomain> auctions = getAll().stream().filter(c -> c.getCategory_id() == category_id).collect(Collectors.toList());
+    public Page<AuctionDomain> filter(int[] categories_id, int page, int size) {
+        List<AuctionDomain> auctions = new ArrayList<>();
+        for (int category_id : categories_id) {
+            auctions.addAll(getAll().stream().filter(c -> c.getCategory_id() == category_id).collect(Collectors.toList()));
+        }
         return toPage(auctions, page, size);
     }
 
@@ -124,8 +127,16 @@ public class AuctionService {
         return auctionRepository.findById(id).orElseThrow( () ->  new InvalidInputException(Message.AUCTION_NOT_FOUND));
     }
 
-    public Page<AuctionDomain> findByTitle(String title, int page, int size) {
-        List<AuctionDomain> auctions = getAll();
+    public Page<AuctionDomain> findByTitle(String title,int[] categories_id, int page, int size) {
+        List<AuctionDomain> auctions = new ArrayList<>();
+        if(categories_id == null || categories_id.length < 1)
+            auctions = getAll();
+        else
+        for (int category_id :
+                categories_id) {
+            List<AuctionDomain> tmp = getAll().stream().filter(c -> c.getCategory_id() == category_id).collect(Collectors.toList());
+            auctions.addAll(tmp);
+        }
         auctions = auctions.stream()
                 .filter(a -> a.getTitle().toLowerCase().contains(title.toLowerCase()))
                 .collect(Collectors.toList());
