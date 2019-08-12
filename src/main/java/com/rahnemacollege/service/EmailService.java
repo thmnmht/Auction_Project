@@ -28,10 +28,10 @@ public class EmailService {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
         helper.setTo(userEmail);
-        String text = "To reset your password, click the link below:\n" + appUrl
+        String text = "To reset your validPassword, click the link below:\n" + appUrl
                 + "/reset?token=" + token;
         helper.setText(text);
-        helper.setSubject("AucApp password recovery");
+        helper.setSubject("AucApp validPassword recovery");
         mailSender.send(message);
     }
 }

@@ -78,11 +78,8 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
             case PASSWORD_INCORRECT:
                 response.setStatus(445);
                 break;
-            case EMAIL_INCORRECT:
-                response.setStatus(446);
-                break;
 
-            //password recovery
+            //validPassword recovery
             case EMAIL_NOT_FOUND:
                 response.setStatus(447);
                 break;
@@ -121,7 +118,7 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {NotFoundException.class})
     protected void notFound(NotFoundException ex,
                               HttpServletResponse response){
-        response.setStatus(456);
+        response.setStatus(446);
         logger.error(ex.getMessage());
     }
 }

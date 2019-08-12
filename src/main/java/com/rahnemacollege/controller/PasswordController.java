@@ -74,7 +74,7 @@ public class PasswordController {
                 e.printStackTrace();
             }
             // Add success message to view
-            System.err.println("successMessage" + " A password reset link has been sent to " + userEmail + " @" +
+            System.err.println("successMessage" + " A validPassword reset link has been sent to " + userEmail + " @" +
                     new Date());
             return assembler.toResource(service.toUserDomain(optional.get()));
         }
@@ -82,21 +82,21 @@ public class PasswordController {
 
 
 
-    //     Display form to reset password
+    //     Display form to reset validPassword
     @RequestMapping(value = "/reset", method = RequestMethod.GET)
     public Resource<UserDomain> displayResetPasswordPage(@RequestParam("token") String token) {
         Optional<ResetRequest> request = requestService.findByToken(token);
         if (request.isPresent()) { // Token found in DB
-//            todo: redirect to password reset page
+//            todo: redirect to validPassword reset page
             System.err.println("redirecting to pass reset screen");
             return assembler.toResource(service.toUserDomain(request.get().getUser()));
         } else { // Token not found in DB
-            System.err.println("errorMessage : Oops!  This is an invalid password reset link.");
+            System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");
             throw new InvalidInputException(Message.INVALID_RESET_LINK);
         }
     }
 
-    //     Process reset password form
+    //     Process reset validPassword form
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
     public Resource<UserDomain> setNewPassword(@RequestParam Map<String, String> requestParams) {
 
@@ -107,8 +107,8 @@ public class PasswordController {
         // This should always be non-null but we check just in case
         if (resetUser != null) {
 
-            // Set new password
-            resetUser.setPassword(passwordService.getPasswordEncoder().encode(requestParams.get("password")));
+            // Set new validPassword
+            resetUser.setPassword(passwordService.getPasswordEncoder().encode(requestParams.get("validPassword")));
             // Set the reset token to null so it cannot be used again
             requestService.removeRequest(request);
 
@@ -116,14 +116,14 @@ public class PasswordController {
 
             // In order to set a model attribute on a redirect, we must use
             // RedirectAttributes
-            System.err.println("successMessage: You have successfully reset your password.  You may now login.");
+            System.err.println("successMessage: You have successfully reset your validPassword.  You may now login.");
 
             //TODO : redirect:login
 
             return assembler.toResource(service.toUserDomain(resetUser));
 
         } else {
-            System.err.println("errorMessage : Oops!  This is an invalid password reset link.");
+            System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");
             throw new  InvalidInputException(Message.NOT_RECORDED_REQUEST);
         }
     }

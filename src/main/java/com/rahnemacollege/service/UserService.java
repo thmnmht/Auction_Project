@@ -29,15 +29,17 @@ public class UserService {
     private final PictureService pictureService;
     private final PasswordEncoder encoder;
     private final AuthenticationManager authenticationManager;
+    private final Validator validator;
 
 
 
-    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService, PictureService pictureService, PasswordEncoder encoder, AuthenticationManager authenticationManager) {
+    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService, PictureService pictureService, PasswordEncoder encoder, AuthenticationManager authenticationManager, Validator validator) {
         this.repository = repository;
         this.userDetailsService = userDetailsService;
         this.pictureService = pictureService;
         this.encoder = encoder;
         this.authenticationManager = authenticationManager;
+        this.validator = validator;
     }
 
 
@@ -56,18 +58,9 @@ public class UserService {
     }
 
     private void validation(String name,String email,String password){
-        if(name == null || name.length() < 1)
-            throw new InvalidInputException(Message.NAME_NULL);
-        if(email == null || email.length() < 5)
-            throw new InvalidInputException(Message.EMAIL_NULL);
-        if(!email.matches("^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$"))
-            throw new InvalidInputException(Message.EMAIL_INVALID);
-        if(password == null || password.length() < 6)
-            throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
-        if (password.length() > 100)
-            throw new InvalidInputException(Message.PASSWORD_TOO_HIGH);
-        if(repository.findByEmail(email).isPresent())
-            throw new InvalidInputException(Message.EMAIL_DUPLICATED);
+        validator.validName(name);
+        validator.validPassword(password);
+        validator.validEmail(email);
     }
 
     public List<UserDomain> getAll() {
@@ -87,6 +80,7 @@ public class UserService {
         }
     }
 
+    //?
     private Optional<User> getByEmail(String email) {
         return repository.getByEmail(email);
     }
@@ -102,15 +96,11 @@ public class UserService {
     }
 
     public UserDomain edit(String name,String email) throws InvalidInputException{
-        if(email == null || email.length() < 1)
+        if(validator.isEmpty(email))
             email = userDetailsService.getUser().getEmail();
-        else {
-            if(!email.matches("^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$"))
-                throw new InvalidInputException(Message.EMAIL_INVALID);
-            if(getByEmail(email).isPresent())
-                throw new InvalidInputException(Message.EMAIL_DUPLICATED);
-        }
-        if(name == null || name.length() < 1)
+        else
+            validator.validEmail(email);
+        if(validator.isEmpty(name))
             name = userDetailsService.getUser().getName();
         User user = userDetailsService.getUser();
         user.setName(name);
