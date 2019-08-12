@@ -6,10 +6,8 @@ import com.rahnemacollege.controller.AuctionController;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
-import com.rahnemacollege.model.Picture;
 import com.rahnemacollege.repository.AuctionRepository;
 import com.rahnemacollege.repository.CategoryRepository;
-import com.rahnemacollege.repository.PictureRepository;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
 import com.rahnemacollege.util.exceptions.NotFoundException;
@@ -42,14 +40,16 @@ public class AuctionService {
     private final CategoryRepository categoryRepository;
     private final UserDetailsServiceImpl userDetailsService;
     private final PictureService pictureService;
+    private final Validator validator;
 
     @Autowired
     public AuctionService(AuctionRepository auctionRepository, CategoryRepository categoryRepository,
-                          UserDetailsServiceImpl userDetailsService, PictureService pictureService) {
+                          UserDetailsServiceImpl userDetailsService, PictureService pictureService, Validator validator) {
         this.auctionRepository = auctionRepository;
         this.categoryRepository = categoryRepository;
         this.userDetailsService = userDetailsService;
         this.pictureService = pictureService;
+        this.validator = validator;
     }
 
 
@@ -63,20 +63,11 @@ public class AuctionService {
     }
 
     private void validation(AuctionDomain auctionDomain){
-        if(auctionDomain.getTitle() == null || auctionDomain.getTitle().length() < 1)
-            throw new InvalidInputException(Message.TITLE_NULL);
-        if (auctionDomain.getTitle().length()>50)
-            throw new InvalidInputException(Message.TITLE_TOO_LONG);
-        if (auctionDomain.getDescription().length()>1000)
-            throw new InvalidInputException(Message.DESCRIPTION_TOO_LONG);
-        if(auctionDomain.getBase_price() < 0)
-            throw new InvalidInputException(Message.BASE_PRICE_NULL);
-        if(auctionDomain.getDate() < 1)
-            throw new InvalidInputException(Message.DATE_NULL);
-        if(auctionDomain.getMax_number() < 2)
-            throw new InvalidInputException(Message.MAX_NUMBER_TOO_LOW);
-        if(auctionDomain.getMax_number() > 15)
-            throw new InvalidInputException(Message.MAX_NUMBER_TOO_HIGH);
+        validator.validTitle(auctionDomain.getTitle());
+        validator.validDescription(auctionDomain.getDescription());
+        validator.validDate(auctionDomain.getDate());
+        validator.validPrice(auctionDomain.getBase_price());
+        validator.validMaxNumber(auctionDomain.getMax_number());
     }
 
     private void savePictures(Auction auction,MultipartFile[] images) throws IOException {
@@ -91,8 +82,6 @@ public class AuctionService {
 
     public Auction toAuction(AuctionDomain auctionDomain){
         Date date = new Date(auctionDomain.getDate());
-        if(auctionDomain.getDate() - new Date().getTime() < 1800000L)
-            throw new InvalidInputException(Message.DATE_INVALID);
         Category category = categoryRepository.findById(auctionDomain.getCategory_id()).orElseThrow( () -> new InvalidInputException(Message.CATEGORY_INVALID));
         Auction auction = new Auction(auctionDomain.getTitle(),auctionDomain.getDescription(),auctionDomain.getBase_price(),category,date,userDetailsService.getUser(),auctionDomain.getMax_number());
         return auction;

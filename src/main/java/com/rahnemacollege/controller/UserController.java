@@ -47,7 +47,7 @@ public class UserController {
     @PostMapping("/login")
     public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws InvalidInputException {
         if (!userService.isExist(authenticationRequest.getEmail()))
-            throw new InvalidInputException(Message.EMAIL_INCORRECT);
+            throw new InvalidInputException(Message.EMAIL_NOT_FOUND);
         userService.authenticate(authenticationRequest.getEmail(), authenticationRequest.getPassword());
         final UserDetails userDetails = detailsService.loadUserByUsername(authenticationRequest.getEmail());
         final String token = tokenUtil.generateToken(userDetails);
@@ -67,7 +67,7 @@ public class UserController {
     }
 
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
-    public Resource<UserDomain> setNewPassword(@RequestParam("password") String password) {
+    public Resource<UserDomain> setNewPassword(@RequestParam("validPassword") String password) {
         User user = detailsService.getUser();
         if (password != null && password.length() > 5 && password.length() < 100) {
             user.setPassword(passwordService.getPasswordEncoder().encode(password));
@@ -80,7 +80,7 @@ public class UserController {
 
 
     @PostMapping("/signup")
-    public Resource<UserDomain> add(@PathParam("name") String name,@PathParam("emil") String email,@PathParam("password") String password) {
+    public Resource<UserDomain> add(@PathParam("name") String name,@PathParam("emil") String email,@PathParam("validPassword") String password) {
         UserDomain user = userService.addUser(name,email,password);
         return assembler.toResource(user);
     }
