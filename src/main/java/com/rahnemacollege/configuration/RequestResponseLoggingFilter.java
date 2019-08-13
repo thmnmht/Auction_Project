@@ -56,14 +56,6 @@ public class RequestResponseLoggingFilter implements Filter {
         return registrationBean;
     }
 
-    @Override
-    public void destroy() {
 
-    }
-
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-
-    }
 }
 
