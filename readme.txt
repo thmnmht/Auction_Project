@@ -126,4 +126,12 @@ header "auth" : "Bearer 'Token'"
 
     out : Resource<UserDomain>
     445 if password = null | !(5<password.length<100)
+************************************************************************************************************************
 
+-auctions/addBookmark POST:
+    @Param ("auctionId") Integer
+
+    out : Resource<AuctionDomain>
+    454 if auctionId = null
+    455 if no auction found by Id
+    456 if server DB contains null auction

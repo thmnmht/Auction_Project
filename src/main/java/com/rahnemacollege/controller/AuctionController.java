@@ -3,8 +3,13 @@ package com.rahnemacollege.controller;
 
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Category;
+import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.AuctionService;
+import com.rahnemacollege.service.UserDetailsServiceImpl;
+import com.rahnemacollege.service.UserService;
 import com.rahnemacollege.util.ResourceAssembler;
+import com.rahnemacollege.util.exceptions.InvalidInputException;
+import com.rahnemacollege.util.exceptions.Message;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
@@ -22,10 +27,15 @@ public class AuctionController {
 
     private final AuctionService auctionService;
     private final ResourceAssembler assembler;
+    private UserDetailsServiceImpl userDetailsService;
+    private final UserService userService;
 
-    public AuctionController(AuctionService auctionService, ResourceAssembler assembler) {
+
+    public AuctionController(AuctionService auctionService, ResourceAssembler assembler, UserDetailsServiceImpl userDetailsService, UserService userService) {
         this.auctionService = auctionService;
         this.assembler = assembler;
+        this.userDetailsService = userDetailsService;
+        this.userService = userService;
     }
 
     @GetMapping("/category")
@@ -63,6 +73,21 @@ public class AuctionController {
     public Resource<AuctionDomain> one(@PathVariable int id) {
         return assembler.toResource(auctionService.findById(id));
     }
+
+    @RequestMapping(value = "/addBookmark", method = RequestMethod.POST)
+    public Resource<AuctionDomain> addBookmark(@RequestParam("auctionId") Integer id) {
+        User user = userDetailsService.getUser();
+        if (id != null) {
+            if (auctionService.findAuctionById(id)!= null){
+                user.getBookmarks().add(auctionService.findAuctionById(id));
+                userService.addUser(user);
+                return assembler.toResource(auctionService.toAuctionDomain(auctionService.findAuctionById(id)));
+            }
+            throw new InvalidInputException(Message.REALLY_BAD_SITUATION);
+        }
+        throw new InvalidInputException(Message.INVALID_ID);
+    }
+
 
     @GetMapping("/all")
     public Resources<Resource<AuctionDomain>> all() {

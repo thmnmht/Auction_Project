@@ -6,8 +6,10 @@ import com.rahnemacollege.controller.AuctionController;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
+import com.rahnemacollege.model.Picture;
 import com.rahnemacollege.repository.AuctionRepository;
 import com.rahnemacollege.repository.CategoryRepository;
+import com.rahnemacollege.repository.PictureRepository;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
 import com.rahnemacollege.util.exceptions.NotFoundException;
@@ -21,12 +23,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -101,6 +106,7 @@ public class AuctionService {
 
     public List<Category> getCategory() {
         return Lists.newArrayList(categoryRepository.findAll());
+
     }
 
     public Page<AuctionDomain> filter(int[] categories_id, int page, int size) {
@@ -113,13 +119,16 @@ public class AuctionService {
 
     public List<AuctionDomain> getAll() {
         return Lists.newArrayList(auctionRepository.findAll()).stream()
-                .map(auction -> toAuctionDomain(auction))
+                .map(this::toAuctionDomain)
                 .collect(Collectors.toList());
     }
 
     public AuctionDomain findById(int id) {
-        Auction auction = auctionRepository.findById(id).orElseThrow(() -> new NotFoundException(id, Auction.class));
+        Auction auction = auctionRepository.findById(id).orElseThrow( () ->  new InvalidInputException(Message.AUCTION_NOT_FOUND));
         return toAuctionDomain(auction);
+    }
+    public Auction findAuctionById(int id){
+        return auctionRepository.findById(id).orElseThrow( () ->  new InvalidInputException(Message.AUCTION_NOT_FOUND));
     }
 
     public Page<AuctionDomain> findByTitle(String title,int[] categories_id, int page, int size) {
@@ -150,6 +159,9 @@ public class AuctionService {
         return pages;
     }
 
+
+
+
     //TODO : change exception handling!
     //TODO : remove it!
     public Resource imageUpload(int id, String fileName) {
@@ -174,4 +186,5 @@ public class AuctionService {
         auctionPage.forEach(auction -> auctionDomainList.add(toAuctionDomain(auction)));
         return new PageImpl<>(auctionDomainList);
     }
+
 }
