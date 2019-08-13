@@ -23,7 +23,8 @@ public class App extends SpringBootServletInitializer {
         return application.sources(App.class);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         System.err.println(new Date().getTime());
         SpringApplication.run(App.class, args);
     }
