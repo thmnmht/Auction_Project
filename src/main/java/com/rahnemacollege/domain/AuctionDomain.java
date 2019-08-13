@@ -15,10 +15,10 @@ public class AuctionDomain {
     private long date = -1;
     private int category_id;
     private int max_number = -1;
-
+    private boolean isMine = false;
     private int id;
 
-    private List<Link> pictures;
+    private List<String> pictures;
 
     public AuctionDomain(String title,
                          String description,

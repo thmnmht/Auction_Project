@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.websocket.server.PathParam;
 import java.io.IOException;
 import java.util.List;
@@ -63,25 +64,26 @@ public class AuctionController {
                                        @PathParam("date") long date,
                                        @PathParam("category_id") int category_id,
                                        @PathParam("max_number") int max_number,
-                                       @RequestPart MultipartFile[] images) throws IOException {
-        System.out.println("salam");
+                                       @RequestPart MultipartFile[] images,
+                                       HttpServletRequest request) throws IOException {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
         AuctionDomain auctionDomain = new AuctionDomain(title, description, base_price, date, category_id, max_number);
-        return assembler.toResource(auctionService.addAuction(auctionDomain, images));
+        return assembler.toResource(auctionService.addAuction(auctionDomain, images,appUrl));
     }
 
     @GetMapping("/find/{id}")
     public Resource<AuctionDomain> one(@PathVariable int id) {
-        return assembler.toResource(auctionService.findById(id));
+        return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id)));
     }
 
     @RequestMapping(value = "/addBookmark", method = RequestMethod.POST)
     public Resource<AuctionDomain> addBookmark(@RequestParam("auctionId") Integer id) {
         User user = userDetailsService.getUser();
         if (id != null) {
-            if (auctionService.findAuctionById(id)!= null){
-                user.getBookmarks().add(auctionService.findAuctionById(id));
+            if (auctionService.findById(id)!= null){
+                user.getBookmarks().add(auctionService.findById(id));
                 userService.addUser(user);
-                return assembler.toResource(auctionService.toAuctionDomain(auctionService.findAuctionById(id)));
+                return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id)));
             }
             throw new InvalidInputException(Message.REALLY_BAD_SITUATION);
         }

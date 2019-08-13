@@ -1,15 +1,18 @@
 package com.rahnemacollege.service;
 
 import com.google.common.collect.Lists;
+import com.rahnemacollege.domain.AuthenticationResponse;
 import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.UserRepository;
+import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,15 +32,18 @@ public class UserService {
     private final PasswordEncoder encoder;
     private final AuthenticationManager authenticationManager;
     private final Validator validator;
+    private final TokenUtil tokenUtil;
 
 
-    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService, PictureService pictureService, PasswordEncoder encoder, AuthenticationManager authenticationManager, Validator validator) {
+
+    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService, PictureService pictureService, PasswordEncoder encoder, AuthenticationManager authenticationManager, Validator validator, TokenUtil tokenUtil) {
         this.repository = repository;
         this.userDetailsService = userDetailsService;
         this.pictureService = pictureService;
         this.encoder = encoder;
         this.authenticationManager = authenticationManager;
         this.validator = validator;
+        this.tokenUtil = tokenUtil;
     }
 
 
@@ -78,10 +83,6 @@ public class UserService {
         }
     }
 
-    //?
-    private Optional<User> getByEmail(String email) {
-        return repository.getByEmail(email);
-    }
 
     //??
     public User addUser(User user) {
@@ -93,18 +94,23 @@ public class UserService {
         return repository.findByEmail(email);
     }
 
-    public UserDomain edit(String name, String email) throws InvalidInputException {
-        if (validator.isEmpty(email))
-            email = userDetailsService.getUser().getEmail();
-        else
-            validator.validEmail(email);
-        if (validator.isEmpty(name))
-            name = userDetailsService.getUser().getName();
+    public User edit(String name, String email) throws InvalidInputException {
         User user = userDetailsService.getUser();
-        user.setName(name);
-        user.setEmail(email);
+        if (!validator.isEmpty(email) && !user.getEmail().equals(email)){
+            validator.validEmail(email);
+            user.setEmail(email);
+        }
+        if (!validator.isEmpty(name))
+            user.setName(name);
         repository.save(user);
-        return toUserDomain(user);
+        return user;
+    }
+
+    public AuthenticationResponse auth(String email,String password){
+        authenticate(email, password);
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        final String token = tokenUtil.generateToken(userDetails);
+        return new AuthenticationResponse(token);
     }
 
     public UserDomain toUserDomain(User user) {
@@ -116,14 +122,23 @@ public class UserService {
     private String savePicture(MultipartFile picture) throws IOException {
         int userId = userDetailsService.getUser().getId();
         new File("./images/profile_images/" + userId + "/").mkdirs();
-        String fileName = userId + "_" + new Date().getTime() + ".jpg";
-        String pathName = "./images/auction_images/" + userId + "/" + fileName;
+        String fileName = userId + ".jpg";
+        String pathName = "./images/profile_images/" + userId + "/" + fileName;
         pictureService.save(picture, pathName);
         return pathName;
     }
 
     //TODO
     public void setPicture(MultipartFile picture) {
+        if(picture == null)
+            return;
+        try {
+            User user = userDetailsService.getUser();
+            user.setPicture(savePicture(picture));
+            repository.save(user);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
