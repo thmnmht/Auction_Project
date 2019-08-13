@@ -2,10 +2,10 @@ package com.rahnemacollege.service;
 
 
 import com.google.common.collect.Lists;
-import com.rahnemacollege.controller.AuctionController;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
+import com.rahnemacollege.model.Picture;
 import com.rahnemacollege.repository.AuctionRepository;
 import com.rahnemacollege.repository.CategoryRepository;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
@@ -17,9 +17,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -28,8 +28,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Service
 public class AuctionService {
@@ -89,7 +87,7 @@ public class AuctionService {
     public AuctionDomain toAuctionDomain(Auction auction) {
         AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(), auction.getDescription(), auction.getBase_price(), auction.getDate().getTime(), auction.getCategory().getId(), auction.getMax_number());
         auctionDomain.setId(auction.getId());
-        List<Link> auctionPictures = pictureService.getAll().stream().filter(picture ->
+        List<String> auctionPictures = pictureService.getAll().stream().filter(picture ->
                 picture.getFileName().startsWith("C:/ActionProjectImages/ActionImages/" + auction.getId() + "/")).map(
                 Picture::getFileName
         ).collect(Collectors.toList());
@@ -117,23 +115,24 @@ public class AuctionService {
     }
 
     public AuctionDomain findById(int id) {
-        Auction auction = auctionRepository.findById(id).orElseThrow( () ->  new InvalidInputException(Message.AUCTION_NOT_FOUND));
+        Auction auction = auctionRepository.findById(id).orElseThrow(() -> new InvalidInputException(Message.AUCTION_NOT_FOUND));
         return toAuctionDomain(auction);
     }
-    public Auction findAuctionById(int id){
-        return auctionRepository.findById(id).orElseThrow( () ->  new InvalidInputException(Message.AUCTION_NOT_FOUND));
+
+    public Auction findAuctionById(int id) {
+        return auctionRepository.findById(id).orElseThrow(() -> new InvalidInputException(Message.AUCTION_NOT_FOUND));
     }
 
-    public Page<AuctionDomain> findByTitle(String title,int[] categories_id, int page, int size) {
+    public Page<AuctionDomain> findByTitle(String title, int[] categories_id, int page, int size) {
         List<AuctionDomain> auctions = new ArrayList<>();
-        if(categories_id == null || categories_id.length < 1)
+        if (categories_id == null || categories_id.length < 1)
             auctions = getAll();
         else
-        for (int category_id :
-                categories_id) {
-            List<AuctionDomain> tmp = getAll().stream().filter(c -> c.getCategory_id() == category_id).collect(Collectors.toList());
-            auctions.addAll(tmp);
-        }
+            for (int category_id :
+                    categories_id) {
+                List<AuctionDomain> tmp = getAll().stream().filter(c -> c.getCategory_id() == category_id).collect(Collectors.toList());
+                auctions.addAll(tmp);
+            }
         auctions = auctions.stream()
                 .filter(a -> a.getTitle().toLowerCase().contains(title.toLowerCase()))
                 .collect(Collectors.toList());
