@@ -21,6 +21,8 @@ import org.springframework.stereotype.Component;
 @Order(value = 1)
 public class
 RequestResponseLoggingFilter implements Filter {
+@Order(value=1)
+public class RequestResponseLoggingFilter implements Filter {
 
     protected final Log logger = LogFactory.getLog(getClass());
 

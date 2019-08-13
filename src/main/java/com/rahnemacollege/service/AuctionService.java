@@ -6,13 +6,10 @@ import com.rahnemacollege.controller.AuctionController;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
-import com.rahnemacollege.model.Picture;
 import com.rahnemacollege.repository.AuctionRepository;
 import com.rahnemacollege.repository.CategoryRepository;
-import com.rahnemacollege.repository.PictureRepository;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
-import com.rahnemacollege.util.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -23,15 +20,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -106,7 +100,6 @@ public class AuctionService {
 
     public List<Category> getCategory() {
         return Lists.newArrayList(categoryRepository.findAll());
-
     }
 
     public Page<AuctionDomain> filter(int[] categories_id, int page, int size) {
@@ -158,7 +151,6 @@ public class AuctionService {
         Page<AuctionDomain> pages = new PageImpl(list.subList(start, end), pageable, list.size());
         return pages;
     }
-
 
     //TODO : change exception handling!
     //TODO : remove it!
