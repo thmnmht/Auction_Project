@@ -47,7 +47,7 @@ public class RequestResponseLoggingFilter implements Filter {
 
     @Bean
     public FilterRegistrationBean<RequestResponseLoggingFilter> loggingFilter() {
-        FilterRegistrationBean<RequestResponseLoggingFilter> registrationBean  = new FilterRegistrationBean<>();
+        FilterRegistrationBean<RequestResponseLoggingFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new RequestResponseLoggingFilter());
         registrationBean.addUrlPatterns("*");
         return registrationBean;

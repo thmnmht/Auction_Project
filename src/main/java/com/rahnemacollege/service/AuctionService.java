@@ -6,13 +6,10 @@ import com.rahnemacollege.controller.AuctionController;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
-import com.rahnemacollege.model.Picture;
-import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.AuctionRepository;
 import com.rahnemacollege.repository.CategoryRepository;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
-import com.rahnemacollege.util.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -179,4 +176,5 @@ public class AuctionService {
         auctionPage.forEach(auction -> auctionDomainList.add(toAuctionDomain(auction)));
         return new PageImpl<>(auctionDomainList);
     }
+
 }
