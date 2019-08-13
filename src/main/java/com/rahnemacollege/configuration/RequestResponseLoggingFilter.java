@@ -2,11 +2,7 @@ package com.rahnemacollege.configuration;
 
 import java.io.IOException;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Order(value = 1)
 public class RequestResponseLoggingFilter implements Filter {
 
-    protected final Log logger = LogFactory.getLog(getClass());
+    private final Log logger = LogFactory.getLog(getClass());
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -50,4 +46,14 @@ public class RequestResponseLoggingFilter implements Filter {
         return registrationBean;
     }
 
+    @Override
+    public void destroy() {
+
+    }
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+
+    }
 }
+
