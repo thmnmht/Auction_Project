@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
+import javax.websocket.server.PathParam;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -83,7 +84,7 @@ public class PasswordController {
 
     //     Display form to reset validPassword
     @RequestMapping(value = "/reset", method = RequestMethod.GET)
-    public Resource<UserDomain> displayResetPasswordPage(@RequestParam("token") String token) {
+    public Resource<UserDomain> displayResetPasswordPage(@PathParam("token") String token) {
         Optional<ResetRequest> request = requestService.findByToken(token);
         if (request.isPresent()) { // Token found in DB
 //            todo: redirect to validPassword reset page
