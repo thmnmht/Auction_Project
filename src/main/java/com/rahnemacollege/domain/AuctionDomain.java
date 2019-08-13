@@ -2,7 +2,6 @@ package com.rahnemacollege.domain;
 
 
 import lombok.Data;
-import org.springframework.hateoas.Link;
 import java.util.List;
 
 

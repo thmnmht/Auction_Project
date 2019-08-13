@@ -21,7 +21,7 @@ apply plugin: 'io.spring.dependency-management'
 
 bootJar {
     baseName = 'gs-securing-web'
-    version =  '0.1.0'
+    version = '1.1.0'
 }
 
 
@@ -39,6 +39,7 @@ repositories {
 
 
 apply plugin: 'java'
+apply plugin: 'war'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
@@ -50,7 +51,7 @@ dependencies {
 
     compile 'io.jsonwebtoken:jjwt:0.9.1'
 
-    
+
     compile('org.flywaydb:flyway-core')
     compile('org.springframework.boot:spring-boot-starter-jdbc')
     compile('mysql:mysql-connector-java')
@@ -58,7 +59,6 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
     compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
-
 
 
     // JPA Data (We are going to use Repositories, Entities, Hibernate)
@@ -69,8 +69,8 @@ dependencies {
 
 
     compile 'org.springframework.boot:spring-boot-starter-hateoas'
-    
-    
+
+
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:27.1-jre'
 
@@ -111,7 +111,24 @@ dependencies {
 //    compile group: 'org.springframework.security', name: 'spring-security-web', version: '4.2.3.RELEASE'
 
 
+    war {
+        archiveName 'hello-gradle.war'
+    }
+    compile 'org.springframework.boot:spring-boot-starter-tomcat'
 
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 
+    providedCompile 'javax.servlet:servlet-api:2.5'
+    providedCompile 'org.apache.tomcat:tomcat-jsp-api:7.0.55'
 
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "com.rahnemacollege.App"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
