@@ -1,13 +1,23 @@
 package com.rahnemacollege.service;
 
+import com.google.common.collect.Lists;
 import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.UserRepository;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,61 +25,65 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserRepository repository;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final PictureService pictureService;
+    private final PasswordEncoder encoder;
+    private final AuthenticationManager authenticationManager;
+    private final Validator validator;
 
-    private PasswordEncoder encoder;
 
-    public UserService(UserRepository repository, PasswordEncoder encoder) {
+    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService, PictureService pictureService, PasswordEncoder encoder, AuthenticationManager authenticationManager, Validator validator) {
         this.repository = repository;
+        this.userDetailsService = userDetailsService;
+        this.pictureService = pictureService;
         this.encoder = encoder;
+        this.authenticationManager = authenticationManager;
+        this.validator = validator;
     }
 
 
-
-    public boolean isExist(String user_email){
-        if(repository.findByEmail(user_email).isPresent())
+    public boolean isExist(String user_email) {
+        if (repository.findByEmail(user_email).isPresent())
             return true;
         return false;
     }
 
-    public User addUser(UserDomain userDomain){
-        validation(userDomain);
-        if(repository.findByEmail(userDomain.getEmail()).isPresent())
-            throw new InvalidInputException(Message.EMAIL_DUPLICATED);
-        User user = toUser(userDomain);
+    public UserDomain addUser(String name, String email, String password) {
+        validation(name, email, password);
+        User user = new User(name, email, encoder.encode(password));
         repository.save(user);
-        return user;
+        return toUserDomain(user);
     }
 
-    public void validation(UserDomain userDomain){
-        if(userDomain.getName() == null || userDomain.getName().length() < 1)
-            throw new InvalidInputException(Message.NAME_NULL);
-        if(userDomain.getEmail() == null || userDomain.getEmail().length() < 5)
-            throw new InvalidInputException(Message.EMAIL_NULL);
-        if(!userDomain.getEmail().matches("^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$"))
-            throw new InvalidInputException(Message.EMAIL_INVALID);
-        if(userDomain.getPassword() == null || userDomain.getPassword().length() < 6)
-            throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
-        if (userDomain.getPassword().length() > 100)
-            throw new InvalidInputException(Message.PASSWORD_TOO_HIGH);
+    private void validation(String name, String email, String password) {
+        validator.validName(name);
+        validator.validPassword(password);
+        validator.validEmail(email);
     }
 
-    public List<User> getAll() {
-        ArrayList<User> users = new ArrayList<>();
-        repository.findAll().forEach(users::add);
+    public List<UserDomain> getAll() {
+        ArrayList<UserDomain> users = new ArrayList<>();
+        Lists.newArrayList(repository.findAll()).stream().map(user -> toUserDomain(user)).forEach(users::add);
         return users;
     }
 
-    public User toUser(UserDomain userDomain){
-        return new User(userDomain.getName(),userDomain.getEmail(),encoder.encode(userDomain.getPassword()));
-    }
-    public Optional<com.rahnemacollege.model.User> findById(int id) {
-        return repository.findById(id);
+
+    public void authenticate(String email, String password) throws InvalidInputException {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+        } catch (DisabledException e) {
+            //???
+        } catch (BadCredentialsException e) {
+            throw new InvalidInputException(Message.PASSWORD_INCORRECT);
+        }
     }
 
-    public User getByEmail(String email) {
+    //?
+    private Optional<User> getByEmail(String email) {
         return repository.getByEmail(email);
     }
 
+    //??
     public User addUser(User user) {
         repository.save(user);
         return user;
@@ -77,6 +91,40 @@ public class UserService {
 
     public Optional<User> findUserByEmail(String email) {
         return repository.findByEmail(email);
+    }
+
+    public UserDomain edit(String name, String email) throws InvalidInputException {
+        if (validator.isEmpty(email))
+            email = userDetailsService.getUser().getEmail();
+        else
+            validator.validEmail(email);
+        if (validator.isEmpty(name))
+            name = userDetailsService.getUser().getName();
+        User user = userDetailsService.getUser();
+        user.setName(name);
+        user.setEmail(email);
+        repository.save(user);
+        return toUserDomain(user);
+    }
+
+    public UserDomain toUserDomain(User user) {
+        UserDomain userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), user.getPicture());
+        return userDomain;
+    }
+
+
+    private String savePicture(MultipartFile picture) throws IOException {
+        int userId = userDetailsService.getUser().getId();
+        new File("./images/profile_images/" + userId + "/").mkdirs();
+        String fileName = userId + "_" + new Date().getTime() + ".jpg";
+        String pathName = "./images/auction_images/" + userId + "/" + fileName;
+        pictureService.save(picture, pathName);
+        return pathName;
+    }
+
+    //TODO
+    public void setPicture(MultipartFile picture) {
+
     }
 
 

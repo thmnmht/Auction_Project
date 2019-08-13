@@ -17,7 +17,8 @@ public class ResetRequest {
     private Date date;
     private String token;
 
-    public ResetRequest(){}
+    public ResetRequest() {
+    }
 
     public ResetRequest(User user, Date date, String token) {
         this.user = user;

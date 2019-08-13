@@ -3,26 +3,22 @@
  */
 package com.rahnemacollege;
 
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-
 import java.util.Date;
 
 
-@SpringBootApplication(exclude = {JacksonAutoConfiguration.class}, scanBasePackages={
+@SpringBootApplication(exclude = {JacksonAutoConfiguration.class}, scanBasePackages = {
         "com.rahnemacollege"})
 @EnableJpaRepositories("com.rahnemacollege.repository")
 public class App extends SpringBootServletInitializer {
 
-    public static String IMAGE_DIR;
-
-    public static void main(String[] args)
-    {
-        IMAGE_DIR = "opt/images/";
+    public static void main(String[] args) {
         System.err.println(new Date().getTime());
         SpringApplication.run(App.class, args);
     }

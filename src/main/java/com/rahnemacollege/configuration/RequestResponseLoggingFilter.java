@@ -18,7 +18,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
-@Order(value=1)
+@Order(value = 1)
 public class
 RequestResponseLoggingFilter implements Filter {
 
@@ -45,7 +45,7 @@ RequestResponseLoggingFilter implements Filter {
 
     @Bean
     public FilterRegistrationBean<RequestResponseLoggingFilter> loggingFilter() {
-        FilterRegistrationBean<RequestResponseLoggingFilter> registrationBean  = new FilterRegistrationBean<>();
+        FilterRegistrationBean<RequestResponseLoggingFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new RequestResponseLoggingFilter());
         registrationBean.addUrlPatterns("*");
         return registrationBean;

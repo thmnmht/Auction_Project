@@ -2,6 +2,7 @@ package com.rahnemacollege.model;
 
 import lombok.Data;
 import org.springframework.data.rest.core.annotation.RestResource;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -13,7 +14,7 @@ public class Picture {
 
 
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
     @Column(name = "filename")
@@ -27,12 +28,13 @@ public class Picture {
     private Auction auction;
 
 
-    public Picture(String fileName,Auction auction){
+    public Picture(String fileName, Auction auction) {
         this.fileName = fileName;
         date = new Date(new java.util.Date().getTime());
         this.auction = auction;
     }
 
-    public Picture(){}
+    public Picture() {
+    }
 
 }

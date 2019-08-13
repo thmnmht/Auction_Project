@@ -27,9 +27,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -40,16 +42,18 @@ public class AuctionService {
 
     private final AuctionRepository auctionRepository;
     private final CategoryRepository categoryRepository;
-    private final PictureRepository pictureRepository;
     private final UserDetailsServiceImpl userDetailsService;
+    private final PictureService pictureService;
+    private final Validator validator;
 
     @Autowired
     public AuctionService(AuctionRepository auctionRepository, CategoryRepository categoryRepository,
-                          PictureRepository pictureRepository, UserDetailsServiceImpl userDetailsService) {
+                          UserDetailsServiceImpl userDetailsService, PictureService pictureService, Validator validator) {
         this.auctionRepository = auctionRepository;
         this.categoryRepository = categoryRepository;
-        this.pictureRepository = pictureRepository;
         this.userDetailsService = userDetailsService;
+        this.pictureService = pictureService;
+        this.validator = validator;
     }
 
 
@@ -62,20 +66,13 @@ public class AuctionService {
         return toAuctionDomain(auction);
     }
 
-
     private void validation(AuctionDomain auctionDomain) {
-        if (auctionDomain.getTitle() == null || auctionDomain.getTitle().length() < 1)
-            throw new InvalidInputException(Message.TITLE_NULL);
-        if (auctionDomain.getBase_price() < 1)
-            throw new InvalidInputException(Message.BASE_PRICE_NULL);
-        if (auctionDomain.getDate() < 1)
-            throw new InvalidInputException(Message.DATE_NULL);
-        if (auctionDomain.getMax_number() < 2)
-            throw new InvalidInputException(Message.MAX_NUMBER_TOO_LOW);
-        if (auctionDomain.getMax_number() > 15)
-            throw new InvalidInputException(Message.MAX_NUMBER_TOO_HIGH);
+        validator.validTitle(auctionDomain.getTitle());
+        validator.validDescription(auctionDomain.getDescription());
+        validator.validDate(auctionDomain.getDate());
+        validator.validPrice(auctionDomain.getBase_price());
+        validator.validMaxNumber(auctionDomain.getMax_number());
     }
-
 
     private void savePictures(Auction auction, MultipartFile[] images) throws IOException {
         String path = "C:/ActionProjectImages/ActionImages/" + auction.getId() + "/";
@@ -84,100 +81,99 @@ public class AuctionService {
                 images) {
             String fileName = new Date().getTime() + ".jpg";
             String pathName = path + fileName;
-            Picture picture = new Picture(pathName, auction);
-            pictureRepository.save(picture);
-            File upl = new File(pathName);
-            upl.createNewFile();
-            FileOutputStream fout = new FileOutputStream(upl);
-            fout.write(image.getBytes());
-            fout.close();
-
+            pictureService.save(image, pathName, auction);
         }
     }
 
-
     public Auction toAuction(AuctionDomain auctionDomain) {
         Date date = new Date(auctionDomain.getDate());
-        if (auctionDomain.getDate() - new Date().getTime() < 1800000L)
-            throw new InvalidInputException(Message.DATE_INVALID);
-        Category category = categoryRepository.findById(auctionDomain.getCategory_id()).orElseThrow(
-                () -> new InvalidInputException(Message.CATEGORY_INVALID));
-        Auction auction = new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(),
-                auctionDomain.getBase_price(), category, date, userDetailsService.getUser(),
-                auctionDomain.getMax_number());
+        Category category = categoryRepository.findById(auctionDomain.getCategory_id()).orElseThrow(() -> new InvalidInputException(Message.CATEGORY_INVALID));
+        Auction auction = new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(), auctionDomain.getBase_price(), category, date, userDetailsService.getUser(), auctionDomain.getMax_number());
         return auction;
     }
 
-
     public AuctionDomain toAuctionDomain(Auction auction) {
         AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(), auction.getDescription(), auction.getBase_price(), auction.getDate().getTime(), auction.getCategory().getId(), auction.getMax_number());
-        auctionDomain.setState(auction.getState());
         auctionDomain.setId(auction.getId());
-        List<String> auctionPictures = Lists.newArrayList(pictureRepository.findAll()).stream().filter(picture ->
+        List<Link> auctionPictures = pictureService.getAll().stream().filter(picture ->
                 picture.getFileName().startsWith("C:/ActionProjectImages/ActionImages/" + auction.getId() + "/")).map(
                 Picture::getFileName
         ).collect(Collectors.toList());
-        System.out.println(auctionPictures);
         auctionDomain.setPictures(auctionPictures);
 
         return auctionDomain;
     }
 
-
     public List<Category> getCategory() {
-
         return Lists.newArrayList(categoryRepository.findAll());
 
     }
 
-
-    public List<AuctionDomain> filter(int category_id) {
-        List<AuctionDomain> auctions = this.getAll();
-        return auctions.stream().filter(a -> a.getCategory_id() == category_id).collect(Collectors.toList());
+    public Page<AuctionDomain> filter(int[] categories_id, int page, int size) {
+        List<AuctionDomain> auctions = new ArrayList<>();
+        for (int category_id : categories_id) {
+            auctions.addAll(getAll().stream().filter(c -> c.getCategory_id() == category_id).collect(Collectors.toList()));
+        }
+        return toPage(auctions, page, size);
     }
 
     public List<AuctionDomain> getAll() {
         return Lists.newArrayList(auctionRepository.findAll()).stream()
-                .map(auction -> toAuctionDomain(auction))
+                .map(this::toAuctionDomain)
                 .collect(Collectors.toList());
     }
 
     public AuctionDomain findById(int id) {
-        Auction auction = auctionRepository.findById(id).orElseThrow(() -> new NotFoundException(id, Auction.class));
+        Auction auction = auctionRepository.findById(id).orElseThrow( () ->  new InvalidInputException(Message.AUCTION_NOT_FOUND));
         return toAuctionDomain(auction);
     }
-
-
-    public List<AuctionDomain> findByTitle(String title) {
-        List<AuctionDomain> auctions = getAll();
-        auctions = auctions.stream()
-                .filter(a -> a.getTitle().startsWith(title))
-                .collect(Collectors.toList());
-        return auctions;
+    public Auction findAuctionById(int id){
+        return auctionRepository.findById(id).orElseThrow( () ->  new InvalidInputException(Message.AUCTION_NOT_FOUND));
     }
 
+    public Page<AuctionDomain> findByTitle(String title,int[] categories_id, int page, int size) {
+        List<AuctionDomain> auctions = new ArrayList<>();
+        if(categories_id == null || categories_id.length < 1)
+            auctions = getAll();
+        else
+        for (int category_id :
+                categories_id) {
+            List<AuctionDomain> tmp = getAll().stream().filter(c -> c.getCategory_id() == category_id).collect(Collectors.toList());
+            auctions.addAll(tmp);
+        }
+        auctions = auctions.stream()
+                .filter(a -> a.getTitle().toLowerCase().contains(title.toLowerCase()))
+                .collect(Collectors.toList());
+        return toPage(auctions, page, size);
+    }
 
-    public Page<AuctionDomain> getPage(int page, int size) {
-        Pageable firstPageWithTwoElements = PageRequest.of(page, size);
-        ArrayList<AuctionDomain> auctions = new ArrayList<>();
-        return auctionRepository.findAll(firstPageWithTwoElements).map(a -> toAuctionDomain(a));
+    public Page<AuctionDomain> getAllAuctions(int page, int size) {
+        return toPage(getAll(), page, size);
+    }
+
+    private Page<AuctionDomain> toPage(List<AuctionDomain> list, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        int start = (int) pageable.getOffset();
+        int end = (start + pageable.getPageSize()) > list.size() ? list.size() : (start + pageable.getPageSize());
+        Page<AuctionDomain> pages = new PageImpl(list.subList(start, end), pageable, list.size());
+        return pages;
     }
 
 
     //TODO : change exception handling!
+    //TODO : remove it!
     public Resource imageUpload(int id, String fileName) {
         String path = "./images/auction_images/" + id + "/" + fileName;
         Path filePath = Paths.get(path).toAbsolutePath().normalize();
+        Resource resource = null;
         try {
-            Resource resource = new UrlResource(filePath.toUri());
-            return resource;
-        } catch (IOException e) {
-
-            //its not good!!
-            System.out.println(e.getMessage());
+            resource = new UrlResource(filePath.toUri());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
-        return null;
+        return resource;
     }
+
 
     public Page<AuctionDomain> getHottest(PageRequest request) {
         return toAuctionDomainPage(auctionRepository.findHottest(request));
@@ -188,4 +184,5 @@ public class AuctionService {
         auctionPage.forEach(auction -> auctionDomainList.add(toAuctionDomain(auction)));
         return new PageImpl<>(auctionDomainList);
     }
+
 }

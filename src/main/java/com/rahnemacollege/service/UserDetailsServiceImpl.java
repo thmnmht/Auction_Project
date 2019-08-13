@@ -21,14 +21,15 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    @Autowired UserRepository userRepository;
+    @Autowired
+    UserRepository userRepository;
 
     @Getter
     private User user;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.getByEmail(email);
+        User user = userRepository.getByEmail(email).get();
         if (user == null)
             throw new UsernameNotFoundException("User not found with email: " + email);
         this.user = user;

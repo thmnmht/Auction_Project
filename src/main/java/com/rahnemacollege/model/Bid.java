@@ -20,10 +20,9 @@ public class Bid {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    @Min(value = 0,message = "Price could not be negative value.")
+    @Min(value = 0, message = "Price could not be negative value.")
     private int price;
     private Date date;
-
 
 
 }
