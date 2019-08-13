@@ -36,15 +36,15 @@ public class AuctionController {
     }
 
 
-    @RequestMapping(value = "/image/{id}/{picture_fileName}",  method = RequestMethod.GET,
-            produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<org.springframework.core.io.Resource> getImage(@PathVariable int id,@PathVariable String picture_fileName){
-        org.springframework.core.io.Resource resource = auctionService.imageUpload(id,picture_fileName);
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(resource);
-    }
+//    @RequestMapping(value = "/image/{id}/{picture_fileName}",  method = RequestMethod.GET,
+//            produces = MediaType.IMAGE_JPEG_VALUE)
+//    public ResponseEntity<org.springframework.core.io.Resource> getImage(@PathVariable int id,@PathVariable String picture_fileName){
+//        org.springframework.core.io.Resource resource = auctionService.imageUpload(id,picture_fileName);
+//        return ResponseEntity
+//                .ok()
+//                .contentType(MediaType.IMAGE_JPEG)
+//                .body(resource);
+//    }
 
 
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

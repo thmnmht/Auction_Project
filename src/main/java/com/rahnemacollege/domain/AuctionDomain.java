@@ -27,7 +27,7 @@ public class AuctionDomain {
     @JsonIgnore
     private int id;
 
-    private List<Link> pictures;
+    private List<String> pictures;
     private int state;
 
     public AuctionDomain(String title,
