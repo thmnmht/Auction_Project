@@ -20,6 +20,11 @@ public class RequestResponseLoggingFilter implements Filter {
     private final Log logger = LogFactory.getLog(getClass());
 
     @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        
+    }
+
+    @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
@@ -35,6 +40,11 @@ public class RequestResponseLoggingFilter implements Filter {
         chain.doFilter(request, response);
 
         logger.info("Logging Response:" + res.getContentType());
+    }
+
+    @Override
+    public void destroy() {
+
     }
 
 

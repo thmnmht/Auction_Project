@@ -36,18 +36,18 @@ public class HomePageController {
     }
 
 
-    @GetMapping("/search/{title}")
-    public PagedResources<Resource<AuctionDomain>> search(@PathVariable String title,
-                                                          @PathParam("category") int[] categories_id,
+    @PostMapping("/search/{category}")
+    public PagedResources<Resource<AuctionDomain>> search(@PathParam("title") String title,
+                                                          @PathVariable int category,
                                                           @RequestParam("page") int page,
                                                           @RequestParam("size") int size,
                                                           PagedResourcesAssembler<AuctionDomain> assembler) {
-        return assembler.toResource(auctionService.findByTitle(title, categories_id, page, size));
+        return assembler.toResource(auctionService.findByTitle(title, category, page, size));
     }
 
     @GetMapping("/filter")
-    public Resources<Resource<AuctionDomain>> filter(@PathParam("category") int[] categories_id, @RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler) {
-        return assembler.toResource(auctionService.filter(categories_id, page, size));
+    public Resources<Resource<AuctionDomain>> filter(@PathParam("category") int category_id, @RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler) {
+        return assembler.toResource(auctionService.filter(category_id, page, size));
     }
 
     @GetMapping("/all")
