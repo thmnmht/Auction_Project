@@ -61,14 +61,14 @@ public class AuctionController {
         log(" call add an auction");
         String appUrl = request.getScheme() + "://" + request.getServerName();
         AuctionDomain auctionDomain = new AuctionDomain(title, description, base_price, date, category_id, max_number);
-        return assembler.toResource(auctionService.addAuction(auctionDomain, images,appUrl),request);
+        return assembler.toResource(auctionService.addAuction(auctionDomain, images,appUrl));
     }
 
     @GetMapping("/find/{id}")
     public Resource<AuctionDomain> one(@PathVariable int id, HttpServletRequest request) {
         log(" try to find an auction");
         String appUrl = request.getScheme() + "://" + request.getServerName();
-        return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id),appUrl),request);
+        return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id),appUrl));
     }
 
     @RequestMapping(value = "/addBookmark", method = RequestMethod.POST)
@@ -80,7 +80,7 @@ public class AuctionController {
             if (auctionService.findById(id)!= null){
                 user.getBookmarks().add(auctionService.findById(id));
                 userService.addUser(user);
-                return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id),appUrl),request);
+                return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id),appUrl));
             }
             throw new InvalidInputException(Message.REALLY_BAD_SITUATION);
         }
@@ -93,7 +93,7 @@ public class AuctionController {
     public Resources<Resource<AuctionDomain>> all(HttpServletRequest request) {
         log(" try to get all auctions");
         String appUrl = request.getScheme() + "://" + request.getServerName();
-        return assembler.toResourcesAuc(auctionService.getAll(appUrl),request);
+        return assembler.toResourcesAuc(auctionService.getAll(appUrl));
     }
 
 

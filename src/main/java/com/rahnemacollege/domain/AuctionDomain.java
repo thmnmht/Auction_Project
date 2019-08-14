@@ -19,6 +19,7 @@ public class AuctionDomain {
     private int category_id;
     private int max_number = -1;
     private boolean isMine = false;
+    private boolean isBookMark = false;
     private int id;
 
     private List<String> pictures;

@@ -7,11 +7,9 @@ import lombok.Data;
 public class SimpleUserDomain {
     private String name;
     private String email;
-    private int id;
 
-    public SimpleUserDomain(String name,String email,int id){
+    public SimpleUserDomain(String name,String email){
         this.name = name;
         this.email = email;
-        this.id = id;
     }
 }

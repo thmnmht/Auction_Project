@@ -41,13 +41,15 @@ header "auth" : "Bearer 'Token'"
 ************************************************************************************************************************
 
 -/users/login : login  POST
+    {
         email : String
         password : String
+    }
 
 ************************************************************************************************************************
 
 -/users/signup  POST : sign up
-        UserDomain : {
+        {
             name,
             email,
             password
@@ -66,7 +68,27 @@ header "auth" : "Bearer 'Token'"
 ************************************************************************************************************************
 
 -/users/edit  POST : edit name and email
-              name : String     email : String
+              {
+                name,
+                email
+              }
+
+************************************************************************************************************************
+
+-/users/edit/picture  POST : set a picture for user
+             @RequestPart MultipartFile picture
+
+
+************************************************************************************************************************
+
+-/users/edit/password  POST : change password
+             @RequestParam("oPassword") String oPassword
+             @RequestParam("nPassword") String nPassword
+
+              out : Resource<{name,email}>
+                 441 if (nPassword | oPassword).length < 6
+                 442 if (nPassword | oPassword).length > 100
+                 499 if token expired or authentication failed (login required).
 
 ************************************************************************************************************************
 
@@ -120,15 +142,6 @@ header "auth" : "Bearer 'Token'"
     449 if token not found
     450 if request hasn't been recorded
 
-
--users/edit_password POST:
-    @Param ("oPassword") oldPasswordString
-    @Param ("nPassword") newPasswordString
-
-    out : Resource<UserDomain>
-    441 if (nPassword | oPassword).length < 6
-    442 if (nPassword | oPassword).length > 100
-    499 if token expired or authentication failed (login required).
 ************************************************************************************************************************
 
 -auctions/addBookmark POST:

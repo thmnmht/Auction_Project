@@ -9,6 +9,9 @@ import com.rahnemacollege.repository.UserRepository;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
+import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -37,6 +40,7 @@ public class UserService {
     private final Validator validator;
     private final TokenUtil tokenUtil;
     private final String VALID_EMAIL_REGEX = "^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$";
+    private final Logger logger;
 
 
     @Value("${server_ip}")
@@ -51,6 +55,7 @@ public class UserService {
         this.authenticationManager = authenticationManager;
         this.validator = validator;
         this.tokenUtil = tokenUtil;
+        logger = LoggerFactory.getLogger(UserService.class);
     }
 
 
@@ -63,7 +68,7 @@ public class UserService {
     public SimpleUserDomain addUser(String name, String email, String password) {
         if (!email.matches(VALID_EMAIL_REGEX))
             throw new InvalidInputException(Message.EMAIL_INVALID);
-        if(repository.findByEmail(email).isPresent())
+        if(isExist(email))
             throw new InvalidInputException(Message.EMAIL_DUPLICATED);
         if(password.length() < 6)
             throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
@@ -71,15 +76,7 @@ public class UserService {
             throw new InvalidInputException(Message.PASSWORD_TOO_HIGH);
         User user = new User(name, email, encoder.encode(password));
         repository.save(user);
-        return new SimpleUserDomain(name,email,user.getId());
-    }
-
-
-
-    private void validation(String name, String email, String password) {
-        validator.validName(name);
-        validator.validPassword(password);
-        validator.validEmail(email);
+        return new SimpleUserDomain(name,email);
     }
 
     public List<UserDomain> getAll() {
@@ -88,17 +85,15 @@ public class UserService {
         return users;
     }
 
-
     public void authenticate(String email, String password) throws InvalidInputException {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
         } catch (DisabledException e) {
-            //???
+            logger.error(e.getMessage());
         } catch (BadCredentialsException e) {
             throw new InvalidInputException(Message.PASSWORD_INCORRECT);
         }
     }
-
 
     //??
     public User addUser(User user) {
@@ -106,16 +101,16 @@ public class UserService {
         return user;
     }
 
+    //?
     public Optional<User> findUserByEmail(String email) {
         return repository.findByEmail(email);
     }
 
-
-    public UserDomain changePassword(User user, String newPassword) {
+    public SimpleUserDomain changePassword(User user, String newPassword) {
         if (userDetailsService.getUser().equals(user)) {
             user.setPassword(encoder.encode(newPassword));
             repository.save(user);
-            return new UserDomain(user.getName(), user.getEmail(), user.getId(), user.getPicture());
+            return new SimpleUserDomain(user.getName(),user.getEmail());
         } else {
             throw new InvalidInputException(Message.FORBIDDEN_REQUEST);
         }
@@ -157,17 +152,17 @@ public class UserService {
         return pathName.substring(8);
     }
 
-    public void setPicture(MultipartFile picture) {
+    public SimpleUserDomain setPicture(MultipartFile picture) {
         if(picture == null)
-            return;
+            throw new InvalidInputException(Message.PICTURE_NULL);
+        User user = userDetailsService.getUser();
         try {
-            User user = userDetailsService.getUser();
             user.setPicture(savePicture(picture));
             repository.save(user);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
-
+        return new SimpleUserDomain(user.getName(),user.getEmail());
     }
 
 
