@@ -1,7 +1,11 @@
 package com.rahnemacollege.domain;
 
-
 import lombok.Data;
+
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
+import java.util.Date;
 import java.util.List;
 
 
@@ -32,5 +36,7 @@ public class AuctionDomain {
         this.category_id = category_id;
         this.max_number = max_number;
     }
+
+
 
 }

@@ -13,7 +13,6 @@ import com.rahnemacollege.util.exceptions.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -41,10 +40,11 @@ public class UserController {
     private final EmailService emailService;
     private final TokenUtil tokenUtil;
     private final Logger log;
+    private final Validator validator;
 
 
     public UserController(UserService userService, ResourceAssembler assembler, PasswordService passwordService,
-                          UserDetailsServiceImpl userDetailService, UserDetailsServiceImpl detailsService, ResetRequestService requestService, EmailService emailService, TokenUtil tokenUtil) {
+                          UserDetailsServiceImpl userDetailService, UserDetailsServiceImpl detailsService, ResetRequestService requestService, EmailService emailService, TokenUtil tokenUtil, Validator validator) {
         this.userService = userService;
         this.assembler = assembler;
         this.passwordService = passwordService;
@@ -54,6 +54,7 @@ public class UserController {
         this.emailService = emailService;
         this.tokenUtil = tokenUtil;
         log = LoggerFactory.getLogger(AuctionController.class);
+        this.validator = validator;
     }
 
 
@@ -77,16 +78,13 @@ public class UserController {
         return new AuthenticationResponse(tokenUtil.generateToken(userDetails));
     }
 
-    @RequestMapping(value = "/editpassword", method = RequestMethod.POST)
-    public Resource<UserDomain> setNewPassword(@RequestParam("validPassword") String password, HttpServletRequest request) {
-        log.info(detailsService.getUser().getName() + " with id " + detailsService.getUser().getId() + " try to edit pass");
-        String appUrl = request.getScheme() + "://" + request.getServerName();
+    @RequestMapping(value = "/edit_password", method = RequestMethod.POST)
+    public Resource<UserDomain> setNewPassword(@RequestParam("oPassword") String oPassword, @RequestParam("nPassword") String nPassword) {
         User user = detailsService.getUser();
-        if (password != null && password.length() > 5 && password.length() < 100) {
-            user.setPassword(passwordService.getPasswordEncoder().encode(password));
-            UserDomain userDomain = userService.addUser(user.getName(), user.getEmail(), user.getPassword(), appUrl);
-
-            return assembler.toResource(userDomain, request);
+        validator.validPassword(nPassword);
+        validator.validPassword(oPassword);
+        if (passwordService.getPasswordEncoder().encode(oPassword).equals(user.getPassword())) {
+            return assembler.toResource(userService.changePassword(user, nPassword));
         }
         throw new InvalidInputException(Message.PASSWORD_INCORRECT);
     }
@@ -155,7 +153,6 @@ public class UserController {
     @RequestMapping(value = "/reset", method = RequestMethod.GET)
     public Resource<UserDomain> displayResetPasswordPage(@PathParam("token") String token, HttpServletRequest r) {
         String appUrl2 = r.getScheme() + "://" + r.getServerName();
-
         Optional<ResetRequest> request = requestService.findByToken(token);
         if (request.isPresent()) {
 //            todo: redirect to validPassword reset page
@@ -169,23 +166,16 @@ public class UserController {
 
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
     public Resource<UserDomain> setNewPassword(@RequestParam Map<String, String> requestParams, HttpServletRequest r) {
-        String appUrl = r.getScheme() + "://" + r.getServerName();
-
+        String appUrl2 = r.getScheme() + "://" + r.getServerName();
         ResetRequest request = requestService.findByToken(requestParams.get("token")).orElseThrow(() -> new InvalidInputException(Message.TOKEN_NOT_FOUND));
         User resetUser = request.getUser();
-
         if (resetUser != null) {
-
             resetUser.setPassword(passwordService.getPasswordEncoder().encode(requestParams.get("validPassword")));
             requestService.removeRequest(request);
-
             userService.addUser(resetUser);
             System.err.println("successMessage: You have successfully reset your validPassword.  You may now login.");
-
             //TODO : redirect:login
-
-            return assembler.toResource(userService.toUserDomain(resetUser, appUrl), r);
-
+            return assembler.toResource(userService.toUserDomain(resetUser,appUrl2),r);
         } else {
             System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");
             throw new InvalidInputException(Message.NOT_RECORDED_REQUEST);

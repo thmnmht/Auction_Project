@@ -2,7 +2,12 @@ package com.rahnemacollege.model;
 
 import lombok.Data;
 import org.springframework.data.rest.core.annotation.RestResource;
+
 import javax.persistence.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Date;
 
 
@@ -10,6 +15,7 @@ import java.util.Date;
 @Entity
 @Table(name = "auctions")
 public class Auction {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

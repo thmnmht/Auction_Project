@@ -24,5 +24,11 @@ public class UserDomain{
         this.picture = picture;
     }
 
+    public UserDomain() {
+    }
 
+    public UserDomain(String name, String email) {
+        this.name = name;
+        this.email = email;
+    }
 }

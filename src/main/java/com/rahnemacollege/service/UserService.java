@@ -61,6 +61,8 @@ public class UserService {
         return toUserDomain(user,url);
     }
 
+
+
     private void validation(String name, String email, String password) {
         validator.validName(name);
         validator.validPassword(password);
@@ -93,6 +95,17 @@ public class UserService {
 
     public Optional<User> findUserByEmail(String email) {
         return repository.findByEmail(email);
+    }
+
+
+    public UserDomain changePassword(User user, String newPassword) {
+        if (userDetailsService.getUser().equals(user)) {
+            user.setPassword(encoder.encode(newPassword));
+            repository.save(user);
+            return new UserDomain(user.getName(), user.getEmail(), user.getId(), user.getPicture());
+        } else {
+            throw new InvalidInputException(Message.FORBIDDEN_REQUEST);
+        }
     }
 
     public User edit(String name, String email) throws InvalidInputException {

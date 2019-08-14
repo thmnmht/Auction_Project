@@ -102,7 +102,11 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
             case REALLY_BAD_SITUATION:
                 response.setStatus(456);
                 break;
+            case FORBIDDEN_REQUEST:
+                response.setStatus(499);
+                break;
         }
+
         logger.error(ex.getMessageStatus().toString());
     }
 

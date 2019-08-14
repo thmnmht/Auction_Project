@@ -102,7 +102,6 @@ public class AuctionController {
         log.info(userDetailsService.getUser().getName() + " with id " + userDetailsService.getUser().getId() + action);
     }
 
-
 }
 
 

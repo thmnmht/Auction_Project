@@ -5,15 +5,12 @@ import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Picture;
 import com.rahnemacollege.repository.PictureRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.NetworkInterface;
-import java.util.Enumeration;
 import java.util.List;
 
 

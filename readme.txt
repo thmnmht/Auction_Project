@@ -121,11 +121,14 @@ header "auth" : "Bearer 'Token'"
     450 if request hasn't been recorded
 
 
--users/reset POST:
-    @Param ("password") String
+-users/edit_password POST:
+    @Param ("oPassword") oldPasswordString
+    @Param ("nPassword") newPasswordString
 
     out : Resource<UserDomain>
-    445 if password = null | !(5<password.length<100)
+    441 if (nPassword | oPassword).length < 6
+    442 if (nPassword | oPassword).length > 100
+    499 if token expired or authentication failed (login required).
 ************************************************************************************************************************
 
 -auctions/addBookmark POST:
