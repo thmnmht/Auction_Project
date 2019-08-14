@@ -25,17 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Collectors;
-
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Service
 public class AuctionService {
@@ -116,7 +108,7 @@ public class AuctionService {
     }
 
     public List<AuctionDomain> getAll(String url) {
-        return Lists.newArrayList(auctionRepository.findAll()).stream()
+        return Lists.newArrayList(auctionRepository.findAll()).stream().filter(auction -> auction.getState() == 0)
                 .map(a -> toAuctionDomain(a,url))
                 .collect(Collectors.toList());
     }

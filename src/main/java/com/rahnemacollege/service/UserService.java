@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -122,13 +123,12 @@ public class UserService {
     private String savePicture(MultipartFile picture) throws IOException {
         int userId = userDetailsService.getUser().getId();
         new File("./images/profile_images/" + userId + "/").mkdirs();
-        String fileName = userId + ".jpg";
+        String fileName = new Date().getTime() + ".jpg";
         String pathName = "./images/profile_images/" + userId + "/" + fileName;
         pictureService.save(picture, pathName);
         return pathName.substring(8);
     }
 
-    //TODO
     public void setPicture(MultipartFile picture) {
         if(picture == null)
             return;

@@ -23,12 +23,6 @@ public class PictureService {
     @Autowired
     private PictureRepository repository;
 
-//    @Value("${server.address}")
-//    private String serverAddress;
-
-//    @Value("${server.port}")
-//    private String serverPort;
-
     public void save(MultipartFile pic, String path, Auction auction) throws IOException {
         String file_name = path.substring(8);
         file_name = file_name;

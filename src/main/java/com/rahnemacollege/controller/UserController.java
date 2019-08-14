@@ -1,6 +1,5 @@
 package com.rahnemacollege.controller;
 
-import com.google.gson.Gson;
 import com.rahnemacollege.domain.AuthenticationRequest;
 import com.rahnemacollege.domain.AuthenticationResponse;
 import com.rahnemacollege.domain.UserDomain;
@@ -11,7 +10,8 @@ import com.rahnemacollege.util.ResourceAssembler;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
-import org.apache.tomcat.util.http.parser.HttpParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
@@ -40,7 +40,7 @@ public class UserController {
     private final ResetRequestService requestService;
     private final EmailService emailService;
     private final TokenUtil tokenUtil;
-
+    private final Logger log;
 
 
     public UserController(UserService userService, ResourceAssembler assembler, PasswordService passwordService,
@@ -53,6 +53,7 @@ public class UserController {
         this.requestService = requestService;
         this.emailService = emailService;
         this.tokenUtil = tokenUtil;
+        log = LoggerFactory.getLogger(AuctionController.class);
     }
 
 
@@ -60,61 +61,60 @@ public class UserController {
     public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws InvalidInputException {
         if (!userService.isExist(authenticationRequest.getEmail()))
             throw new InvalidInputException(Message.EMAIL_NOT_FOUND);
-        return userService.auth(authenticationRequest.getEmail(),authenticationRequest.getPassword());
+        log.info(authenticationRequest.getEmail() + " wants to login *_*");
+        return userService.auth(authenticationRequest.getEmail(), authenticationRequest.getPassword());
 
     }
 
     @PostMapping("/edit")
-    public AuthenticationResponse edit(String name, String email,@PathParam("picture") MultipartFile picture) {
+    public AuthenticationResponse edit(String name, String email, @PathParam("picture") MultipartFile picture) {
+        log.info(detailsService.getUser().getName() + " with id " + detailsService.getUser().getId() + " try to edit his name or email");
+        email = email.toLowerCase();
         userService.setPicture(picture);
         User user = userService.edit(name, email);
+        log.info(user.getName() + " changed his/her infos :)");
         final UserDetails userDetails = detailsService.loadUserByUsername(user.getEmail());
         return new AuthenticationResponse(tokenUtil.generateToken(userDetails));
     }
 
     @RequestMapping(value = "/editpassword", method = RequestMethod.POST)
-    public Resource<UserDomain> setNewPassword(@RequestParam("validPassword") String password,HttpServletRequest request) {
+    public Resource<UserDomain> setNewPassword(@RequestParam("validPassword") String password, HttpServletRequest request) {
+        log.info(detailsService.getUser().getName() + " with id " + detailsService.getUser().getId() + " try to edit pass");
         String appUrl = request.getScheme() + "://" + request.getServerName();
         User user = detailsService.getUser();
         if (password != null && password.length() > 5 && password.length() < 100) {
             user.setPassword(passwordService.getPasswordEncoder().encode(password));
-            UserDomain userDomain = userService.addUser(user.getName(), user.getEmail(), user.getPassword(),appUrl);
+            UserDomain userDomain = userService.addUser(user.getName(), user.getEmail(), user.getPassword(), appUrl);
 
-            return assembler.toResource(userDomain);
+            return assembler.toResource(userDomain, request);
         }
         throw new InvalidInputException(Message.PASSWORD_INCORRECT);
     }
 
 
-
     @PostMapping("/signup")
-    public Resource<UserDomain> add(@PathParam("name") String name, @PathParam("emil") String email, @PathParam("validPassword") String password,HttpServletRequest request) {
-        System.out.println(name);
+    public Resource<UserDomain> add(@PathParam("name") String name, @PathParam("emil") String email, @PathParam("validPassword") String password, HttpServletRequest request) {
+        log.info("someone try to sign up ._.");
+        email = email.toLowerCase();
         String appUrl = request.getScheme() + "://" + request.getServerName();
-        UserDomain user = userService.addUser(name, email, password,appUrl);
-        return assembler.toResource(user);
-    }
-
-
-    //TODO : remove it! it's just for test
-    @GetMapping("/all")
-    public Resources<Resource<UserDomain>> all(HttpServletRequest request) {
-        String appUrl = request.getScheme() + "://" + request.getServerName();
-        return assembler.toResourcesUser(userService.getAll(appUrl));
+        UserDomain user = userService.addUser(name, email, password, appUrl);
+        log.info(user.getName() + " added to DB :)");
+        return assembler.toResource(user, request);
     }
 
     @GetMapping("/me")
     public ResponseEntity<UserDomain> one(HttpServletRequest request) {
+        log.info(detailsService.getUser().getName() + " with id " + detailsService.getUser().getId() + " try to get him/her infos");
         String appUrl = request.getScheme() + "://" + request.getServerName();
-        UserDomain user = userService.toUserDomain(detailsService.getUser(),appUrl);
+        UserDomain user = userService.toUserDomain(detailsService.getUser(), appUrl);
         System.out.println(user.getEmail());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
 
-
     @RequestMapping(value = "/forgot", method = RequestMethod.POST)
-    public Resource<UserDomain> processForgotPasswordForm(@RequestParam("email") String userEmail, HttpServletRequest  request) {
+    public Resource<UserDomain> processForgotPasswordForm(@RequestParam("email") String userEmail, HttpServletRequest request) {
+        userEmail = userEmail.toLowerCase();
         String appUrl2 = request.getScheme() + "://" + request.getServerName();
         System.out.println(userEmail);
         Optional<User> optional = userService.findUserByEmail(userEmail);
@@ -147,7 +147,7 @@ public class UserController {
             }
             System.err.println("successMessage" + " A validPassword reset link has been sent to " + userEmail + " @" +
                     new Date());
-            return assembler.toResource(userService.toUserDomain(optional.get(),appUrl2));
+            return assembler.toResource(userService.toUserDomain(optional.get(), appUrl2), request);
         }
     }
 
@@ -160,7 +160,7 @@ public class UserController {
         if (request.isPresent()) {
 //            todo: redirect to validPassword reset page
             System.err.println("redirecting to pass reset screen");
-            return assembler.toResource(userService.toUserDomain(request.get().getUser(),appUrl2));
+            return assembler.toResource(userService.toUserDomain(request.get().getUser(), appUrl2), r);
         } else {
             System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");
             throw new InvalidInputException(Message.INVALID_RESET_LINK);
@@ -168,7 +168,7 @@ public class UserController {
     }
 
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
-    public Resource<UserDomain> setNewPassword(@RequestParam Map<String, String> requestParams,HttpServletRequest r) {
+    public Resource<UserDomain> setNewPassword(@RequestParam Map<String, String> requestParams, HttpServletRequest r) {
         String appUrl = r.getScheme() + "://" + r.getServerName();
 
         ResetRequest request = requestService.findByToken(requestParams.get("token")).orElseThrow(() -> new InvalidInputException(Message.TOKEN_NOT_FOUND));
@@ -184,7 +184,7 @@ public class UserController {
 
             //TODO : redirect:login
 
-            return assembler.toResource(userService.toUserDomain(resetUser,appUrl));
+            return assembler.toResource(userService.toUserDomain(resetUser, appUrl), r);
 
         } else {
             System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");
