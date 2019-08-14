@@ -27,9 +27,8 @@ public class UserDomain{
     public UserDomain() {
     }
 
-    public UserDomain(String name, String email, String password) {
+    public UserDomain(String name, String email) {
         this.name = name;
         this.email = email;
-        this.password = password;
     }
 }

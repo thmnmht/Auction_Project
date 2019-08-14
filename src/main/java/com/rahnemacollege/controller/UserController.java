@@ -6,7 +6,6 @@ import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.ResetRequest;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.*;
-import com.rahnemacollege.service.UserDetailsServiceImpl;
 import com.rahnemacollege.util.ResourceAssembler;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
@@ -15,8 +14,8 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.websocket.server.PathParam;
@@ -59,11 +58,9 @@ public class UserController {
     @PostMapping("/login")
     public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws InvalidInputException {
         if (!userService.isExist(authenticationRequest.getEmail()))
-            throw new InvalidInputException(Message.EMAIL_INCORRECT);
-        userService.authenticate(authenticationRequest.getEmail(), authenticationRequest.getPassword());
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
-        final String token = tokenUtil.generateToken(userDetails);
-        return new AuthenticationResponse(token);
+            throw new InvalidInputException(Message.EMAIL_NOT_FOUND);
+        return userService.auth(authenticationRequest.getEmail(), authenticationRequest.getPassword());
+
     }
 
 
@@ -80,12 +77,13 @@ public class UserController {
 
 
     @PostMapping("/signup")
-    public Resource<User> add(@RequestBody UserDomain userDomain) {
-        System.out.println("salm");
-        User user = userService.addUser(userDomain);
-        System.out.println("hale");
+    public Resource<UserDomain> add(@PathParam("name") String name, @PathParam("emil") String email, @PathParam("validPassword") String password, HttpServletRequest request) {
+        System.out.println(name);
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        UserDomain user = userService.addUser(name, email, password, appUrl);
         return assembler.toResource(user);
     }
+
 
     @GetMapping("/all")
     public Resources<Resource<UserDomain>> all() {

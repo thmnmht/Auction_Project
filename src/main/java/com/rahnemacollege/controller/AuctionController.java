@@ -4,8 +4,13 @@ package com.rahnemacollege.controller;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
+import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.AuctionService;
+import com.rahnemacollege.service.UserDetailsServiceImpl;
+import com.rahnemacollege.service.UserService;
 import com.rahnemacollege.util.ResourceAssembler;
+import com.rahnemacollege.util.exceptions.InvalidInputException;
+import com.rahnemacollege.util.exceptions.Message;
 import com.rahnemacollege.util.exceptions.NotFoundException;
 import org.checkerframework.checker.formatter.FormatUtil;
 import org.springframework.hateoas.Resource;
@@ -13,68 +18,75 @@ import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.websocket.server.PathParam;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
 @RestController
 @RequestMapping("/auctions")
-public class AuctionController {
-
-    private final AuctionService auctionService;
+public class AuctionController { private final AuctionService auctionService;
     private final ResourceAssembler assembler;
+    private UserDetailsServiceImpl userDetailsService;
+    private final UserService userService;
 
-    public AuctionController(AuctionService auctionService, ResourceAssembler assembler) {
+
+    public AuctionController(AuctionService auctionService, ResourceAssembler assembler, UserDetailsServiceImpl userDetailsService, UserService userService) {
         this.auctionService = auctionService;
         this.assembler = assembler;
+        this.userDetailsService = userDetailsService;
+        this.userService = userService;
     }
 
     @GetMapping("/category")
-    public List<Category> getCategory(){
+    public List<Category> getCategory() {
         return auctionService.getCategory();
     }
 
-
-    //no date!!!
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Resource<Auction> add(@RequestPart String title,
-                                 String description,
-                                 int base_price,
-                                 long date,
-            int category_id,int max_number, @RequestPart MultipartFile[] images) throws IOException {
-        AuctionDomain auctionDomain = new AuctionDomain(title,description,base_price,new Date(date),category_id,max_number);
-        return assembler.toResource(auctionService.addAuction(auctionDomain,images));
-    }
-
-    @GetMapping("/greeting")
-    public String greeting() {
-        return "hello world :)";
+    public Resource<AuctionDomain> add(@PathParam("title") String title,
+                                       @PathParam("description") String description,
+                                       @PathParam("base_price") int base_price,
+                                       @PathParam("date") long date,
+                                       @PathParam("category_id") int category_id,
+                                       @PathParam("max_number") int max_number,
+                                       @RequestPart MultipartFile[] images,
+                                       HttpServletRequest request) throws IOException {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        AuctionDomain auctionDomain = new AuctionDomain(title, description, base_price, date, category_id, max_number);
+        return assembler.toResource(auctionService.addAuction(auctionDomain, images,appUrl));
     }
 
     @GetMapping("/find/{id}")
-    public Resource<Auction> one(@PathVariable int id) {
-        Auction auction = auctionService.findById(id).orElseThrow(() -> new IllegalArgumentException(id+ " was not found!"));
-        return assembler.toResource(auction);
+    public Resource<AuctionDomain> one(@PathVariable int id, HttpServletRequest request) {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id),appUrl));
     }
 
-    @GetMapping("/image/{id}")
-    public void showPic(){}
+    @RequestMapping(value = "/addBookmark", method = RequestMethod.POST)
+    public Resource<AuctionDomain> addBookmark(@RequestParam("auctionId") Integer id,HttpServletRequest request) {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        User user = userDetailsService.getUser();
+        if (id != null) {
+            if (auctionService.findById(id)!= null){
+                user.getBookmarks().add(auctionService.findById(id));
+                userService.addUser(user);
+                return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id),appUrl));
+            }
+            throw new InvalidInputException(Message.REALLY_BAD_SITUATION);
+        }
+        throw new InvalidInputException(Message.INVALID_ID);
+    }
+
 
     @GetMapping("/all")
-    public Resources<Resource<Auction>> all() {
-        return assembler.toResourcesAuc(auctionService.getAll());
+    public Resources<Resource<AuctionDomain>> all(HttpServletRequest request) {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        return assembler.toResourcesAuc(auctionService.getAll(appUrl));
     }
 
-    @GetMapping("/search/{title}")
-    public Resources<Resource<Auction>> search(@PathVariable String title){
-        List<Auction> auctions = auctionService.findByTitle(title);
-        return assembler.toResourcesAuc(auctions);
-    }
-
-    @GetMapping("/filter/{category_id}")
-    public Resources<Resource<Auction>> filter(@PathVariable int category_id){
-        return assembler.toResourcesAuc(auctionService.filter(category_id));
-    }
 }
 
 
