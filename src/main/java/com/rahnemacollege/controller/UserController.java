@@ -106,7 +106,6 @@ public class UserController {
     public ResponseEntity<UserDomain> one(HttpServletRequest request) {
         log.info(detailsService.getUser().getName() + " with id " + detailsService.getUser().getId() + " try to get him/her infos");
         UserDomain user = userService.toUserDomain(detailsService.getUser());
-        System.out.println(user.getEmail());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 

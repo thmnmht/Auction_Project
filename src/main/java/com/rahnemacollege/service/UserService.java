@@ -143,7 +143,7 @@ public class UserService {
     }
 
     public UserDomain toUserDomain(User user) {
-        UserDomain userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), user.getPicture());
+        UserDomain userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), "http://" + ip + user.getPicture());
         return userDomain;
     }
 
@@ -162,7 +162,7 @@ public class UserService {
             return;
         try {
             User user = userDetailsService.getUser();
-            user.setPicture("http://" + ip + savePicture(picture));
+            user.setPicture(savePicture(picture));
             repository.save(user);
         } catch (IOException e) {
             e.printStackTrace();
