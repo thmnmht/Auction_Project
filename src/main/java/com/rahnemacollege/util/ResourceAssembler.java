@@ -19,28 +19,26 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 public class ResourceAssembler {
 
     public Resource<UserDomain> toResource(UserDomain user) {
-        return new Resource<>(user,
-                linkTo(methodOn(UserController.class).one()).withSelfRel(),
-                linkTo(methodOn(UserController.class).all()).withRel("all"));
+        return null;
     }
 
     public Resources<Resource<UserDomain>> toResourcesUser(List<UserDomain> users) {
         return new Resources<>(users.stream()
                 .map(this::toResource)
-                .collect(Collectors.toList()), linkTo(methodOn(UserController.class).all()).withSelfRel());
+                .collect(Collectors.toList()));
     }
 
     public Resources<Resource<AuctionDomain>> toResourcesAuc(List<AuctionDomain> auctions) {
         return new Resources<>(auctions.stream()
                 .map(this::toResource)
-                .collect(Collectors.toList()), linkTo(methodOn(AuctionController.class).all()).withSelfRel());
+                .collect(Collectors.toList()));
     }
 
 
     public Resource<AuctionDomain> toResource(AuctionDomain auction) {
         List<Link> links = new ArrayList<>();
-        links.add(linkTo(methodOn(AuctionController.class).all()).withRel("all"));
-        links.add(linkTo(methodOn(AuctionController.class).one(auction.getId())).withRel("self"));
+//        links.add(linkTo(methodOn(AuctionController.class).all()).withRel("all"));
+//        links.add(linkTo(methodOn(AuctionController.class).one(auction.getId())).withRel("self"));
         return new Resource<>(auction, links);
     }
 

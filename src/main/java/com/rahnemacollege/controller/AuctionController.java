@@ -13,7 +13,6 @@ import com.rahnemacollege.util.exceptions.Message;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,19 +43,6 @@ public class AuctionController {
         return auctionService.getCategory();
     }
 
-
-    //TODO : remove it :(
-    @RequestMapping(value = "/image/{id}/{picture_fileName}", method = RequestMethod.GET,
-            produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<org.springframework.core.io.Resource> getImage(@PathVariable int id, @PathVariable String picture_fileName) {
-        org.springframework.core.io.Resource resource = auctionService.imageUpload(id, picture_fileName);
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(resource);
-    }
-
-
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Resource<AuctionDomain> add(@PathParam("title") String title,
                                        @PathParam("description") String description,
@@ -72,18 +58,20 @@ public class AuctionController {
     }
 
     @GetMapping("/find/{id}")
-    public Resource<AuctionDomain> one(@PathVariable int id) {
-        return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id)));
+    public Resource<AuctionDomain> one(@PathVariable int id, HttpServletRequest request) {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id),appUrl));
     }
 
     @RequestMapping(value = "/addBookmark", method = RequestMethod.POST)
-    public Resource<AuctionDomain> addBookmark(@RequestParam("auctionId") Integer id) {
+    public Resource<AuctionDomain> addBookmark(@RequestParam("auctionId") Integer id,HttpServletRequest request) {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
         User user = userDetailsService.getUser();
         if (id != null) {
             if (auctionService.findById(id)!= null){
                 user.getBookmarks().add(auctionService.findById(id));
                 userService.addUser(user);
-                return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id)));
+                return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id),appUrl));
             }
             throw new InvalidInputException(Message.REALLY_BAD_SITUATION);
         }
@@ -92,8 +80,9 @@ public class AuctionController {
 
 
     @GetMapping("/all")
-    public Resources<Resource<AuctionDomain>> all() {
-        return assembler.toResourcesAuc(auctionService.getAll());
+    public Resources<Resource<AuctionDomain>> all(HttpServletRequest request) {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        return assembler.toResourcesAuc(auctionService.getAll(appUrl));
     }
 
 

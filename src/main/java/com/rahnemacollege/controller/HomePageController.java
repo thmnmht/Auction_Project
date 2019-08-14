@@ -11,6 +11,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.websocket.server.PathParam;
 import java.util.List;
 
@@ -30,8 +31,10 @@ public class HomePageController {
     @GetMapping("/hottest")
     PagedResources<Resource<AuctionDomain>> paged(@RequestParam("page") int page,
                                                   @RequestParam(value = "size", defaultValue = "10") int size,
-                                                  PagedResourcesAssembler<AuctionDomain> assembler) {
-        Page<AuctionDomain> hotAuctions = auctionService.getHottest(PageRequest.of(page, size));
+                                                  PagedResourcesAssembler<AuctionDomain> assembler,
+                                                  HttpServletRequest request) {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        Page<AuctionDomain> hotAuctions = auctionService.getHottest(PageRequest.of(page, size),appUrl);
         return assembler.toResource(hotAuctions);
     }
 
@@ -41,18 +44,23 @@ public class HomePageController {
                                                           @PathVariable int category,
                                                           @RequestParam("page") int page,
                                                           @RequestParam("size") int size,
+                                                          HttpServletRequest request,
                                                           PagedResourcesAssembler<AuctionDomain> assembler) {
-        return assembler.toResource(auctionService.findByTitle(title, category, page, size));
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        return assembler.toResource(auctionService.findByTitle(title, category, page, size,appUrl));
     }
 
     @GetMapping("/filter")
-    public Resources<Resource<AuctionDomain>> filter(@PathParam("category") int category_id, @RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler) {
-        return assembler.toResource(auctionService.filter(category_id, page, size));
+    public Resources<Resource<AuctionDomain>> filter(@PathParam("category") int category_id, @RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler,
+                                                     HttpServletRequest request) {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        return assembler.toResource(auctionService.filter(category_id, page, size,appUrl));
     }
 
     @GetMapping("/all")
-    public PagedResources<Resource<AuctionDomain>> getPage(@RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler) {
-        Page<AuctionDomain> personPage = auctionService.getAllAuctions(page, size);
+    public PagedResources<Resource<AuctionDomain>> getPage(@RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler,HttpServletRequest request) {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        Page<AuctionDomain> personPage = auctionService.getAllAuctions(page, size,appUrl);
         return assembler.toResource(personPage);
     }
 

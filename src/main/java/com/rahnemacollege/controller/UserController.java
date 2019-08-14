@@ -11,6 +11,7 @@ import com.rahnemacollege.util.ResourceAssembler;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
+import org.apache.tomcat.util.http.parser.HttpParser;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
@@ -72,11 +73,12 @@ public class UserController {
     }
 
     @RequestMapping(value = "/editpassword", method = RequestMethod.POST)
-    public Resource<UserDomain> setNewPassword(@RequestParam("validPassword") String password) {
+    public Resource<UserDomain> setNewPassword(@RequestParam("validPassword") String password,HttpServletRequest request) {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
         User user = detailsService.getUser();
         if (password != null && password.length() > 5 && password.length() < 100) {
             user.setPassword(passwordService.getPasswordEncoder().encode(password));
-            UserDomain userDomain = userService.addUser(user.getName(), user.getEmail(), user.getPassword());
+            UserDomain userDomain = userService.addUser(user.getName(), user.getEmail(), user.getPassword(),appUrl);
 
             return assembler.toResource(userDomain);
         }
@@ -86,22 +88,25 @@ public class UserController {
 
 
     @PostMapping("/signup")
-    public Resource<UserDomain> add(@PathParam("name") String name, @PathParam("emil") String email, @PathParam("validPassword") String password) {
+    public Resource<UserDomain> add(@PathParam("name") String name, @PathParam("emil") String email, @PathParam("validPassword") String password,HttpServletRequest request) {
         System.out.println(name);
-        UserDomain user = userService.addUser(name, email, password);
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        UserDomain user = userService.addUser(name, email, password,appUrl);
         return assembler.toResource(user);
     }
 
 
     //TODO : remove it! it's just for test
     @GetMapping("/all")
-    public Resources<Resource<UserDomain>> all() {
-        return assembler.toResourcesUser(userService.getAll());
+    public Resources<Resource<UserDomain>> all(HttpServletRequest request) {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        return assembler.toResourcesUser(userService.getAll(appUrl));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDomain> one() {
-        UserDomain user = userService.toUserDomain(detailsService.getUser());
+    public ResponseEntity<UserDomain> one(HttpServletRequest request) {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        UserDomain user = userService.toUserDomain(detailsService.getUser(),appUrl);
         System.out.println(user.getEmail());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
@@ -110,6 +115,7 @@ public class UserController {
 
     @RequestMapping(value = "/forgot", method = RequestMethod.POST)
     public Resource<UserDomain> processForgotPasswordForm(@RequestParam("email") String userEmail, HttpServletRequest  request) {
+        String appUrl2 = request.getScheme() + "://" + request.getServerName();
         System.out.println(userEmail);
         Optional<User> optional = userService.findUserByEmail(userEmail);
         if (!optional.isPresent()) {
@@ -141,18 +147,20 @@ public class UserController {
             }
             System.err.println("successMessage" + " A validPassword reset link has been sent to " + userEmail + " @" +
                     new Date());
-            return assembler.toResource(userService.toUserDomain(optional.get()));
+            return assembler.toResource(userService.toUserDomain(optional.get(),appUrl2));
         }
     }
 
 
     @RequestMapping(value = "/reset", method = RequestMethod.GET)
-    public Resource<UserDomain> displayResetPasswordPage(@PathParam("token") String token) {
+    public Resource<UserDomain> displayResetPasswordPage(@PathParam("token") String token, HttpServletRequest r) {
+        String appUrl2 = r.getScheme() + "://" + r.getServerName();
+
         Optional<ResetRequest> request = requestService.findByToken(token);
         if (request.isPresent()) {
 //            todo: redirect to validPassword reset page
             System.err.println("redirecting to pass reset screen");
-            return assembler.toResource(userService.toUserDomain(request.get().getUser()));
+            return assembler.toResource(userService.toUserDomain(request.get().getUser(),appUrl2));
         } else {
             System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");
             throw new InvalidInputException(Message.INVALID_RESET_LINK);
@@ -160,7 +168,8 @@ public class UserController {
     }
 
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
-    public Resource<UserDomain> setNewPassword(@RequestParam Map<String, String> requestParams) {
+    public Resource<UserDomain> setNewPassword(@RequestParam Map<String, String> requestParams,HttpServletRequest r) {
+        String appUrl = r.getScheme() + "://" + r.getServerName();
 
         ResetRequest request = requestService.findByToken(requestParams.get("token")).orElseThrow(() -> new InvalidInputException(Message.TOKEN_NOT_FOUND));
         User resetUser = request.getUser();
@@ -175,7 +184,7 @@ public class UserController {
 
             //TODO : redirect:login
 
-            return assembler.toResource(userService.toUserDomain(resetUser));
+            return assembler.toResource(userService.toUserDomain(resetUser,appUrl));
 
         } else {
             System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");

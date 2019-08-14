@@ -29,9 +29,9 @@ public class PictureService {
 //    @Value("${server.port}")
 //    private String serverPort;
 
-    public void save(MultipartFile pic, String path, Auction auction,String url) throws IOException {
+    public void save(MultipartFile pic, String path, Auction auction) throws IOException {
         String file_name = path.substring(8);
-        file_name = url + file_name;
+        file_name = file_name;
         Picture picture = new Picture(file_name, auction);
         repository.save(picture);
         save(pic, path);

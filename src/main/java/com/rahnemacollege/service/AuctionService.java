@@ -63,7 +63,7 @@ public class AuctionService {
         auctionRepository.save(auction);
         if (images != null)
             savePictures(auction, images,url);
-        return toAuctionDomain(auction);
+        return toAuctionDomain(auction,url);
     }
 
     private void validation(AuctionDomain auctionDomain) {
@@ -78,9 +78,9 @@ public class AuctionService {
         new File("./images/auction_images/" + auction.getId() + "/").mkdirs();
         for (MultipartFile image :
                 images) {
-            String fileName = auction.getId() + "_" + new Date().getTime() + ".jpg";
+            String fileName = new Date().getTime() + ".jpg";
             String pathName = "./images/auction_images/" + auction.getId() + "/" + fileName;
-            pictureService.save(image, pathName, auction,url);
+            pictureService.save(image, pathName, auction);
         }
     }
 
@@ -91,14 +91,14 @@ public class AuctionService {
         return auction;
     }
 
-    public AuctionDomain toAuctionDomain(Auction auction) {
+    public AuctionDomain toAuctionDomain(Auction auction,String url) {
         AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(), auction.getDescription(), auction.getBase_price(), auction.getDate().getTime(), auction.getCategory().getId(), auction.getMax_number());
         auctionDomain.setId(auction.getId());
         if(auction.getOwner().getId() == userDetailsService.getUser().getId())
             auctionDomain.setMine(true);
         List<String> auctionPictures = pictureService.getAll().stream().filter(picture ->
                 picture.getFileName().contains("/" + auction.getId() + "/")).map(
-                picture -> picture.getFileName()
+                picture -> url + picture.getFileName()
         ).collect(Collectors.toList());
         auctionDomain.setPictures(auctionPictures);
 
@@ -110,14 +110,14 @@ public class AuctionService {
 
     }
 
-    public Page<AuctionDomain> filter(int category_id, int page, int size) {
-        List<AuctionDomain> auctions = getAll().stream().filter(c -> c.getCategory_id() == category_id).collect(Collectors.toList());
+    public Page<AuctionDomain> filter(int category_id, int page, int size,String url) {
+        List<AuctionDomain> auctions = getAll(url).stream().filter(c -> c.getCategory_id() == category_id).collect(Collectors.toList());
         return toPage(auctions, page, size);
     }
 
-    public List<AuctionDomain> getAll() {
+    public List<AuctionDomain> getAll(String url) {
         return Lists.newArrayList(auctionRepository.findAll()).stream()
-                .map(this::toAuctionDomain)
+                .map(a -> toAuctionDomain(a,url))
                 .collect(Collectors.toList());
     }
 
@@ -126,12 +126,12 @@ public class AuctionService {
         return auction;
     }
 
-    public Page<AuctionDomain> findByTitle(String title, int category_id, int page, int size) {
+    public Page<AuctionDomain> findByTitle(String title, int category_id, int page, int size,String url) {
         List<AuctionDomain> auctions = new ArrayList<>();
         if (category_id == 0)
-            auctions = getAll();
+            auctions = getAll(url);
         else {
-            List<AuctionDomain> tmp = getAll().stream().filter(c -> c.getCategory_id() == category_id).collect(Collectors.toList());
+            List<AuctionDomain> tmp = getAll(url).stream().filter(c -> c.getCategory_id() == category_id).collect(Collectors.toList());
             auctions.addAll(tmp);
         }
         auctions = auctions.stream()
@@ -140,8 +140,8 @@ public class AuctionService {
         return toPage(auctions, page, size);
     }
 
-    public Page<AuctionDomain> getAllAuctions(int page, int size) {
-        return toPage(getAll(), page, size);
+    public Page<AuctionDomain> getAllAuctions(int page, int size,String url) {
+        return toPage(getAll(url), page, size);
     }
 
     private Page<AuctionDomain> toPage(List<AuctionDomain> list, int page, int size) {
@@ -153,28 +153,13 @@ public class AuctionService {
     }
 
 
-    //TODO : change exception handling!
-    //TODO : remove it!
-    public Resource imageUpload(int id, String fileName) {
-        String path = "./images/auction_images/" + id + "/" + fileName;
-        Path filePath = Paths.get(path).toAbsolutePath().normalize();
-        Resource resource = null;
-        try {
-            resource = new UrlResource(filePath.toUri());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        return resource;
+    public Page<AuctionDomain> getHottest(PageRequest request,String url) {
+        return toAuctionDomainPage(auctionRepository.findHottest(request),url);
     }
 
-
-    public Page<AuctionDomain> getHottest(PageRequest request) {
-        return toAuctionDomainPage(auctionRepository.findHottest(request));
-    }
-
-    private Page<AuctionDomain> toAuctionDomainPage(Page<Auction> auctionPage) {
+    private Page<AuctionDomain> toAuctionDomainPage(Page<Auction> auctionPage,String url) {
         List<AuctionDomain> auctionDomainList = new ArrayList<>();
-        auctionPage.forEach(auction -> auctionDomainList.add(toAuctionDomain(auction)));
+        auctionPage.forEach(auction -> auctionDomainList.add(toAuctionDomain(auction,url)));
         return new PageImpl<>(auctionDomainList);
     }
 

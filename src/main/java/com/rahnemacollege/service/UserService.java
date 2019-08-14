@@ -53,11 +53,11 @@ public class UserService {
         return false;
     }
 
-    public UserDomain addUser(String name, String email, String password) {
+    public UserDomain addUser(String name, String email, String password,String url) {
         validation(name, email, password);
         User user = new User(name, email, encoder.encode(password));
         repository.save(user);
-        return toUserDomain(user);
+        return toUserDomain(user,url);
     }
 
     private void validation(String name, String email, String password) {
@@ -66,9 +66,9 @@ public class UserService {
         validator.validEmail(email);
     }
 
-    public List<UserDomain> getAll() {
+    public List<UserDomain> getAll(String url) {
         ArrayList<UserDomain> users = new ArrayList<>();
-        Lists.newArrayList(repository.findAll()).stream().map(user -> toUserDomain(user)).forEach(users::add);
+        Lists.newArrayList(repository.findAll()).stream().map(user -> toUserDomain(user,url)).forEach(users::add);
         return users;
     }
 
@@ -113,8 +113,8 @@ public class UserService {
         return new AuthenticationResponse(token);
     }
 
-    public UserDomain toUserDomain(User user) {
-        UserDomain userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), user.getPicture());
+    public UserDomain toUserDomain(User user,String url) {
+        UserDomain userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), url + user.getPicture());
         return userDomain;
     }
 
@@ -125,7 +125,7 @@ public class UserService {
         String fileName = userId + ".jpg";
         String pathName = "./images/profile_images/" + userId + "/" + fileName;
         pictureService.save(picture, pathName);
-        return pathName;
+        return pathName.substring(8);
     }
 
     //TODO
