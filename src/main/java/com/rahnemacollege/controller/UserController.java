@@ -24,8 +24,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-
-
 @RestController
 @RequestMapping("/users")
 @Transactional
@@ -77,29 +75,34 @@ public class UserController {
 
 
     @PostMapping("/signup")
-    public Resource<UserDomain> add(@PathParam("name") String name, @PathParam("emil") String email, @PathParam("validPassword") String password, HttpServletRequest request) {
+    public Resource<UserDomain> add(@PathParam("name") String name, @PathParam("emil") String email, @PathParam("validPassword") String password,HttpServletRequest request) {
         System.out.println(name);
         String appUrl = request.getScheme() + "://" + request.getServerName();
-        UserDomain user = userService.addUser(name, email, password, appUrl);
+        UserDomain user = userService.addUser(name, email, password,appUrl);
         return assembler.toResource(user);
     }
 
 
+    //TODO : remove it! it's just for test
     @GetMapping("/all")
-    public Resources<Resource<UserDomain>> all() {
-        return assembler.toResourcesUser(userService.getAll());
+    public Resources<Resource<UserDomain>> all(HttpServletRequest request) {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        return assembler.toResourcesUser(userService.getAll(appUrl));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDomain> one() {
-        UserDomain user = userService.toUserDomain(detailsService.getUser());
+    public ResponseEntity<UserDomain> one(HttpServletRequest request) {
+        String appUrl = request.getScheme() + "://" + request.getServerName();
+        UserDomain user = userService.toUserDomain(detailsService.getUser(),appUrl);
         System.out.println(user.getEmail());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
 
+
     @RequestMapping(value = "/forgot", method = RequestMethod.POST)
-    public Resource<UserDomain> processForgotPasswordForm(@RequestParam("email") String userEmail, HttpServletRequest request) {
+    public Resource<UserDomain> processForgotPasswordForm(@RequestParam("email") String userEmail, HttpServletRequest  request) {
+        String appUrl2 = request.getScheme() + "://" + request.getServerName();
         System.out.println(userEmail);
         Optional<User> optional = userService.findUserByEmail(userEmail);
         if (!optional.isPresent()) {
@@ -131,18 +134,20 @@ public class UserController {
             }
             System.err.println("successMessage" + " A validPassword reset link has been sent to " + userEmail + " @" +
                     new Date());
-            return assembler.toResource(userService.toUserDomain(optional.get()));
+            return assembler.toResource(userService.toUserDomain(optional.get(),appUrl2));
         }
     }
 
 
     @RequestMapping(value = "/reset", method = RequestMethod.GET)
-    public Resource<UserDomain> displayResetPasswordPage(@PathParam("token") String token) {
+    public Resource<UserDomain> displayResetPasswordPage(@PathParam("token") String token, HttpServletRequest r) {
+        String appUrl2 = r.getScheme() + "://" + r.getServerName();
+
         Optional<ResetRequest> request = requestService.findByToken(token);
         if (request.isPresent()) {
 //            todo: redirect to validPassword reset page
             System.err.println("redirecting to pass reset screen");
-            return assembler.toResource(userService.toUserDomain(request.get().getUser()));
+            return assembler.toResource(userService.toUserDomain(request.get().getUser(),appUrl2));
         } else {
             System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");
             throw new InvalidInputException(Message.INVALID_RESET_LINK);
