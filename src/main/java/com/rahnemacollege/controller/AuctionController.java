@@ -93,7 +93,7 @@ public class AuctionController {
     public Resources<Resource<AuctionDomain>> all(HttpServletRequest request) {
         log(" try to get all auctions");
         String appUrl = request.getScheme() + "://" + request.getServerName();
-        return assembler.toResourcesAuc(auctionService.getAll(appUrl));
+        return assembler.toResourcesAuc(auctionService.getAllAliveAuctions(appUrl));
     }
 
 

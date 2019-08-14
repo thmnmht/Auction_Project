@@ -34,11 +34,9 @@ public class HomePageController {
     @GetMapping("/hottest")
     PagedResources<Resource<AuctionDomain>> paged(@RequestParam("page") int page,
                                                   @RequestParam(value = "size", defaultValue = "10") int size,
-                                                  PagedResourcesAssembler<AuctionDomain> assembler,
-                                                  HttpServletRequest request) {
+                                                  PagedResourcesAssembler<AuctionDomain> assembler) {
         log.info("get hottest");
-        String appUrl = request.getScheme() + "://" + request.getServerName();
-        Page<AuctionDomain> hotAuctions = auctionService.getHottest(PageRequest.of(page, size),appUrl);
+        Page<AuctionDomain> hotAuctions = auctionService.getHottest(PageRequest.of(page, size));
         return assembler.toResource(hotAuctions);
     }
 
@@ -48,26 +46,21 @@ public class HomePageController {
                                                           @PathVariable int category,
                                                           @RequestParam("page") int page,
                                                           @RequestParam("size") int size,
-                                                          HttpServletRequest request,
                                                           PagedResourcesAssembler<AuctionDomain> assembler) {
         log.info("search");
-        String appUrl = request.getScheme() + "://" + request.getServerName();
-        return assembler.toResource(auctionService.findByTitle(title, category, page, size,appUrl));
+        return assembler.toResource(auctionService.findByTitle(title, category, page, size));
     }
 
     @GetMapping("/filter/{category_id}")
-    public Resources<Resource<AuctionDomain>> filter(@PathVariable int category_id, @RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler,
-                                                     HttpServletRequest request) {
+    public Resources<Resource<AuctionDomain>> filter(@PathVariable int category_id, @RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler) {
         log.info("filter");
-        String appUrl = request.getScheme() + "://" + request.getServerName();
-        return assembler.toResource(auctionService.filter(category_id, page, size,appUrl));
+        return assembler.toResource(auctionService.filter(category_id, page, size));
     }
 
     @GetMapping("/all")
-    public PagedResources<Resource<AuctionDomain>> getPage(@RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler,HttpServletRequest request) {
+    public PagedResources<Resource<AuctionDomain>> getPage(@RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler) {
         log.info("get all auctions");
-        String appUrl = request.getScheme() + "://" + request.getServerName();
-        Page<AuctionDomain> personPage = auctionService.getAllAuctions(page, size,appUrl);
+        Page<AuctionDomain> personPage = auctionService.getAllAuctions(page, size);
         return assembler.toResource(personPage);
     }
 

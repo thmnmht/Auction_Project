@@ -2,17 +2,14 @@ package com.rahnemacollege.service;
 
 
 import com.google.common.collect.Lists;
-import com.rahnemacollege.controller.AuctionController;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
-import com.rahnemacollege.model.Picture;
 import com.rahnemacollege.repository.AuctionRepository;
 import com.rahnemacollege.repository.CategoryRepository;
 import com.rahnemacollege.repository.PictureRepository;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
-import com.rahnemacollege.util.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -34,6 +31,7 @@ public class AuctionService {
     private final CategoryRepository categoryRepository;
     private final UserDetailsServiceImpl userDetailsService;
     private final PictureService pictureService;
+    private final PictureRepository pictureRepository;
     private final Validator validator;
 
     @Value("${server_ip}")
@@ -41,25 +39,27 @@ public class AuctionService {
 
     @Autowired
     public AuctionService(AuctionRepository auctionRepository, CategoryRepository categoryRepository,
-                          UserDetailsServiceImpl userDetailsService, PictureService pictureService, Validator validator) {
+                          UserDetailsServiceImpl userDetailsService, PictureService pictureService,
+                          PictureRepository pictureRepository, Validator validator) {
         this.auctionRepository = auctionRepository;
         this.categoryRepository = categoryRepository;
         this.userDetailsService = userDetailsService;
         this.pictureService = pictureService;
+        this.pictureRepository = pictureRepository;
         this.validator = validator;
     }
 
 
-    public AuctionDomain addAuction(AuctionDomain auctionDomain, MultipartFile[] images,String url) throws IOException {
+    public AuctionDomain addAuction(AuctionDomain auctionDomain, MultipartFile[] images){
         validation(auctionDomain);
         Auction auction = toAuction(auctionDomain);
         auctionRepository.save(auction);
         if (images != null)
-            savePictures(auction, images,url);
-        return toAuctionDomain(auction,url);
+            pictureService.setAuctionPictures(auction, images);
+        return toAuctionDomain(auction);
     }
 
-    private void validation(AuctionDomain auctionDomain) {
+    private void validation(AuctionDomain auctionDomain){
         validator.validTitle(auctionDomain.getTitle());
         validator.validDescription(auctionDomain.getDescription());
         validator.validDate(auctionDomain.getDate());
@@ -67,15 +67,6 @@ public class AuctionService {
         validator.validMaxNumber(auctionDomain.getMax_number());
     }
 
-    private void savePictures(Auction auction, MultipartFile[] images,String url) throws IOException {
-        new File("./images/auction_images/" + auction.getId() + "/").mkdirs();
-        for (MultipartFile image :
-                images) {
-            String fileName = new Date().getTime() + ".jpg";
-            String pathName = "./images/auction_images/" + auction.getId() + "/" + fileName;
-            pictureService.save(image, pathName, auction);
-        }
-    }
 
     public Auction toAuction(AuctionDomain auctionDomain) {
         Date date = new Date(auctionDomain.getDate());
@@ -84,15 +75,14 @@ public class AuctionService {
         return auction;
     }
 
-    public AuctionDomain toAuctionDomain(Auction auction,String url) {
-        String u = "http://" + ip;
-                AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(), auction.getDescription(), auction.getBase_price(), auction.getDate().getTime(), auction.getCategory().getId(), auction.getMax_number());
+    public AuctionDomain toAuctionDomain(Auction auction) {
+        AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(), auction.getDescription(), auction.getBase_price(), auction.getDate().getTime(), auction.getCategory().getId(), auction.getMax_number());
         auctionDomain.setId(auction.getId());
-        if(auction.getOwner().getId() == userDetailsService.getUser().getId())
+        if (auction.getOwner().getId() == userDetailsService.getUser().getId())
             auctionDomain.setMine(true);
-        List<String> auctionPictures = pictureService.getAll().stream().filter(picture ->
+        List<String> auctionPictures = Lists.newArrayList(pictureRepository.findAll()).stream().filter(picture ->
                 picture.getFileName().contains("/" + auction.getId() + "/")).map(
-                picture -> u + picture.getFileName()
+                picture -> "http://" + ip + picture.getFileName()
         ).collect(Collectors.toList());
         auctionDomain.setPictures(auctionPictures);
 
@@ -104,14 +94,20 @@ public class AuctionService {
 
     }
 
-    public Page<AuctionDomain> filter(int category_id, int page, int size,String url) {
-        List<AuctionDomain> auctions = getAll(url).stream().filter(c -> c.getCategory_id() == category_id).collect(Collectors.toList());
+    public Page<AuctionDomain> filter(int category_id, int page, int size) {
+        List<AuctionDomain> auctions = getAllAliveAuctions().stream().filter(c -> c.getCategory_id() == category_id).collect(Collectors.toList());
         return toPage(auctions, page, size);
     }
 
-    public List<AuctionDomain> getAll(String url) {
+    public List<AuctionDomain> getAllAliveAuctions() {
         return Lists.newArrayList(auctionRepository.findAll()).stream().filter(auction -> auction.getState() == 0)
-                .map(a -> toAuctionDomain(a,url))
+                .map(a -> toAuctionDomain(a))
+                .collect(Collectors.toList());
+    }
+
+    public List<AuctionDomain> getAll() {
+        return Lists.newArrayList(auctionRepository.findAll()).stream()
+                .map(a -> toAuctionDomain(a))
                 .collect(Collectors.toList());
     }
 
@@ -120,12 +116,12 @@ public class AuctionService {
         return auction;
     }
 
-    public Page<AuctionDomain> findByTitle(String title, int category_id, int page, int size,String url) {
+    public Page<AuctionDomain> findByTitle(String title, int category_id, int page, int size) {
         List<AuctionDomain> auctions = new ArrayList<>();
         if (category_id == 0)
-            auctions = getAll(url);
+            auctions = getAllAliveAuctions();
         else {
-            List<AuctionDomain> tmp = getAll(url).stream().filter(c -> c.getCategory_id() == category_id).collect(Collectors.toList());
+            List<AuctionDomain> tmp = getAllAliveAuctions().stream().filter(c -> c.getCategory_id() == category_id).collect(Collectors.toList());
             auctions.addAll(tmp);
         }
         auctions = auctions.stream()
@@ -134,8 +130,8 @@ public class AuctionService {
         return toPage(auctions, page, size);
     }
 
-    public Page<AuctionDomain> getAllAuctions(int page, int size,String url) {
-        return toPage(getAll(url), page, size);
+    public Page<AuctionDomain> getAllAuctions(int page, int size) {
+        return toPage(getAll(), page, size);
     }
 
     private Page<AuctionDomain> toPage(List<AuctionDomain> list, int page, int size) {
@@ -147,13 +143,13 @@ public class AuctionService {
     }
 
 
-    public Page<AuctionDomain> getHottest(PageRequest request,String url) {
-        return toAuctionDomainPage(auctionRepository.findHottest(request),url);
+    public Page<AuctionDomain> getHottest(PageRequest request) {
+        return toAuctionDomainPage(auctionRepository.findHottest(request));
     }
 
-    private Page<AuctionDomain> toAuctionDomainPage(Page<Auction> auctionPage,String url) {
+    private Page<AuctionDomain> toAuctionDomainPage(Page<Auction> auctionPage) {
         List<AuctionDomain> auctionDomainList = new ArrayList<>();
-        auctionPage.forEach(auction -> auctionDomainList.add(toAuctionDomain(auction,url)));
+        auctionPage.forEach(auction -> auctionDomainList.add(toAuctionDomain(auction)));
         return new PageImpl<>(auctionDomainList);
     }
 

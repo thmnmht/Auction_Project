@@ -31,12 +31,6 @@ public class PictureService {
     private final Logger logger = LoggerFactory.getLogger(PictureService.class);
 
 
-    public void save(MultipartFile pic, String path, Auction auction) throws IOException {
-        String file_name = path.substring(8);
-        Picture picture = new Picture(file_name, auction);
-        pictureRepository.save(picture);
-        save(pic, path);
-    }
 
     public List<Picture> getAll() {
         return Lists.newArrayList(pictureRepository.findAll());
@@ -48,6 +42,29 @@ public class PictureService {
         FileOutputStream fout = new FileOutputStream(upl);
         fout.write(pic.getBytes());
         fout.close();
+    }
+
+
+    public void setAuctionPictures(Auction auction,MultipartFile[] images) {
+        new File("./images/auction_images/" + auction.getId() + "/").mkdirs();
+        for (MultipartFile image :
+                images) {
+            String fileName = new Date().getTime() + ".jpg";
+            String pathName = "./images/auction_images/" + auction.getId() + "/" + fileName;
+            try {
+                saveAuctionPicture(image, pathName, auction);
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+            }
+        }
+    }
+
+
+    public void saveAuctionPicture(MultipartFile pic, String path, Auction auction) throws IOException {
+        String file_name = path.substring(8);
+        Picture picture = new Picture(file_name, auction);
+        pictureRepository.save(picture);
+        save(pic, path);
     }
 
     public SimpleUserDomain setProfilePicture(User user,MultipartFile picture){
