@@ -15,7 +15,6 @@ import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.websocket.server.PathParam;
@@ -142,7 +141,6 @@ public class UserController {
     @RequestMapping(value = "/reset", method = RequestMethod.GET)
     public Resource<UserDomain> displayResetPasswordPage(@PathParam("token") String token, HttpServletRequest r) {
         String appUrl2 = r.getScheme() + "://" + r.getServerName();
-
         Optional<ResetRequest> request = requestService.findByToken(token);
         if (request.isPresent()) {
 //            todo: redirect to validPassword reset page
@@ -155,7 +153,8 @@ public class UserController {
     }
 
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
-    public Resource<UserDomain> setNewPassword(@RequestParam Map<String, String> requestParams) {
+    public Resource<UserDomain> setNewPassword(@RequestParam Map<String, String> requestParams, HttpServletRequest r) {
+        String appUrl2 = r.getScheme() + "://" + r.getServerName();
         ResetRequest request = requestService.findByToken(requestParams.get("token")).orElseThrow(() -> new InvalidInputException(Message.TOKEN_NOT_FOUND));
         User resetUser = request.getUser();
         if (resetUser != null) {
@@ -164,7 +163,7 @@ public class UserController {
             userService.addUser(resetUser);
             System.err.println("successMessage: You have successfully reset your validPassword.  You may now login.");
             //TODO : redirect:login
-            return assembler.toResource(userService.toUserDomain(resetUser));
+            return assembler.toResource(userService.toUserDomain(resetUser,appUrl2));
         } else {
             System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");
             throw new InvalidInputException(Message.NOT_RECORDED_REQUEST);

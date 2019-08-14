@@ -60,18 +60,6 @@ public class UserService {
         return toUserDomain(user,url);
     }
 
-    public UserDomain addUser(String name, String email, String password, String url) {
-        validation(name, email, password);
-        User user = new User(name, email, encoder.encode(password));
-        repository.save(user);
-        return toUserDomain(user, url);
-    }
-
-    public UserDomain toUserDomain(User user, String url) {
-        UserDomain userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), url + user.getPicture());
-        return userDomain;
-    }
-
 
 
     private void validation(String name, String email, String password) {
