@@ -110,7 +110,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.springframework.security/spring-security-web
 //    compile group: 'org.springframework.security', name: 'spring-security-web', version: '4.2.3.RELEASE'
 
-    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    compile 'org.springframework.boot:spring-boot-starter-tomcat'
 
 //    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 
