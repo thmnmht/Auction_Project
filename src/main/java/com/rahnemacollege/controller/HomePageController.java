@@ -55,8 +55,8 @@ public class HomePageController {
         return assembler.toResource(auctionService.findByTitle(title, category, page, size,appUrl));
     }
 
-    @GetMapping("/filter")
-    public Resources<Resource<AuctionDomain>> filter(@PathParam("category") int category_id, @RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler,
+    @GetMapping("/filter/{category_id}")
+    public Resources<Resource<AuctionDomain>> filter(@PathVariable int category_id, @RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler,
                                                      HttpServletRequest request) {
         log.info("filter");
         String appUrl = request.getScheme() + "://" + request.getServerName();

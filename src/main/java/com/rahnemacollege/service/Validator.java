@@ -17,7 +17,7 @@ public class Validator {
 
 
     public void validName(String name) {
-        if (name == null || name.length() < 1)
+        if (isEmpty(name))
             throw new InvalidInputException(Message.NAME_NULL);
     }
 
@@ -28,7 +28,7 @@ public class Validator {
     }
 
     public void validPassword(String password) {
-        if (password == null || password.length() < 6)
+        if (password.length() < 6)
             throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
         if (password.length() > 100)
             throw new InvalidInputException(Message.PASSWORD_TOO_HIGH);

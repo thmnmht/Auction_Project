@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Data
 @Entity
-@Table(name = "pictures")
+@Table(name = "Pictures")
 public class Picture {
 
 
@@ -26,10 +26,13 @@ public class Picture {
     @JoinColumn(name = "auction_id")
     private Auction auction;
 
+    public Picture(){}
+
     public Picture(String fileName,Auction auction){
         this.fileName = fileName;
         date = new Date(new java.util.Date().getTime());
     }
+
 
 
 }

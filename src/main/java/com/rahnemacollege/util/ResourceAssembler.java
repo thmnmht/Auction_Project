@@ -3,6 +3,7 @@ package com.rahnemacollege.util;
 import com.rahnemacollege.controller.AuctionController;
 import com.rahnemacollege.controller.UserController;
 import com.rahnemacollege.domain.AuctionDomain;
+import com.rahnemacollege.domain.SimpleUserDomain;
 import com.rahnemacollege.domain.UserDomain;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
@@ -24,6 +25,7 @@ public class ResourceAssembler {
         return new Resource<>(user,
                 linkTo(methodOn(UserController.class).one(request)).withSelfRel());
     }
+
 
     public Resources<Resource<UserDomain>> toResourcesUser(List<UserDomain> users,HttpServletRequest request) {
         return new Resources<>(users.stream()
