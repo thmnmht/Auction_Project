@@ -105,6 +105,8 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
             case FORBIDDEN_REQUEST:
                 response.setStatus(499);
                 break;
+            case PICTURE_NULL:
+                response.setStatus(498);
         }
 
         logger.error(ex.getMessageStatus().toString());

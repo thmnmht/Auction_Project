@@ -36,13 +36,16 @@ public class UserController {
     private UserDetailsServiceImpl detailsService;
     private final ResetRequestService requestService;
     private final EmailService emailService;
+    private final PictureService pictureService;
     private final TokenUtil tokenUtil;
     private final Logger log;
-    private final Validator validator;
 
 
     public UserController(UserService userService, ResourceAssembler assembler, PasswordService passwordService,
-                          UserDetailsServiceImpl userDetailService, UserDetailsServiceImpl detailsService, ResetRequestService requestService, EmailService emailService, TokenUtil tokenUtil, Validator validator) {
+                          UserDetailsServiceImpl userDetailService,
+                          UserDetailsServiceImpl detailsService,
+                          ResetRequestService requestService,
+                          EmailService emailService, PictureService pictureService, TokenUtil tokenUtil) {
         this.userService = userService;
         this.assembler = assembler;
         this.passwordService = passwordService;
@@ -50,19 +53,24 @@ public class UserController {
         this.detailsService = detailsService;
         this.requestService = requestService;
         this.emailService = emailService;
+        this.pictureService = pictureService;
         this.tokenUtil = tokenUtil;
         log = LoggerFactory.getLogger(UserController.class);
-        this.validator = validator;
     }
 
 
     @PostMapping("/login")
     public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws InvalidInputException {
         log.info(authenticationRequest.getEmail() + " wants to login *_*");
-        return userService.auth(authenticationRequest.getEmail(), authenticationRequest.getPassword());
-
+        String email = authenticationRequest.getEmail();
+        String password = authenticationRequest.getPassword();
+        if (!userService.isExist(email))
+            throw new InvalidInputException(Message.EMAIL_NOT_FOUND);
+        userService.authenticate(email, password);
+        final UserDetails userDetails = detailsService.loadUserByUsername(email);
+        final String token = tokenUtil.generateToken(userDetails);
+        return new AuthenticationResponse(token);
     }
-
 
     @PostMapping("/edit")
     public AuthenticationResponse edit(@RequestBody SimpleUserDomain userDomain) {
@@ -71,7 +79,7 @@ public class UserController {
         String name = userDomain.getName();
         if (email != null)
             email = email.toLowerCase();
-        User user = userService.edit(name, email);
+        User user = userService.edit(detailsService.getUser(), name, email);
         log.info(user.getName() + " changed his/her infos :)");
         final UserDetails userDetails = detailsService.loadUserByUsername(user.getEmail());
         return new AuthenticationResponse(tokenUtil.generateToken(userDetails));
@@ -80,12 +88,15 @@ public class UserController {
     @PostMapping("/edit/picture")
     public ResponseEntity<SimpleUserDomain> setUserPicture(@RequestPart MultipartFile picture){
         log.info(detailsService.getUser().getName() + " with id " + detailsService.getUser().getId() + " try to set a profile picture");
-        return new ResponseEntity<>(userService.setPicture(picture),HttpStatus.OK);
+        if(picture == null)
+            throw new InvalidInputException(Message.PICTURE_NULL);
+        User user = detailsService.getUser();
+        return new ResponseEntity<>(pictureService.setProfilePicture(user,picture),HttpStatus.OK);
     }
 
     @RequestMapping(value = "/edit/password", method = RequestMethod.POST)
-    public Resource<SimpleUserDomain> setNewPassword(@RequestParam("oPassword") String oPassword,
-                                               @RequestParam("nPassword") String nPassword) {
+    public Resource<SimpleUserDomain> setNewPassword(@RequestParam("oPassword") String oPassword,@RequestParam("nPassword") String nPassword) {
+        log.info(detailsService.getUser().getEmail() + " try to change password");
         User user = detailsService.getUser();
         if (nPassword == null || oPassword == null || nPassword.length() < 6)
             throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
