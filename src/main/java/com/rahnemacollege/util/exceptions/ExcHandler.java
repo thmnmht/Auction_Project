@@ -1,5 +1,6 @@
 package com.rahnemacollege.util.exceptions;
 
+import org.apache.commons.logging.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -101,6 +102,9 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
                 break;
             case REALLY_BAD_SITUATION:
                 response.setStatus(456);
+                break;
+            case FORBIDDEN_REQUEST:
+                response.setStatus(499);
                 break;
         }
         logger.error(ex.getMessageStatus().toString());

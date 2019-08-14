@@ -28,8 +28,8 @@ public enum Message {
 
     INVALID_ID,
     AUCTION_NOT_FOUND,
-    REALLY_BAD_SITUATION
+    REALLY_BAD_SITUATION,
 
-
+    FORBIDDEN_REQUEST;
 }
 
