@@ -94,6 +94,17 @@ public class UserService {
         return repository.findByEmail(email);
     }
 
+
+    public UserDomain changePassword(User user, String newPassword) {
+        if (userDetailsService.getUser().equals(user)) {
+            user.setPassword(encoder.encode(newPassword));
+            repository.save(user);
+            return new UserDomain(user.getName(), user.getEmail(), user.getId(), user.getPicture());
+        } else {
+            throw new InvalidInputException(Message.FORBIDDEN_REQUEST);
+        }
+    }
+
     public User edit(String name, String email) throws InvalidInputException {
         User user = userDetailsService.getUser();
         if (!validator.isEmpty(email) && !user.getEmail().equals(email)){

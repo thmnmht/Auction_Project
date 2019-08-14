@@ -7,7 +7,6 @@ import com.rahnemacollege.model.ResetRequest;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.*;
 import com.rahnemacollege.service.UserDetailsServiceImpl;
-import com.rahnemacollege.util.JwtTokenUtil;
 import com.rahnemacollege.util.ResourceAssembler;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
@@ -18,8 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.websocket.server.PathParam;
@@ -27,7 +24,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import javax.validation.Valid;
+
+
 
 @RestController
 @RequestMapping("/users")
@@ -155,29 +153,22 @@ public class UserController {
 
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
     public Resource<UserDomain> setNewPassword(@RequestParam Map<String, String> requestParams) {
-
         ResetRequest request = requestService.findByToken(requestParams.get("token")).orElseThrow(() -> new InvalidInputException(Message.TOKEN_NOT_FOUND));
         User resetUser = request.getUser();
-
         if (resetUser != null) {
-
             resetUser.setPassword(passwordService.getPasswordEncoder().encode(requestParams.get("validPassword")));
             requestService.removeRequest(request);
-
             userService.addUser(resetUser);
             System.err.println("successMessage: You have successfully reset your validPassword.  You may now login.");
-
             //TODO : redirect:login
-
             return assembler.toResource(userService.toUserDomain(resetUser));
-
         } else {
             System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");
             throw new InvalidInputException(Message.NOT_RECORDED_REQUEST);
         }
     }
 
-    // TODO: redirect to login page
 
+    // TODO: redirect to login page if something went wrong
 
 }

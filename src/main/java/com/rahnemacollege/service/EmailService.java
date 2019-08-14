@@ -26,7 +26,7 @@ public class EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(message);
         helper.setTo(userEmail);
         String text = "To reset your validPassword, click the link below:\n" + appUrl
-                + "/reset?token=" + token;
+                + "/users/reset?token=" + token;
         helper.setText(text);
         helper.setSubject("AucApp validPassword recovery");
         mailSender.send(message);
