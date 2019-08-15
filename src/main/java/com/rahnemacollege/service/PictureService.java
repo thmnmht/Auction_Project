@@ -48,12 +48,12 @@ public class PictureService {
 
 
     public void setAuctionPictures(Auction auction,MultipartFile[] images) {
-        new File("./home/sobhan/Auction_back/images/auction_images/" + auction.getId() + "/").mkdirs();
+        new File("./usr/local/share/Auction_back/images/auction_images/" + auction.getId() + "/").mkdirs();
         logger.info("directory created");
         for (MultipartFile image :
                 images) {
             String fileName = new Date().getTime() + ".jpg";
-            String pathName = "./home/sobhan/Auction_back/images/auction_images/" + auction.getId() + "/" + fileName;
+            String pathName = "./usr/local/share/Auction_back/images/auction_images/" + auction.getId() + "/" + fileName;
             try {
                 saveAuctionPicture(image, pathName, auction);
             } catch (IOException e) {
@@ -73,9 +73,9 @@ public class PictureService {
 
     public SimpleUserDomain setProfilePicture(User user,MultipartFile picture){
         int userId = user.getId();
-        new File("./home/sobhan/Auction_back/images/profile_images/" + userId + "/").mkdirs();
+        new File("./usr/local/share/Auction_back/images/profile_images/" + userId + "/").mkdirs();
         String fileName = new Date().getTime() + ".jpg";
-        String pathName = "./home/sobhan/Auction_back/images/profile_images/" + userId + "/" + fileName;
+        String pathName = "./usr/local/share/Auction_back/images/profile_images/" + userId + "/" + fileName;
         try {
             save(picture, pathName);
             user.setPicture(pathName.substring(33));
