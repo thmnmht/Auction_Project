@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Data
 @Entity
-@Table(name = "pictures")
+@Table(name = "Pictures")
 public class Picture {
 
 

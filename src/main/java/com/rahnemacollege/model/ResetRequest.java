@@ -6,7 +6,7 @@ import java.util.Date;
 
 @lombok.Data
 @Entity
-@Table(name = "resetRequests")
+@Table(name = "ResetRequests")
 public class ResetRequest {
 
     @Id

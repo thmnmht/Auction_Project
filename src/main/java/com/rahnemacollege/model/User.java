@@ -13,7 +13,7 @@ import javax.persistence.Id;
 
 @Data
 @Entity
-@Table(name = "users")
+@Table(name = "Users")
 @Embeddable
 public class User {
     @Id
