@@ -53,7 +53,7 @@ public class PictureService {
         for (MultipartFile image :
                 images) {
             String fileName = "/auction_images/" + auction.getId() + "/" +  new Date().getTime() + ".jpg";
-            String pathName = "./usr/local/share/Auction_back/images";
+            String pathName = "./usr/local/share/Auction_back/images" + fileName;
             try {
                 saveAuctionPicture(image, pathName, auction,fileName);
             } catch (IOException e) {
