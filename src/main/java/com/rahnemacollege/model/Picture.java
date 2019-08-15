@@ -30,6 +30,7 @@ public class Picture {
 
     public Picture(String fileName,Auction auction){
         this.fileName = fileName;
+        this.auction = auction;
         date = new Date(new java.util.Date().getTime());
     }
 

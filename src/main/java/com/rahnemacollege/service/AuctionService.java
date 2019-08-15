@@ -2,6 +2,7 @@ package com.rahnemacollege.service;
 
 
 import com.google.common.collect.Lists;
+import com.rahnemacollege.domain.AddAuctionDomain;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
@@ -17,10 +18,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,45 +27,48 @@ public class AuctionService {
     private final AuctionRepository auctionRepository;
     private final CategoryRepository categoryRepository;
     private final UserDetailsServiceImpl userDetailsService;
-    private final PictureService pictureService;
     private final PictureRepository pictureRepository;
-    private final Validator validator;
 
     @Value("${server_ip}")
     private String ip;
 
     @Autowired
     public AuctionService(AuctionRepository auctionRepository, CategoryRepository categoryRepository,
-                          UserDetailsServiceImpl userDetailsService, PictureService pictureService,
-                          PictureRepository pictureRepository, Validator validator) {
+                          UserDetailsServiceImpl userDetailsService,
+                          PictureRepository pictureRepository) {
         this.auctionRepository = auctionRepository;
         this.categoryRepository = categoryRepository;
         this.userDetailsService = userDetailsService;
-        this.pictureService = pictureService;
         this.pictureRepository = pictureRepository;
-        this.validator = validator;
     }
 
-
-    public AuctionDomain addAuction(AuctionDomain auctionDomain, MultipartFile[] images){
+    public Auction addAuction(AddAuctionDomain auctionDomain){
         validation(auctionDomain);
         Auction auction = toAuction(auctionDomain);
         auctionRepository.save(auction);
-        if (images != null)
-            pictureService.setAuctionPictures(auction, images);
-        return toAuctionDomain(auction);
+        return auction;
     }
 
-    private void validation(AuctionDomain auctionDomain){
-        validator.validTitle(auctionDomain.getTitle());
-        validator.validDescription(auctionDomain.getDescription());
-        validator.validDate(auctionDomain.getDate());
-        validator.validPrice(auctionDomain.getBase_price());
-        validator.validMaxNumber(auctionDomain.getMax_number());
+    private void validation(AddAuctionDomain auctionDomain){
+        if (auctionDomain.getTitle() == null || auctionDomain.getTitle().length() < 1)
+            throw new InvalidInputException(Message.TITLE_NULL);
+        if (auctionDomain.getTitle().length() > 50)
+            throw new InvalidInputException(Message.TITLE_TOO_LONG);
+        if (auctionDomain.getDescription().length() > 1000)
+            throw new InvalidInputException(Message.DESCRIPTION_TOO_LONG);
+        if (auctionDomain.getDate() < 1)
+            throw new InvalidInputException(Message.DATE_NULL);
+        if (auctionDomain.getDate() - new Date().getTime() < 1800000L)
+            throw new InvalidInputException(Message.DATE_INVALID);
+        if (auctionDomain.getBase_price() < 0)
+            throw new InvalidInputException(Message.BASE_PRICE_NULL);
+        if (auctionDomain.getMax_number() < 2)
+            throw new InvalidInputException(Message.MAX_NUMBER_TOO_LOW);
+        if (auctionDomain.getMax_number() > 15)
+            throw new InvalidInputException(Message.MAX_NUMBER_TOO_HIGH);
     }
 
-
-    public Auction toAuction(AuctionDomain auctionDomain) {
+    private Auction toAuction(AddAuctionDomain auctionDomain) {
         Date date = new Date(auctionDomain.getDate());
         Category category = categoryRepository.findById(auctionDomain.getCategory_id()).orElseThrow(() -> new InvalidInputException(Message.CATEGORY_INVALID));
         Auction auction = new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(), auctionDomain.getBase_price(), category, date, userDetailsService.getUser(), auctionDomain.getMax_number());
@@ -84,8 +84,8 @@ public class AuctionService {
                 picture.getFileName().contains("/" + auction.getId() + "/")).map(
                 picture -> "http://" + ip + picture.getFileName()
         ).collect(Collectors.toList());
+        System.out.println("here");
         auctionDomain.setPictures(auctionPictures);
-
         return auctionDomain;
     }
 
@@ -100,7 +100,7 @@ public class AuctionService {
     }
 
     public List<AuctionDomain> getAllAliveAuctions() {
-        return Lists.newArrayList(auctionRepository.findAll()).stream().filter(auction -> auction.getState() == 0)
+        return Lists.newArrayList(auctionRepository.findAll()).stream().filter(auction -> auction.getState() == 0).sorted((a,b) -> b.getId() - a.getId())
                 .map(a -> toAuctionDomain(a))
                 .collect(Collectors.toList());
     }
@@ -141,7 +141,6 @@ public class AuctionService {
         Page<AuctionDomain> pages = new PageImpl(list.subList(start, end), pageable, list.size());
         return pages;
     }
-
 
     public Page<AuctionDomain> getHottest(PageRequest request) {
         return toAuctionDomainPage(auctionRepository.findHottest(request));
