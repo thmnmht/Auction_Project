@@ -52,10 +52,10 @@ public class PictureService {
         logger.info("directory created");
         for (MultipartFile image :
                 images) {
-            String fileName = new Date().getTime() + ".jpg";
-            String pathName = "./usr/local/share/Auction_back/images/auction_images/" + auction.getId() + "/" + fileName;
+            String fileName = "auction_images/" + auction.getId() + "/" +  new Date().getTime() + ".jpg";
+            String pathName = "./usr/local/share/Auction_back/images/";
             try {
-                saveAuctionPicture(image, pathName, auction);
+                saveAuctionPicture(image, pathName, auction,fileName);
             } catch (IOException e) {
                 logger.error(e.getMessage());
             }
@@ -63,8 +63,7 @@ public class PictureService {
     }
 
 
-    public void saveAuctionPicture(MultipartFile pic, String path, Auction auction) throws IOException {
-        String file_name = path.substring(33);
+    public void saveAuctionPicture(MultipartFile pic, String path, Auction auction,String file_name) throws IOException {
         Picture picture = new Picture(file_name, auction);
         pictureRepository.save(picture);
         logger.info("added picture to repository");
@@ -74,11 +73,11 @@ public class PictureService {
     public SimpleUserDomain setProfilePicture(User user,MultipartFile picture){
         int userId = user.getId();
         new File("./usr/local/share/Auction_back/images/profile_images/" + userId + "/").mkdirs();
-        String fileName = new Date().getTime() + ".jpg";
-        String pathName = "./usr/local/share/Auction_back/images/profile_images/" + userId + "/" + fileName;
+        String fileName = "profile_images/" + userId + "/" + new Date().getTime() + ".jpg";
+        String pathName = "./usr/local/share/Auction_back/images/" +  fileName;
         try {
             save(picture, pathName);
-            user.setPicture(pathName.substring(33));
+            user.setPicture(fileName);
             userRepository.save(user);
         } catch (IOException e) {
             logger.error(e.getMessage());
