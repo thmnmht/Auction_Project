@@ -14,28 +14,18 @@ import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
 import com.rahnemacollege.util.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Collectors;
-
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Service
 public class AuctionService {
@@ -45,6 +35,9 @@ public class AuctionService {
     private final UserDetailsServiceImpl userDetailsService;
     private final PictureService pictureService;
     private final Validator validator;
+
+    @Value("${server_ip}")
+    private String ip;
 
     @Autowired
     public AuctionService(AuctionRepository auctionRepository, CategoryRepository categoryRepository,
@@ -92,13 +85,14 @@ public class AuctionService {
     }
 
     public AuctionDomain toAuctionDomain(Auction auction,String url) {
-        AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(), auction.getDescription(), auction.getBase_price(), auction.getDate().getTime(), auction.getCategory().getId(), auction.getMax_number());
+        String u = "http://" + ip;
+                AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(), auction.getDescription(), auction.getBase_price(), auction.getDate().getTime(), auction.getCategory().getId(), auction.getMax_number());
         auctionDomain.setId(auction.getId());
         if(auction.getOwner().getId() == userDetailsService.getUser().getId())
             auctionDomain.setMine(true);
         List<String> auctionPictures = pictureService.getAll().stream().filter(picture ->
                 picture.getFileName().contains("/" + auction.getId() + "/")).map(
-                picture -> url + picture.getFileName()
+                picture -> u + picture.getFileName()
         ).collect(Collectors.toList());
         auctionDomain.setPictures(auctionPictures);
 
@@ -116,7 +110,7 @@ public class AuctionService {
     }
 
     public List<AuctionDomain> getAll(String url) {
-        return Lists.newArrayList(auctionRepository.findAll()).stream()
+        return Lists.newArrayList(auctionRepository.findAll()).stream().filter(auction -> auction.getState() == 0)
                 .map(a -> toAuctionDomain(a,url))
                 .collect(Collectors.toList());
     }

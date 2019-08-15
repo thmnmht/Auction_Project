@@ -2,12 +2,14 @@ package com.rahnemacollege.service;
 
 import com.google.common.collect.Lists;
 import com.rahnemacollege.domain.AuthenticationResponse;
+import com.rahnemacollege.domain.SimpleUserDomain;
 import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.UserRepository;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -20,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +36,11 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final Validator validator;
     private final TokenUtil tokenUtil;
+    private final String VALID_EMAIL_REGEX = "^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$";
 
+
+    @Value("${server_ip}")
+    private String ip;
 
 
     public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService, PictureService pictureService, PasswordEncoder encoder, AuthenticationManager authenticationManager, Validator validator, TokenUtil tokenUtil) {
@@ -53,11 +60,18 @@ public class UserService {
         return false;
     }
 
-    public UserDomain addUser(String name, String email, String password,String url) {
-        validation(name, email, password);
+    public SimpleUserDomain addUser(String name, String email, String password) {
+        if (!email.matches(VALID_EMAIL_REGEX))
+            throw new InvalidInputException(Message.EMAIL_INVALID);
+        if(repository.findByEmail(email).isPresent())
+            throw new InvalidInputException(Message.EMAIL_DUPLICATED);
+        if(password.length() < 6)
+            throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
+        if(password.length() > 100)
+            throw new InvalidInputException(Message.PASSWORD_TOO_HIGH);
         User user = new User(name, email, encoder.encode(password));
         repository.save(user);
-        return toUserDomain(user,url);
+        return new SimpleUserDomain(name,email,user.getId());
     }
 
 
@@ -68,9 +82,9 @@ public class UserService {
         validator.validEmail(email);
     }
 
-    public List<UserDomain> getAll(String url) {
+    public List<UserDomain> getAll() {
         ArrayList<UserDomain> users = new ArrayList<>();
-        Lists.newArrayList(repository.findAll()).stream().map(user -> toUserDomain(user,url)).forEach(users::add);
+        Lists.newArrayList(repository.findAll()).stream().map(user -> toUserDomain(user)).forEach(users::add);
         return users;
     }
 
@@ -119,15 +133,17 @@ public class UserService {
         return user;
     }
 
-    public AuthenticationResponse auth(String email,String password){
+    public AuthenticationResponse auth(String email,String password) throws InvalidInputException{
+        if (!isExist(email))
+            throw new InvalidInputException(Message.EMAIL_NOT_FOUND);
         authenticate(email, password);
         final UserDetails userDetails = userDetailsService.loadUserByUsername(email);
         final String token = tokenUtil.generateToken(userDetails);
         return new AuthenticationResponse(token);
     }
 
-    public UserDomain toUserDomain(User user,String url) {
-        UserDomain userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), url + user.getPicture());
+    public UserDomain toUserDomain(User user) {
+        UserDomain userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), "http://" + ip + user.getPicture());
         return userDomain;
     }
 
@@ -135,13 +151,12 @@ public class UserService {
     private String savePicture(MultipartFile picture) throws IOException {
         int userId = userDetailsService.getUser().getId();
         new File("./images/profile_images/" + userId + "/").mkdirs();
-        String fileName = userId + ".jpg";
+        String fileName = new Date().getTime() + ".jpg";
         String pathName = "./images/profile_images/" + userId + "/" + fileName;
         pictureService.save(picture, pathName);
         return pathName.substring(8);
     }
 
-    //TODO
     public void setPicture(MultipartFile picture) {
         if(picture == null)
             return;
