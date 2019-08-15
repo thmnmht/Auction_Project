@@ -37,16 +37,19 @@ public class PictureService {
     }
 
     public void save(MultipartFile pic, String path) throws IOException {
+        logger.info("start to try save picture with path: " + path);
         File upl = new File(path);
         upl.createNewFile();
         FileOutputStream fout = new FileOutputStream(upl);
         fout.write(pic.getBytes());
         fout.close();
+        logger.info("picture saved");
     }
 
 
     public void setAuctionPictures(Auction auction,MultipartFile[] images) {
         new File("./home/sobhan/Auction_back/images/auction_images/" + auction.getId() + "/").mkdirs();
+        logger.info("directory created");
         for (MultipartFile image :
                 images) {
             String fileName = new Date().getTime() + ".jpg";
@@ -64,6 +67,7 @@ public class PictureService {
         String file_name = path.substring(33);
         Picture picture = new Picture(file_name, auction);
         pictureRepository.save(picture);
+        logger.info("added picture to repository");
         save(pic, path);
     }
 
