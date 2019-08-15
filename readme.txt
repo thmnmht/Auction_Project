@@ -15,19 +15,26 @@ header "auth" : "Bearer 'Token'"
 ************************************************************************************************************************
 
 -/auctions/find/{id}    GET : get an auction
+************************************************************************************************************************
+
+-/auctions/add/picture/{id}   POST : set a picture for an auction
+            @PathVariable int id, @RequestBody MultipartFile[] images
 
 ************************************************************************************************************************
 
 -/auctions/add  POST : add a new Auction
-        String title, String description, int base_price, long date, int category_id, int max_number, MultipartFile[] images
+
+        {
+            title,description,base_price,date,category_id,max_number
+        }
 
 
-        430 : if title.length < 1 || title==null
+        430 : if title == null
         451 : if title.length > 50
-        432 : if base_price < 0
+        432 : if base_price == null
         452 : if description > 1000
         436 : if category doesn't exist
-        438 : if date contains unsupported value
+        438 : if date == null
         437 : if date is too soon (less than half an hour)
         434 : if max_number  < 2
         435 : if max_number > 15
@@ -36,6 +43,17 @@ header "auth" : "Bearer 'Token'"
         response => Resource<AuctionDomain> : AuctionDomain{
                    title,description,base_price,date,category_id,max_number,pictures,state
         }
+
+
+************************************************************************************************************************
+
+-auctions/addBookmark POST:
+    @Param ("auctionId") Integer
+
+    out : Resource<AuctionDomain>
+    454 if auctionId = null
+    455 if no auction found by Id
+    456 if server DB contains null auction
 
 ************************************************************************************************************************
 ************************************************************************************************************************
@@ -55,9 +73,10 @@ header "auth" : "Bearer 'Token'"
             password
         }
 
+        439 : if email = null
         441 : if password < 6
         442 : if password > 100
-        440 : if name < 1
+        440 : if name = null
         443 : if email isn't valid
         454 : if email is duplicated
 
@@ -98,14 +117,14 @@ header "auth" : "Bearer 'Token'"
 ************************************************************************************************************************
 ************************************************************************************************************************
 
--/home/search/{title} GET : search by title
-        String title, @PathParam("category") int[] categories_id, @RequestParam("page") int page, @RequestParam("size") int size
-        if category was empty it search with all categories :)
+-/home/search/{category} POST : search by title
+        @PathParam("title") String title, @PathVariable int category, @RequestParam("page") int page, @RequestParam("size") int size,
+        if category was 0 it search with all categories :)
 
 ************************************************************************************************************************
 
--/home/filter GET : filter some categories
-        @PathParam("category") int[] categories_id, @RequestParam("page") int page, @RequestParam("size") int size
+-/home/filter/{category_id} GET : filter some categories
+        @RequestParam("page") int page, @RequestParam("size") int size
 
 ************************************************************************************************************************
 
@@ -141,13 +160,3 @@ header "auth" : "Bearer 'Token'"
     out : Resource<User>
     449 if token not found
     450 if request hasn't been recorded
-
-************************************************************************************************************************
-
--auctions/addBookmark POST:
-    @Param ("auctionId") Integer
-
-    out : Resource<AuctionDomain>
-    454 if auctionId = null
-    455 if no auction found by Id
-    456 if server DB contains null auction
