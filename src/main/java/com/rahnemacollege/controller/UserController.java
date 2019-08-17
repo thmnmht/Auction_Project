@@ -16,10 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
-import javax.ws.rs.PathParam;
+import javax.websocket.server.PathParam;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -95,16 +95,21 @@ public class UserController {
     }
 
     @RequestMapping(value = "/edit/password", method = RequestMethod.POST)
-    public Resource<SimpleUserDomain> setNewPassword(@RequestParam("oPassword") String oPassword,@RequestParam("nPassword") String nPassword) {
-        log.info(detailsService.getUser().getEmail() + " try to change password");
+    public Resource<SimpleUserDomain> setNewPassword(@RequestParam("oPassword") String oPassword, @RequestParam("nPassword") String nPassword) {
+        log.info(detailsService.getUser().getEmail() + " tries to change password");
         User user = detailsService.getUser();
-        if (nPassword == null || oPassword == null || nPassword.length() < 6)
+        if (nPassword == null || oPassword == null || nPassword.length() < 6) {
+            log.error("Invalid password input to be changed.");
             throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
-        if (!passwordService.getPasswordEncoder().matches(oPassword,user.getPassword()))
+        }
+        if (!passwordService.getPasswordEncoder().matches(oPassword, user.getPassword())) {
+            log.error("OldPassword doesn't match user's password");
             throw new InvalidInputException(Message.PASSWORD_INCORRECT);
+        }
+        log.info("Password changed for : " + detailsService.getUser().getEmail());
         return assembler.toResource(userService.changePassword(user, nPassword));
-
     }
+
 
     @PostMapping(value = "/signup", consumes = "application/json")
     public ResponseEntity<SimpleUserDomain> add(@RequestBody AddUserDomain userDomain) {
@@ -129,14 +134,13 @@ public class UserController {
     }
 
 
-    //TODO : refactoring
     @RequestMapping(value = "/forgot", method = RequestMethod.POST)
     public Resource<UserDomain> processForgotPasswordForm(@RequestParam("email") String userEmail, HttpServletRequest request) {
         userEmail = userEmail.toLowerCase();
-        System.out.println(userEmail);
+        log.info(userEmail + " has just requested for password recovery email.");
         Optional<User> optional = userService.findUserByEmail(userEmail);
         if (!optional.isPresent()) {
-            System.err.println("email not found on DB");
+            log.error("There's not account found for " + userEmail);
             throw new InvalidInputException(Message.EMAIL_NOT_FOUND);
         } else {
             String token;
@@ -159,48 +163,53 @@ public class UserController {
             String appUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
             try {
                 emailService.sendPassRecoveryMail(userEmail, appUrl, token);
+                log.info("A password reset link has been sent to " + userEmail + " @" +
+                        new Date());
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            System.err.println("successMessage" + " A validPassword reset link has been sent to " + userEmail + " @" +
-                    new Date());
             return assembler.toResource(userService.toUserDomain(optional.get()));
         }
     }
 
-    //TODO : refactoring
+
     @RequestMapping(value = "/reset", method = RequestMethod.GET)
-    public Resource<UserDomain> displayResetPasswordPage(@PathParam("token") String token) {
+    public String displayResetPasswordPage(@PathParam("token") String token, RedirectAttributes redirectAttributes) {
+        log.info("Validation check for token :\"" + token + "\" is requested.");
         Optional<ResetRequest> request = requestService.findByToken(token);
         if (request.isPresent()) {
-//            todo: redirect to validPassword reset page
             System.err.println("redirecting to pass reset screen");
-            return assembler.toResource(userService.toUserDomain(request.get().getUser()));
+            redirectAttributes.addAttribute("token", token);
+            log.info("Redirecting to passwordReset page for token : \"" + token + "\"");
+            return "redirect:/passwordReset?token="+token;
         } else {
+            log.error("Token: \"" + token + "\" is invalid to reset password");
             System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");
             throw new InvalidInputException(Message.INVALID_RESET_LINK);
         }
     }
 
-    //TODO : refactoring
+
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
     public Resource<UserDomain> setNewPassword(@RequestParam Map<String, String> requestParams) {
-        ResetRequest request = requestService.findByToken(requestParams.get("token")).orElseThrow(() -> new InvalidInputException(Message.TOKEN_NOT_FOUND));
+        log.info("Reset password request received for token :\"" + requestParams.get("token") + "\"");
+        ResetRequest request = requestService.findByToken(requestParams.get("token")).orElseGet(() -> {
+            log.error("No request recorded for token: \"" + requestParams.get("token") + "\"");
+            throw new InvalidInputException(Message.TOKEN_NOT_FOUND);
+        });
         User resetUser = request.getUser();
-        if (resetUser != null) {
+        if (resetUser != null ) {
+            new Validator().validPassword(requestParams.get("validPassword"));
             resetUser.setPassword(passwordService.getPasswordEncoder().encode(requestParams.get("validPassword")));
             requestService.removeRequest(request);
             userService.addUser(resetUser);
-            System.err.println("successMessage: You have successfully reset your validPassword.  You may now login.");
+            log.info(resetUser.getEmail()+ " successfully reset his/her password");
             //TODO : redirect:login
             return assembler.toResource(userService.toUserDomain(resetUser));
         } else {
-            System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");
+            log.error("Invalid password reset link.");
             throw new InvalidInputException(Message.NOT_RECORDED_REQUEST);
         }
     }
-
-    // TODO: redirect to login page
-
 
 }
