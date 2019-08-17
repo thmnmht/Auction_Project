@@ -29,6 +29,7 @@ public class PictureService {
     @Autowired
     private UserRepository userRepository;
     private final Logger logger = LoggerFactory.getLogger(PictureService.class);
+    private final String IMAGE_PATH = "./usr/local/share/Auction_back/images";
 
 
 
@@ -48,12 +49,13 @@ public class PictureService {
 
 
     public void setAuctionPictures(Auction auction,MultipartFile[] images) {
-        new File("./usr/local/share/Auction_back/images/auction_images/" + auction.getId() + "/").mkdirs();
+        String path = IMAGE_PATH + "/auction_images/" + auction.getId() + "/";
+        new File(path).mkdirs();
         logger.info("directory created");
         for (MultipartFile image :
                 images) {
             String fileName = "/auction_images/" + auction.getId() + "/" +  new Date().getTime() + ".jpg";
-            String pathName = "./usr/local/share/Auction_back/images" + fileName;
+            String pathName = IMAGE_PATH + fileName;
             try {
                 saveAuctionPicture(image, pathName, auction,fileName);
             } catch (IOException e) {
@@ -72,9 +74,10 @@ public class PictureService {
 
     public SimpleUserDomain setProfilePicture(User user,MultipartFile picture){
         int userId = user.getId();
-        new File("./usr/local/share/Auction_back/images/profile_images/" + userId + "/").mkdirs();
+        String path = IMAGE_PATH + "/profile_images/" + userId + "/";
+        new File(path).mkdirs();
         String fileName = "/profile_images/" + userId + "/" + new Date().getTime() + ".jpg";
-        String pathName = "./usr/local/share/Auction_back/images" +  fileName;
+        String pathName = IMAGE_PATH +  fileName;
         try {
             save(picture, pathName);
             user.setPicture(fileName);

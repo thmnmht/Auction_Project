@@ -10,6 +10,7 @@ import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -25,27 +26,26 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    private final UserRepository repository;
-    private final PasswordEncoder encoder;
-    private final AuthenticationManager authenticationManager;
-    private final Validator validator;
-    private final TokenUtil tokenUtil;
-    private final Logger logger;
+    @Autowired
+    private UserRepository repository;
 
+    @Autowired
+    private PasswordEncoder encoder;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private TokenUtil tokenUtil;
+
+
+    private final Logger logger;
     private final String VALID_EMAIL_REGEX = "^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$";
 
     @Value("${server_ip}")
     private String ip;
 
 
-    public UserService(UserRepository repository,
-                       PasswordEncoder encoder,
-                       AuthenticationManager authenticationManager, Validator validator, TokenUtil tokenUtil) {
-        this.repository = repository;
-        this.encoder = encoder;
-        this.authenticationManager = authenticationManager;
-        this.validator = validator;
-        this.tokenUtil = tokenUtil;
+    public UserService() {
         logger = LoggerFactory.getLogger(UserService.class);
     }
 
@@ -101,11 +101,12 @@ public class UserService {
     }
 
     public User edit(User user, String name, String email) throws InvalidInputException {
-        if (!validator.isEmpty(email) && !user.getEmail().equals(email)) {
-            validator.validEmail(email);
+        if (email != null && email.length() > 1 && !user.getEmail().equals(email)) {
+            if(!email.matches(VALID_EMAIL_REGEX))
+                throw new InvalidInputException(Message.EMAIL_INVALID);
             user.setEmail(email);
         }
-        if (!validator.isEmpty(name))
+        if (name != null && name.length() > 0)
             user.setName(name);
         repository.save(user);
         return user;
