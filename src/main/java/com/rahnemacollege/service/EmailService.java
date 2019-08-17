@@ -1,6 +1,7 @@
 package com.rahnemacollege.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -13,6 +14,7 @@ import javax.mail.internet.MimeMessage;
 @EnableAsync
 public class EmailService {
     private final JavaMailSender mailSender;
+
 
     @Autowired
     public EmailService(JavaMailSender mailSender) {

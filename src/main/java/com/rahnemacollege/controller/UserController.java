@@ -10,6 +10,7 @@ import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,8 @@ public class UserController {
     private final PictureService pictureService;
     private final TokenUtil tokenUtil;
     private final Logger log;
+    @Value("${server_ip}")
+    private String ip;
 
 
     public UserController(UserService userService, ResourceAssembler assembler, PasswordService passwordService,
@@ -159,8 +162,8 @@ public class UserController {
                 resetRequest = new ResetRequest(optional.get(), new Date(), token);
                 requestService.addRequest(resetRequest);
             }
-
-            String appUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+            String appUrl = request.getScheme() + "://" + ip;
+//            String appUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
             try {
                 emailService.sendPassRecoveryMail(userEmail, appUrl, token);
                 log.info("A password reset link has been sent to " + userEmail + " @" +
