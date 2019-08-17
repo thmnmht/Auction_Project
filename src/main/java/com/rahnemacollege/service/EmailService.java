@@ -23,7 +23,9 @@ public class EmailService {
     @Async
     public void sendPassRecoveryMail(String userEmail, String appUrl, String token) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
+
         MimeMessageHelper helper = new MimeMessageHelper(message);
+        helper.setFrom("fivegears.rahnema@gmail.com");
         helper.setTo(userEmail);
         String text = "To reset your validPassword, click the link below:\n" + appUrl
                 + "/users/reset?token=" + token;
