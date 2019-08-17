@@ -41,7 +41,7 @@ public class InitTest {
     protected final String ADD = "/auctions/add";
     protected final String ADD_PICTURE = "/auctions/add/picture/";
     protected final String FIND = "/auctions/find/";
-    protected final String ADD_BOOKMARK = "/auctions/addBookmark";
+    protected final String ADD_BOOKMARK = "/auctions/bookmark/";
     protected final String ALL = "/auctions/all";
     protected final String SEARCH = "/home/search/";
 

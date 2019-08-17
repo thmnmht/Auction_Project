@@ -144,9 +144,10 @@ public class UserController {
     }
 
     @GetMapping("/auctions")
-    public Resources<Resource<AuctionDomain>> allUserAuctions(@RequestParam("page") int page,
-                                                              @RequestParam("size") int size,
-                                                              PagedResourcesAssembler<AuctionDomain> assembler) {
+    public Resources<Resource<AuctionDomain>> allUserAuctions(PagedResourcesAssembler<AuctionDomain> assembler) {
+        //TODO : change it
+        int page = 0;
+        int size = 1000;
         User user = detailsService.getUser();
         return assembler.toResource(auctionService.findByOwner(user, page, size));
     }
