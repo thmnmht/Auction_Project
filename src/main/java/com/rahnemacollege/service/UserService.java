@@ -129,6 +129,6 @@ public class UserService {
         return userDomain;
     }
 
-    public void getUserBookmarks()
+    
 
 }
