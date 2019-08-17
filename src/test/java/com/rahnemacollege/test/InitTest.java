@@ -2,10 +2,12 @@ package com.rahnemacollege.test;
 
 import com.google.gson.Gson;
 import com.rahnemacollege.domain.AuthenticationResponse;
+import com.rahnemacollege.domain.SimpleUserDomain;
 import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.User;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,6 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -48,10 +51,11 @@ public class InitTest {
     protected final String Image_PATH = "Beautiful_Fantasy_Worlds_Wallpapers_31.jpg";
 
 
-    @BeforeClass
-    public static void signup() throws Exception{
+   /* @Test
+    public void signup() throws Exception{
         //??
-        /*User user = new User();
+        gson = new Gson();
+        User user = new User();
         user.setName("ali");
         user.setEmail("ali_alavi@gmail.com");
         user.setPassword("123456");
@@ -60,8 +64,8 @@ public class InitTest {
         String response = gson.toJson(userDomain);
         String request = gson.toJson(user);
         mvc.perform(MockMvcRequestBuilders.post("/users/signup").contentType(MediaType.APPLICATION_JSON).content(request))
-                .andExpect(status().isOk()).andExpect(content().json(response));*/
-    }
+                .andExpect(status().isOk()).andExpect(content().json(response));
+    }*/
 
 
     @Before
