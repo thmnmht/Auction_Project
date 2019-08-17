@@ -6,24 +6,40 @@ import com.rahnemacollege.domain.AddAuctionDomain;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
+import com.rahnemacollege.model.Picture;
+import com.rahnemacollege.model.User;
+import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.AuctionRepository;
 import com.rahnemacollege.repository.CategoryRepository;
+import com.rahnemacollege.repository.UserRepository;
 import com.rahnemacollege.repository.PictureRepository;
+import com.rahnemacollege.repository.UserRepository;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class AuctionService {
 
+    private final UserRepository userRepository;
     private final AuctionRepository auctionRepository;
     private final CategoryRepository categoryRepository;
     private final UserDetailsServiceImpl userDetailsService;
@@ -33,9 +49,10 @@ public class AuctionService {
     private String ip;
 
     @Autowired
-    public AuctionService(AuctionRepository auctionRepository, CategoryRepository categoryRepository,
+    public AuctionService(UserRepository userRepository, AuctionRepository auctionRepository, CategoryRepository categoryRepository,
                           UserDetailsServiceImpl userDetailsService,
                           PictureRepository pictureRepository) {
+        this.userRepository = userRepository;
         this.auctionRepository = auctionRepository;
         this.categoryRepository = categoryRepository;
         this.userDetailsService = userDetailsService;
@@ -75,6 +92,10 @@ public class AuctionService {
         return auction;
     }
 
+    public Auction findAuctionById(int id) {
+        return auctionRepository.findById(id).orElseThrow(() -> new InvalidInputException(Message.AUCTION_NOT_FOUND));
+    }
+
     public AuctionDomain toAuctionDomain(Auction auction) {
         AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(), auction.getDescription(), auction.getBase_price(), auction.getDate().getTime(), auction.getCategory().getId(), auction.getMax_number());
         auctionDomain.setId(auction.getId());
@@ -84,7 +105,6 @@ public class AuctionService {
                 picture.getFileName().contains("/" + auction.getId() + "/")).map(
                 picture -> "http://" + ip + picture.getFileName()
         ).collect(Collectors.toList());
-        System.out.println("here");
         auctionDomain.setPictures(auctionPictures);
         return auctionDomain;
     }
@@ -130,11 +150,23 @@ public class AuctionService {
         return toPage(auctions, page, size);
     }
 
+    public Page<AuctionDomain> findByOwner(User user, int page, int size) {
+        List<AuctionDomain> auctions = toAuctionDomainList(auctionRepository.findByOwner_id(user.getId()));
+        return toPage(auctions, page, size);
+    }
+
+    public List<AuctionDomain> toAuctionDomainList(List<Auction> auctions) {
+        return Lists.newArrayList(auctions.stream()
+                .map(this::toAuctionDomain)
+                .collect(Collectors.toList()));
+    }
+
+
     public Page<AuctionDomain> getAllAuctions(int page, int size) {
         return toPage(getAll(), page, size);
     }
 
-    private Page<AuctionDomain> toPage(List<AuctionDomain> list, int page, int size) {
+    public Page<AuctionDomain> toPage(List<AuctionDomain> list, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         int start = (int) pageable.getOffset();
         int end = (start + pageable.getPageSize()) > list.size() ? list.size() : (start + pageable.getPageSize());
@@ -150,6 +182,17 @@ public class AuctionService {
         List<AuctionDomain> auctionDomainList = new ArrayList<>();
         auctionPage.forEach(auction -> auctionDomainList.add(toAuctionDomain(auction)));
         return new PageImpl<>(auctionDomainList);
+    }
+
+
+    @Transactional
+    public void addBookmark(User user, int id) {
+        user = userRepository.findByEmail(user.getEmail()).get();
+        Set<Auction> bookmarks = user.getBookmarks();
+        Auction newBookmark = auctionRepository.findById(id).orElseThrow(() -> new InvalidInputException(Message.AUCTION_NOT_FOUND));
+        bookmarks.add(newBookmark);
+        user.setBookmarks(bookmarks);
+        userRepository.save(user);
     }
 
 }

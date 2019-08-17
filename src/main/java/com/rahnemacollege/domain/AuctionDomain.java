@@ -1,11 +1,8 @@
 package com.rahnemacollege.domain;
 
+
 import lombok.Data;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Size;
-import java.util.Date;
 import java.util.List;
 
 
@@ -18,8 +15,8 @@ public class AuctionDomain {
     private long date = -1;
     private int category_id;
     private int max_number = -1;
+    private boolean is_bookmark = false;
     private boolean isMine = false;
-    private boolean isBookMark = false;
     private int id;
 
     private List<String> pictures;
@@ -37,7 +34,5 @@ public class AuctionDomain {
         this.category_id = category_id;
         this.max_number = max_number;
     }
-
-
 
 }

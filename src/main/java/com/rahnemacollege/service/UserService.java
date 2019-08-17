@@ -1,15 +1,19 @@
 package com.rahnemacollege.service;
 
 import com.google.common.collect.Lists;
+import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.domain.SimpleUserDomain;
 import com.rahnemacollege.domain.UserDomain;
+import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.UserRepository;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
+import org.springframework.data.domain.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -17,6 +21,11 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,27 +34,30 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    private final UserRepository repository;
-    private final PasswordEncoder encoder;
-    private final AuthenticationManager authenticationManager;
-    private final Validator validator;
-    private final TokenUtil tokenUtil;
-    private final Logger logger;
+    @Autowired
+    private UserRepository repository;
 
+    @Autowired
+    private PasswordEncoder encoder;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private TokenUtil tokenUtil;
+
+    @Autowired
+    private AuctionService auctionService;
+
+
+
+    private final Logger logger;
     private final String VALID_EMAIL_REGEX = "^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$";
 
     @Value("${server_ip}")
     private String ip;
 
 
-    public UserService(UserRepository repository,
-                       PasswordEncoder encoder,
-                       AuthenticationManager authenticationManager, Validator validator, TokenUtil tokenUtil) {
-        this.repository = repository;
-        this.encoder = encoder;
-        this.authenticationManager = authenticationManager;
-        this.validator = validator;
-        this.tokenUtil = tokenUtil;
+    public UserService() {
         logger = LoggerFactory.getLogger(UserService.class);
     }
 
@@ -101,11 +113,12 @@ public class UserService {
     }
 
     public User edit(User user, String name, String email) throws InvalidInputException {
-        if (!validator.isEmpty(email) && !user.getEmail().equals(email)) {
-            validator.validEmail(email);
+        if (email != null && email.length() > 1 && !user.getEmail().equals(email)) {
+            if(!email.matches(VALID_EMAIL_REGEX))
+                throw new InvalidInputException(Message.EMAIL_INVALID);
             user.setEmail(email);
         }
-        if (!validator.isEmpty(name))
+        if (name != null && name.length() > 0)
             user.setName(name);
         repository.save(user);
         return user;
@@ -119,6 +132,14 @@ public class UserService {
             userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), user.getPicture());
         return userDomain;
     }
+
+    @Transactional
+    public Page<AuctionDomain> getUserBookmarks(String email, int page, int size) {
+        User user = repository.findByEmail(email).get();
+        List<Auction> bookmarks = new ArrayList<>(user.getBookmarks());
+        return auctionService.toPage(auctionService.toAuctionDomainList(bookmarks), page, size);
+    }
+
 
 
 }

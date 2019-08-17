@@ -4,6 +4,9 @@ import com.rahnemacollege.domain.*;
 import com.rahnemacollege.model.ResetRequest;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.*;
+import com.rahnemacollege.service.AuctionService;
+import com.rahnemacollege.service.PasswordService;
+import com.rahnemacollege.service.UserDetailsServiceImpl;
 import com.rahnemacollege.util.ResourceAssembler;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
@@ -11,7 +14,9 @@ import com.rahnemacollege.util.exceptions.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,6 +43,8 @@ public class UserController {
     private final EmailService emailService;
     private final PictureService pictureService;
     private final TokenUtil tokenUtil;
+    private final AuctionService auctionService;
+
     private final Logger log;
     @Value("${server_ip}")
     private String ip;
@@ -47,7 +54,7 @@ public class UserController {
                           UserDetailsServiceImpl userDetailService,
                           UserDetailsServiceImpl detailsService,
                           ResetRequestService requestService,
-                          EmailService emailService, PictureService pictureService, TokenUtil tokenUtil) {
+                          EmailService emailService, PictureService pictureService, TokenUtil tokenUtil, AuctionService auctionService) {
         this.userService = userService;
         this.assembler = assembler;
         this.passwordService = passwordService;
@@ -57,6 +64,7 @@ public class UserController {
         this.emailService = emailService;
         this.pictureService = pictureService;
         this.tokenUtil = tokenUtil;
+        this.auctionService = auctionService;
         log = LoggerFactory.getLogger(UserController.class);
     }
 
@@ -135,6 +143,31 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    @GetMapping("/auctions")
+    public Resources<Resource<AuctionDomain>> allUserAuctions(@RequestParam("page") int page,
+                                                              @RequestParam("size") int size,
+                                                              PagedResourcesAssembler<AuctionDomain> assembler) {
+        User user = detailsService.getUser();
+        return assembler.toResource(auctionService.findByOwner(user, page, size));
+    }
+
+
+    @GetMapping("/bookmarks")
+    public Resources<Resource<AuctionDomain>> userBookmarks(@RequestParam("page") int page,
+                                                            @RequestParam("size") int size,
+                                                            PagedResourcesAssembler<AuctionDomain> assembler) {
+        User user = detailsService.getUser();
+        return assembler.toResource(userService.getUserBookmarks(user.getEmail(), page, size));
+    }
+
+
+    /*@GetMapping("/filter")
+    public Resources<Resource<AuctionDomain>> filter(@PathParam("category") int[] categories_id,
+                                                     @RequestParam("page") int page, @RequestParam("size") int size,
+                                                     PagedResourcesAssembler<AuctionDomain> assembler) {
+        return assembler.toResource(auctionService.filter(categories_id, page, size));
+    }*/
+
 
     @RequestMapping(value = "/forgot", method = RequestMethod.POST)
     public Resource<UserDomain> processForgotPasswordForm(@RequestParam("email") String userEmail, HttpServletRequest request) {
@@ -184,7 +217,10 @@ public class UserController {
         });
         User resetUser = request.getUser();
         if (resetUser != null ) {
-            new Validator().validPassword(requestParams.get("validPassword"));
+            if(requestParams.get("validPassword") == null || requestParams.get("validPassword").length() < 6)
+                throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
+            if(requestParams.get("validPassword").length() > 100)
+                throw new InvalidInputException(Message.PASSWORD_TOO_HIGH);
             resetUser.setPassword(passwordService.getPasswordEncoder().encode(requestParams.get("validPassword")));
             requestService.removeRequest(request);
             userService.addUser(resetUser);

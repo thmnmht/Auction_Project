@@ -1,24 +1,23 @@
 package com.rahnemacollege.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.Date;
 
 
 @Data
 @Entity
 @Table(name = "Auctions")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Auction {
 
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @EqualsAndHashCode.Include
     private int id;
     private String title;
     private String description;

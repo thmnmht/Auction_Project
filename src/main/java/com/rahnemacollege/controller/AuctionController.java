@@ -22,13 +22,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.ws.rs.PathParam;
 import java.util.List;
 import org.slf4j.Logger;
 
 
 @RestController
 @RequestMapping("/auctions")
+
 public class AuctionController {
 
     private final AuctionService auctionService;
@@ -79,15 +79,15 @@ public class AuctionController {
         return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id)));
     }
 
+
     @RequestMapping(value = "/addBookmark", method = RequestMethod.POST)
     public Resource<AuctionDomain> addBookmark(@RequestParam("auctionId") Integer id) {
         log.info(userDetailsService.getUser().getName() + " try to add bookmark");
         User user = userDetailsService.getUser();
         if (id != null) {
-            if (auctionService.findById(id)!= null){
-                user.getBookmarks().add(auctionService.findById(id));
-                userService.addUser(user);
-                return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id)));
+            if (auctionService.findAuctionById(id)!= null){
+                auctionService.addBookmark(user, id);
+                return assembler.toResource(auctionService.toAuctionDomain(auctionService.findAuctionById(id)));
             }
             throw new InvalidInputException(Message.REALLY_BAD_SITUATION);
         }
