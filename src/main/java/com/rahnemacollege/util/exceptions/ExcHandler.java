@@ -69,7 +69,6 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
             case EMAIL_INVALID:
                 response.setStatus(443);
                 break;
-            //it change
             case EMAIL_DUPLICATED:
                 response.setStatus(454);
                 break;
@@ -81,7 +80,7 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
 
             //validPassword recovery
             case EMAIL_NOT_FOUND:
-                response.setStatus(447);
+                response.setStatus(446);
                 break;
             case INVALID_RESET_LINK:
                 response.setStatus(448);
@@ -95,15 +94,21 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
 
             //addBookmark
             case INVALID_ID:
-                response.setStatus(454);
+                response.setStatus(457);
                 break;
             case AUCTION_NOT_FOUND:
-                response.setStatus(455);
+                response.setStatus(458);
                 break;
             case REALLY_BAD_SITUATION:
                 response.setStatus(456);
                 break;
+            case FORBIDDEN_REQUEST:
+                response.setStatus(499);
+                break;
+            case PICTURE_NULL:
+                response.setStatus(498);
         }
+
         logger.error(ex.getMessageStatus().toString());
     }
 
@@ -118,7 +123,14 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {NotFoundException.class})
     protected void notFound(NotFoundException ex,
                             HttpServletResponse response) {
-        response.setStatus(446);
+        response.setStatus(447);
+        logger.error(ex.getMessage());
+    }
+
+    @ExceptionHandler(value = {NullPointerException.class})
+    protected void nullValue(NullPointerException ex,
+                            HttpServletResponse response) {
+        logger.error("something is null -_-");
         logger.error(ex.getMessage());
     }
 }

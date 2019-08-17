@@ -15,19 +15,26 @@ header "auth" : "Bearer 'Token'"
 ************************************************************************************************************************
 
 -/auctions/find/{id}    GET : get an auction
+************************************************************************************************************************
+
+-/auctions/add/picture/{id}   POST : set a picture for an auction
+            @PathVariable int id, @RequestBody MultipartFile[] images
 
 ************************************************************************************************************************
 
 -/auctions/add  POST : add a new Auction
-        String title, String description, int base_price, long date, int category_id, int max_number, MultipartFile[] images
+
+        {
+            title,description,base_price,date,category_id,max_number
+        }
 
 
-        430 : if title.length < 1 || title==null
+        430 : if title == null
         451 : if title.length > 50
-        432 : if base_price < 0
+        432 : if base_price == null
         452 : if description > 1000
         436 : if category doesn't exist
-        438 : if date contains unsupported value
+        438 : if date == null
         437 : if date is too soon (less than half an hour)
         434 : if max_number  < 2
         435 : if max_number > 15
@@ -37,25 +44,39 @@ header "auth" : "Bearer 'Token'"
                    title,description,base_price,date,category_id,max_number,pictures,state
         }
 
+
+************************************************************************************************************************
+
+-auctions/addBookmark POST:
+    @Param ("auctionId") Integer
+
+    out : Resource<AuctionDomain>
+    454 if auctionId = null
+    455 if no auction found by Id
+    456 if server DB contains null auction
+
 ************************************************************************************************************************
 ************************************************************************************************************************
 
 -/users/login : login  POST
+    {
         email : String
         password : String
+    }
 
 ************************************************************************************************************************
 
 -/users/signup  POST : sign up
-        UserDomain : {
+        {
             name,
             email,
             password
         }
 
+        439 : if email = null
         441 : if password < 6
         442 : if password > 100
-        440 : if name < 1
+        440 : if name = null
         443 : if email isn't valid
         454 : if email is duplicated
 
@@ -66,7 +87,27 @@ header "auth" : "Bearer 'Token'"
 ************************************************************************************************************************
 
 -/users/edit  POST : edit name and email
-              name : String     email : String
+              {
+                name,
+                email
+              }
+
+************************************************************************************************************************
+
+-/users/edit/picture  POST : set a picture for user
+             @RequestPart MultipartFile picture
+
+
+************************************************************************************************************************
+
+-/users/edit/password  POST : change password
+             @RequestParam("oPassword") String oPassword
+             @RequestParam("nPassword") String nPassword
+
+              out : Resource<{name,email}>
+                 441 if (nPassword | oPassword).length < 6
+                 442 if (nPassword | oPassword).length > 100
+                 499 if token expired or authentication failed (login required).
 
 ************************************************************************************************************************
 
@@ -76,14 +117,14 @@ header "auth" : "Bearer 'Token'"
 ************************************************************************************************************************
 ************************************************************************************************************************
 
--/home/search/{title} GET : search by title
-        String title, @PathParam("category") int[] categories_id, @RequestParam("page") int page, @RequestParam("size") int size
-        if category was empty it search with all categories :)
+-/home/search/{category} POST : search by title
+        @PathParam("title") String title, @PathVariable int category, @RequestParam("page") int page, @RequestParam("size") int size,
+        if category was 0 it search with all categories :)
 
 ************************************************************************************************************************
 
--/home/filter GET : filter some categories
-        @PathParam("category") int[] categories_id, @RequestParam("page") int page, @RequestParam("size") int size
+-/home/filter/{category_id} GET : filter some categories
+        @RequestParam("page") int page, @RequestParam("size") int size
 
 ************************************************************************************************************************
 
@@ -119,19 +160,3 @@ header "auth" : "Bearer 'Token'"
     out : Resource<User>
     449 if token not found
     450 if request hasn't been recorded
-
-
--users/reset POST:
-    @Param ("password") String
-
-    out : Resource<UserDomain>
-    445 if password = null | !(5<password.length<100)
-************************************************************************************************************************
-
--auctions/addBookmark POST:
-    @Param ("auctionId") Integer
-
-    out : Resource<AuctionDomain>
-    454 if auctionId = null
-    455 if no auction found by Id
-    456 if server DB contains null auction

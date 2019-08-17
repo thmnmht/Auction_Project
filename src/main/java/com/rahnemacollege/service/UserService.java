@@ -2,13 +2,19 @@ package com.rahnemacollege.service;
 
 import com.google.common.collect.Lists;
 import com.rahnemacollege.domain.AuctionDomain;
+import com.rahnemacollege.domain.SimpleUserDomain;
 import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.UserRepository;
+import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.springframework.data.domain.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -21,34 +27,35 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 
 @Service
 public class UserService {
-    private final UserRepository repository;
-    private final UserDetailsServiceImpl userDetailsService;
-    private final PictureService pictureService;
-    private final PasswordEncoder encoder;
-    private final AuthenticationManager authenticationManager;
-    private final Validator validator;
-    private final AuctionService auctionService;
+
+    @Autowired
+    private UserRepository repository;
+
+    @Autowired
+    private PasswordEncoder encoder;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private TokenUtil tokenUtil;
 
 
-    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService,
-                       PictureService pictureService, PasswordEncoder encoder,
-                       AuthenticationManager authenticationManager, Validator validator, AuctionService auctionService) {
-        this.repository = repository;
-        this.userDetailsService = userDetailsService;
-        this.pictureService = pictureService;
-        this.encoder = encoder;
-        this.authenticationManager = authenticationManager;
-        this.validator = validator;
-        this.auctionService = auctionService;
+    private final Logger logger;
+    private final String VALID_EMAIL_REGEX = "^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$";
+
+    @Value("${server_ip}")
+    private String ip;
+
+
+    public UserService() {
+        logger = LoggerFactory.getLogger(UserService.class);
     }
-
 
     public boolean isExist(String user_email) {
         if (repository.findByEmail(user_email).isPresent())
@@ -56,17 +63,18 @@ public class UserService {
         return false;
     }
 
-    public UserDomain addUser(String name, String email, String password) {
-        validation(name, email, password);
+    public SimpleUserDomain addUser(String name, String email, String password) {
+        if (!email.matches(VALID_EMAIL_REGEX))
+            throw new InvalidInputException(Message.EMAIL_INVALID);
+        if (isExist(email))
+            throw new InvalidInputException(Message.EMAIL_DUPLICATED);
+        if (password.length() < 6)
+            throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
+        if (password.length() > 100)
+            throw new InvalidInputException(Message.PASSWORD_TOO_HIGH);
         User user = new User(name, email, encoder.encode(password));
         repository.save(user);
-        return toUserDomain(user);
-    }
-
-    private void validation(String name, String email, String password) {
-        validator.validName(name);
-        validator.validPassword(password);
-        validator.validEmail(email);
+        return new SimpleUserDomain(name, email);
     }
 
     public List<UserDomain> getAll() {
@@ -75,23 +83,16 @@ public class UserService {
         return users;
     }
 
-
     public void authenticate(String email, String password) throws InvalidInputException {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
         } catch (DisabledException e) {
-            //???
+            logger.error(e.getMessage());
         } catch (BadCredentialsException e) {
             throw new InvalidInputException(Message.PASSWORD_INCORRECT);
         }
     }
 
-    //?
-    private Optional<User> getByEmail(String email) {
-        return repository.getByEmail(email);
-    }
-
-    //??
     public User addUser(User user) {
         repository.save(user);
         return user;
@@ -101,46 +102,31 @@ public class UserService {
         return repository.findByEmail(email);
     }
 
-    public UserDomain edit(String name, String email) throws InvalidInputException {
-        if (validator.isEmpty(email))
-            email = userDetailsService.getUser().getEmail();
-        else
-            validator.validEmail(email);
-        if (validator.isEmpty(name))
-            name = userDetailsService.getUser().getName();
-        User user = userDetailsService.getUser();
-        user.setName(name);
-        user.setEmail(email);
+    public SimpleUserDomain changePassword(User user, String newPassword) {
+        user.setPassword(encoder.encode(newPassword));
         repository.save(user);
-        return toUserDomain(user);
+        return new SimpleUserDomain(user.getName(), user.getEmail());
+    }
+
+    public User edit(User user, String name, String email) throws InvalidInputException {
+        if (email != null && email.length() > 1 && !user.getEmail().equals(email)) {
+            if(!email.matches(VALID_EMAIL_REGEX))
+                throw new InvalidInputException(Message.EMAIL_INVALID);
+            user.setEmail(email);
+        }
+        if (name != null && name.length() > 0)
+            user.setName(name);
+        repository.save(user);
+        return user;
     }
 
     public UserDomain toUserDomain(User user) {
-        UserDomain userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), user.getPicture());
+        UserDomain userDomain;
+        if(user.getPicture() != null && user.getPicture().length() > 1)
+            userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), "http://" + ip + user.getPicture());
+        else
+            userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), user.getPicture());
         return userDomain;
-    }
-
-
-    private String savePicture(MultipartFile picture) throws IOException {
-        int userId = userDetailsService.getUser().getId();
-        new File("./images/profile_images/" + userId + "/").mkdirs();
-        String fileName = userId + "_" + new Date().getTime() + ".jpg";
-        String pathName = "./images/auction_images/" + userId + "/" + fileName;
-        pictureService.save(picture, pathName);
-        return pathName;
-    }
-
-    //TODO
-    public void setPicture(MultipartFile picture) {
-
-    }
-
-
-    @Transactional
-    public Page<AuctionDomain> getUserBookmarks(String email, int page, int size) {
-        User user = repository.findByEmail(email).get();
-        List<Auction> bookmarks = new ArrayList<>(user.getBookmarks());
-        return auctionService.toPage(auctionService.toAuctionDomainList(bookmarks), page, size);
     }
 
 

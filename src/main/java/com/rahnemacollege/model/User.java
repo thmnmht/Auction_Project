@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import org.springframework.data.rest.core.annotation.RestResource;
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,8 +17,9 @@ import javax.persistence.Id;
 
 @Data
 @Entity
-@Table(name = "users")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Table(name = "Users")
+@Embeddable
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -46,6 +49,7 @@ public class User {
     public User() {
     }
 
+
     public User(String name, String email, String password) {
         this.name = name;
         this.email = email;
@@ -54,6 +58,23 @@ public class User {
         this.bookmarks = null;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id.equals(user.id) &&
+                name.equals(user.name) &&
+                email.equals(user.email) &&
+                password.equals(user.password) &&
+                Objects.equals(picture, user.picture) &&
+                Objects.equals(bookmarks, user.bookmarks) &&
+                Objects.equals(resetRequest, user.resetRequest);
+    }
 
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, email, password, picture, bookmarks, resetRequest);
+    }
 }

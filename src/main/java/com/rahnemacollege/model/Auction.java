@@ -10,9 +10,10 @@ import java.util.Date;
 
 @Data
 @Entity
-@Table(name = "auctions")
+@Table(name = "Auctions")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Auction {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -21,12 +22,12 @@ public class Auction {
     private String title;
     private String description;
     private int base_price;
-    private int state;
     @ManyToOne
     @JoinColumn(name = "category_id")
     @RestResource(exported = false)
     private Category category;
     private Date date;
+    private int state;
     @ManyToOne
     @JoinColumn(name = "winner_id")
     private User winner;
@@ -46,9 +47,9 @@ public class Auction {
         this.base_price = base_price;
         this.date = date;
         this.category = category;
+        this.state = 0;
         this.winner = null;
         this.owner = user;
-        this.state = 0;
         this.max_number = max_number;
     }
 
