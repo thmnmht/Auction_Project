@@ -17,10 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
-import javax.websocket.server.PathParam;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -172,23 +171,6 @@ public class UserController {
                 e.printStackTrace();
             }
             return assembler.toResource(userService.toUserDomain(optional.get()));
-        }
-    }
-
-
-    @RequestMapping(value = "/reset", method = RequestMethod.GET)
-    public String displayResetPasswordPage(@PathParam("token") String token, RedirectAttributes redirectAttributes) {
-        log.info("Validation check for token :\"" + token + "\" is requested.");
-        Optional<ResetRequest> request = requestService.findByToken(token);
-        if (request.isPresent()) {
-            System.err.println("redirecting to pass reset screen");
-            redirectAttributes.addAttribute("token", token);
-            log.info("Redirecting to passwordReset page for token : \"" + token + "\"");
-            return "redirect:/passwordReset?token="+token;
-        } else {
-            log.error("Token: \"" + token + "\" is invalid to reset password");
-            System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");
-            throw new InvalidInputException(Message.INVALID_RESET_LINK);
         }
     }
 
