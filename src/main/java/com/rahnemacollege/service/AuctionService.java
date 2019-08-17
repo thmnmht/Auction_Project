@@ -92,6 +92,10 @@ public class AuctionService {
         return auction;
     }
 
+    public Auction findAuctionById(int id) {
+        return auctionRepository.findById(id).orElseThrow(() -> new InvalidInputException(Message.AUCTION_NOT_FOUND));
+    }
+
     public AuctionDomain toAuctionDomain(Auction auction) {
         AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(), auction.getDescription(), auction.getBase_price(), auction.getDate().getTime(), auction.getCategory().getId(), auction.getMax_number());
         auctionDomain.setId(auction.getId());
@@ -150,6 +154,13 @@ public class AuctionService {
         List<AuctionDomain> auctions = toAuctionDomainList(auctionRepository.findByOwner_id(user.getId()));
         return toPage(auctions, page, size);
     }
+
+    public List<AuctionDomain> toAuctionDomainList(List<Auction> auctions) {
+        return Lists.newArrayList(auctions.stream()
+                .map(this::toAuctionDomain)
+                .collect(Collectors.toList()));
+    }
+
 
     public Page<AuctionDomain> getAllAuctions(int page, int size) {
         return toPage(getAll(), page, size);

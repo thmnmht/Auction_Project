@@ -45,6 +45,10 @@ public class UserService {
     @Autowired
     private TokenUtil tokenUtil;
 
+    @Autowired
+    private AuctionService auctionService;
+
+
 
     private final Logger logger;
     private final String VALID_EMAIL_REGEX = "^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$";
@@ -129,6 +133,13 @@ public class UserService {
         return userDomain;
     }
 
-    
+    @Transactional
+    public Page<AuctionDomain> getUserBookmarks(String email, int page, int size) {
+        User user = repository.findByEmail(email).get();
+        List<Auction> bookmarks = new ArrayList<>(user.getBookmarks());
+        return auctionService.toPage(auctionService.toAuctionDomainList(bookmarks), page, size);
+    }
+
+
 
 }

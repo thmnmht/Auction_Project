@@ -7,7 +7,6 @@ import com.rahnemacollege.service.*;
 import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.service.PasswordService;
 import com.rahnemacollege.service.UserDetailsServiceImpl;
-import com.rahnemacollege.util.JwtTokenUtil;
 import com.rahnemacollege.util.ResourceAssembler;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
@@ -44,6 +43,8 @@ public class UserController {
     private final EmailService emailService;
     private final PictureService pictureService;
     private final TokenUtil tokenUtil;
+    private final AuctionService auctionService;
+
     private final Logger log;
     @Value("${server_ip}")
     private String ip;
@@ -53,7 +54,7 @@ public class UserController {
                           UserDetailsServiceImpl userDetailService,
                           UserDetailsServiceImpl detailsService,
                           ResetRequestService requestService,
-                          EmailService emailService, PictureService pictureService, TokenUtil tokenUtil) {
+                          EmailService emailService, PictureService pictureService, TokenUtil tokenUtil, AuctionService auctionService) {
         this.userService = userService;
         this.assembler = assembler;
         this.passwordService = passwordService;
@@ -63,6 +64,7 @@ public class UserController {
         this.emailService = emailService;
         this.pictureService = pictureService;
         this.tokenUtil = tokenUtil;
+        this.auctionService = auctionService;
         log = LoggerFactory.getLogger(UserController.class);
     }
 
@@ -159,12 +161,12 @@ public class UserController {
     }
 
 
-    @GetMapping("/filter")
+    /*@GetMapping("/filter")
     public Resources<Resource<AuctionDomain>> filter(@PathParam("category") int[] categories_id,
                                                      @RequestParam("page") int page, @RequestParam("size") int size,
                                                      PagedResourcesAssembler<AuctionDomain> assembler) {
         return assembler.toResource(auctionService.filter(categories_id, page, size));
-    }
+    }*/
 
 
     @RequestMapping(value = "/forgot", method = RequestMethod.POST)
