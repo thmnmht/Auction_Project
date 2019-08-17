@@ -184,7 +184,10 @@ public class UserController {
         });
         User resetUser = request.getUser();
         if (resetUser != null ) {
-            new Validator().validPassword(requestParams.get("validPassword"));
+            if(requestParams.get("validPassword") == null || requestParams.get("validPassword").length() < 6)
+                throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
+            if(requestParams.get("validPassword").length() > 100)
+                throw new InvalidInputException(Message.PASSWORD_TOO_HIGH);
             resetUser.setPassword(passwordService.getPasswordEncoder().encode(requestParams.get("validPassword")));
             requestService.removeRequest(request);
             userService.addUser(resetUser);

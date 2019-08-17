@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -45,7 +46,8 @@ public class AuctionControllerTest extends InitTest{
                 .content(request).header("auth",auth)
         ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         AuctionDomain auctionDomain = gson.fromJson(response,AuctionDomain.class);
-        System.out.println(auctionDomain.getTitle());
+        assertThat(auctionDomain.getTitle())
+                .isEqualTo("testADDAuction");
     }
 
 }
