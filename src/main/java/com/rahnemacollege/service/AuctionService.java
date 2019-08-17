@@ -101,6 +101,11 @@ public class AuctionService {
         auctionDomain.setId(auction.getId());
         if (auction.getOwner().getId() == userDetailsService.getUser().getId())
             auctionDomain.setMine(true);
+        String userEmail = userDetailsService.getUser().getEmail();
+        User user = userRepository.findByEmail(userEmail).get();
+        if(user.getBookmarks().contains(auction)) {
+            auctionDomain.set_bookmark(true);
+        }
         List<String> auctionPictures = Lists.newArrayList(pictureRepository.findAll()).stream().filter(picture ->
                 picture.getFileName().contains("/" + auction.getId() + "/")).map(
                 picture -> "http://" + ip + picture.getFileName()
@@ -190,7 +195,10 @@ public class AuctionService {
         user = userRepository.findByEmail(user.getEmail()).get();
         Set<Auction> bookmarks = user.getBookmarks();
         Auction newBookmark = auctionRepository.findById(id).orElseThrow(() -> new InvalidInputException(Message.AUCTION_NOT_FOUND));
-        bookmarks.add(newBookmark);
+        if(bookmarks.contains(newBookmark))
+            bookmarks.remove(newBookmark);
+        else
+            bookmarks.add(newBookmark);
         user.setBookmarks(bookmarks);
         userRepository.save(user);
     }
