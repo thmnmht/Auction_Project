@@ -37,7 +37,7 @@ public class PasswordController {
             System.err.println("redirecting to pass reset screen");
             redirectAttributes.addAttribute("token", token);
             log.info("Redirecting to passwordReset page for token : \"" + token + "\"");
-            return "redirect:/passwordReset";
+            return "index";
         } else {
             log.error("Token: \"" + token + "\" is invalid to reset password");
             System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");
