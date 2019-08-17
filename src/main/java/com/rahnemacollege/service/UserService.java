@@ -1,17 +1,21 @@
 package com.rahnemacollege.service;
 
 import com.google.common.collect.Lists;
+import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.domain.UserDomain;
+import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.UserRepository;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
+import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -30,15 +34,19 @@ public class UserService {
     private final PasswordEncoder encoder;
     private final AuthenticationManager authenticationManager;
     private final Validator validator;
+    private final AuctionService auctionService;
 
 
-    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService, PictureService pictureService, PasswordEncoder encoder, AuthenticationManager authenticationManager, Validator validator) {
+    public UserService(UserRepository repository, UserDetailsServiceImpl userDetailsService,
+                       PictureService pictureService, PasswordEncoder encoder,
+                       AuthenticationManager authenticationManager, Validator validator, AuctionService auctionService) {
         this.repository = repository;
         this.userDetailsService = userDetailsService;
         this.pictureService = pictureService;
         this.encoder = encoder;
         this.authenticationManager = authenticationManager;
         this.validator = validator;
+        this.auctionService = auctionService;
     }
 
 
@@ -125,6 +133,14 @@ public class UserService {
     //TODO
     public void setPicture(MultipartFile picture) {
 
+    }
+
+
+    @Transactional
+    public Page<AuctionDomain> getUserBookmarks(String email, int page, int size) {
+        User user = repository.findByEmail(email).get();
+        List<Auction> bookmarks = new ArrayList<>(user.getBookmarks());
+        return auctionService.toPage(auctionService.toAuctionDomainList(bookmarks), page, size);
     }
 
 

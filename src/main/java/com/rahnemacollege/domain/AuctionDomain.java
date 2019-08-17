@@ -2,7 +2,7 @@ package com.rahnemacollege.domain;
 
 
 import lombok.Data;
-import org.springframework.hateoas.Link;
+
 import java.util.List;
 
 
@@ -15,11 +15,11 @@ public class AuctionDomain {
     private long date = -1;
     private int category_id;
     private int max_number = -1;
+    private boolean is_bookmark = false;
 
     private int id;
 
     private List<String> pictures;
-    private int state;
 
     public AuctionDomain(String title,
                          String description,

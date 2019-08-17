@@ -12,7 +12,6 @@ import org.springframework.hateoas.Resources;
 import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
-import java.util.List;
 
 @RestController
 @RequestMapping("/home")
@@ -46,12 +45,16 @@ public class HomePageController {
     }
 
     @GetMapping("/filter")
-    public Resources<Resource<AuctionDomain>> filter(@PathParam("category") int[] categories_id, @RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler) {
+    public Resources<Resource<AuctionDomain>> filter(@PathParam("category") int[] categories_id,
+                                                     @RequestParam("page") int page, @RequestParam("size") int size,
+                                                     PagedResourcesAssembler<AuctionDomain> assembler) {
         return assembler.toResource(auctionService.filter(categories_id, page, size));
     }
 
     @GetMapping("/all")
-    public PagedResources<Resource<AuctionDomain>> getPage(@RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler) {
+    public PagedResources<Resource<AuctionDomain>> getPage(@RequestParam("page") int page,
+                                                           @RequestParam("size") int size,
+                                                           PagedResourcesAssembler<AuctionDomain> assembler) {
         Page<AuctionDomain> personPage = auctionService.getAllAuctions(page, size);
         return assembler.toResource(personPage);
     }

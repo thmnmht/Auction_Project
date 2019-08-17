@@ -119,7 +119,7 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 
     providedCompile 'javax.servlet:servlet-api:2.5'
-    providedCompile 'org.apache.tomcat:tomcat-jsp-api:7.0.55'
+    providedCompile 'org.apache.tomcat:tomcat-jsp-api:8.5.43'
 
 }
 

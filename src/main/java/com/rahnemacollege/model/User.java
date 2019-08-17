@@ -2,21 +2,25 @@ package com.rahnemacollege.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import org.springframework.data.rest.core.annotation.RestResource;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+
 @Data
 @Entity
 @Table(name = "users")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @EqualsAndHashCode.Include
     private Integer id;
     private String name;
     //    @Email(message = "Invalid email address.")
@@ -25,12 +29,18 @@ public class User {
     @JsonIgnore
     private String password;
     private String picture;
-    @ManyToMany
-    @RestResource(exported = false)
-    private Set<Auction> bookmarks;
+    @ManyToMany(cascade = CascadeType.ALL)
+//    @RestResource(exported = false)
+    @JoinTable(name = "users_bookmarks",
+            joinColumns = @JoinColumn(name = "user_id" , referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "bookmarks_id" , referencedColumnName = "id"))
+    private Set<Auction> bookmarks = new HashSet<Auction>();
+
 
     @OneToOne(mappedBy = "user")
     private ResetRequest resetRequest;
+
+
 
 
     public User() {
@@ -43,6 +53,7 @@ public class User {
         this.picture = null;
         this.bookmarks = null;
     }
+
 
 
 }

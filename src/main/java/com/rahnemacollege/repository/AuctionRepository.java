@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 
 @Repository
 public interface AuctionRepository extends PagingAndSortingRepository<Auction, Integer> {
@@ -20,4 +22,8 @@ public interface AuctionRepository extends PagingAndSortingRepository<Auction, I
             "    auctions.id\n " +
             "ORDER BY number_of_bookmarks DESC", nativeQuery = true)
     Page<Auction> findHottest(Pageable pageable);
+
+    List<Auction> findByOwner_id(int user_id);
+
+
 }

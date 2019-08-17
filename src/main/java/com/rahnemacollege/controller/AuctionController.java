@@ -23,6 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/auctions")
+
 public class AuctionController {
 
     private final AuctionService auctionService;
@@ -74,13 +75,13 @@ public class AuctionController {
         return assembler.toResource(auctionService.findById(id));
     }
 
+
     @RequestMapping(value = "/addBookmark", method = RequestMethod.POST)
     public Resource<AuctionDomain> addBookmark(@RequestParam("auctionId") Integer id) {
         User user = userDetailsService.getUser();
         if (id != null) {
             if (auctionService.findAuctionById(id)!= null){
-                user.getBookmarks().add(auctionService.findAuctionById(id));
-                userService.addUser(user);
+                auctionService.addBookmark(user, id);
                 return assembler.toResource(auctionService.toAuctionDomain(auctionService.findAuctionById(id)));
             }
             throw new InvalidInputException(Message.REALLY_BAD_SITUATION);
