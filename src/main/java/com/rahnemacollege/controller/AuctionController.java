@@ -1,6 +1,7 @@
 package com.rahnemacollege.controller;
 
 
+import com.rahnemacollege.domain.AddAuctionDomain;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
