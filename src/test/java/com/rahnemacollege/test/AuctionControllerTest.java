@@ -33,21 +33,36 @@ public class AuctionControllerTest extends InitTest{
 
     @Test
     public void addAuction() throws Exception{
+        AuctionDomain auctionDomain = addAuction("testADDAuction","",100,5,1,15660254847150L);
+        assertThat(auctionDomain.getTitle())
+                .isEqualTo("testADDAuction");
+        assertThat(auctionDomain.isMine())
+                .isEqualTo(true);
+    }
+
+    @Test
+    public void toggleBookMark() throws Exception{
+        AuctionDomain auctionDomain = addAuction("test bookmark","",100,5,1,15660254847150L);
+        assertThat(auctionDomain.is_bookmark())
+                .isEqualTo(false);
+        mvc.perform(MockMvcRequestBuilders.post(ADD_BOOKMARK + "?auctionId=" + auctionDomain.getId()).header("auth",auth));
+    }
+
+    private AuctionDomain addAuction(String title,String description,int base_price,int max_number,int category_id,long date) throws Exception{
         AddAuctionDomain addAuctionDomain = new AddAuctionDomain();
-        addAuctionDomain.setTitle("testADDAuction");
-        addAuctionDomain.setBase_price(1000);
-        addAuctionDomain.setCategory_id(1);
-        addAuctionDomain.setDate(15660254847150L);
-        addAuctionDomain.setMax_number(5);
-        addAuctionDomain.setDescription("");
+        addAuctionDomain.setTitle(title);
+        addAuctionDomain.setBase_price(base_price);
+        addAuctionDomain.setCategory_id(category_id);
+        addAuctionDomain.setDate(date);
+        addAuctionDomain.setMax_number(max_number);
+        addAuctionDomain.setDescription(description);
         String request = gson.toJson(addAuctionDomain);
         String response = mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth",auth)
         ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         AuctionDomain auctionDomain = gson.fromJson(response,AuctionDomain.class);
-        assertThat(auctionDomain.getTitle())
-                .isEqualTo("testADDAuction");
+        return auctionDomain;
     }
 
 }
