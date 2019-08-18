@@ -15,8 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,10 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/users")
@@ -144,21 +141,23 @@ public class UserController {
     }
 
     @GetMapping("/auctions")
-    public Resources<Resource<AuctionDomain>> allUserAuctions(PagedResourcesAssembler<AuctionDomain> assembler) {
+    public PagedResources<Resource<AuctionDomain>> allUserAuctions(@RequestParam("page") int page,
+                                                                             @RequestParam("size") int size,
+                                                                             PagedResourcesAssembler<AuctionDomain> assembler) {
         //TODO : change it
-        int page = 0;
-        int size = 1000;
         User user = detailsService.getUser();
-        return assembler.toResource(auctionService.findByOwner(user, page, size));
+        List<AuctionDomain> auctionDomains = auctionService.toAuctionDomainList(auctionService.findByOwner(user), user);
+        return assembler.toResource(auctionService.toPage(auctionDomains, page, size));
     }
 
 
     @GetMapping("/bookmarks")
-    public Resources<Resource<AuctionDomain>> userBookmarks(@RequestParam("page") int page,
+    public PagedResources<Resource<AuctionDomain>> userBookmarks(@RequestParam("page") int page,
                                                             @RequestParam("size") int size,
                                                             PagedResourcesAssembler<AuctionDomain> assembler) {
         User user = detailsService.getUser();
-        return assembler.toResource(userService.getUserBookmarks(user.getEmail(), page, size));
+        List<AuctionDomain> auctionDomains= auctionService.toAuctionDomainList(userService.getUserBookmarks(user), user);
+        return assembler.toResource(auctionService.toPage(auctionDomains, page, size));
     }
 
 

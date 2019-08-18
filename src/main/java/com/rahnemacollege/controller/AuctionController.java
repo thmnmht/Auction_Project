@@ -57,9 +57,10 @@ public class AuctionController {
     @PostMapping(value = "/add")
     public Resource<AuctionDomain> add(@RequestBody AddAuctionDomain auctionDomain){
         log(" call add an auction");
-        Auction auction = auctionService.addAuction(auctionDomain);
+        User user = userDetailsService.getUser();
+        Auction auction = auctionService.addAuction(auctionDomain, user);
         log(" added auction");
-        return assembler.toResource(auctionService.toAuctionDomain(auction));
+        return assembler.toResource(auctionService.toAuctionDomain(auction, user));
     }
 
     @PostMapping(value = "/add/picture/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -70,13 +71,15 @@ public class AuctionController {
             throw new InvalidInputException(Message.PICTURE_NULL);
         pictureService.setAuctionPictures(auction,images);
         log(" added picture for auction " + auction.getId());
-        return assembler.toResource(auctionService.toAuctionDomain(auction));
+        User user = userDetailsService.getUser();
+        return assembler.toResource(auctionService.toAuctionDomain(auction, user));
     }
 
     @GetMapping("/find/{id}")
     public Resource<AuctionDomain> one(@PathVariable int id) {
         log(" try to find an auction");
-        return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id)));
+        User user = userDetailsService.getUser();
+        return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id), user));
     }
 
 
@@ -87,7 +90,7 @@ public class AuctionController {
         if (id != null) {
             if (auctionService.findAuctionById(id)!= null){
                 auctionService.addBookmark(user, id);
-                return assembler.toResource(auctionService.toAuctionDomain(auctionService.findAuctionById(id)));
+                return assembler.toResource(auctionService.toAuctionDomain(auctionService.findAuctionById(id), user));
             }
             throw new InvalidInputException(Message.REALLY_BAD_SITUATION);
         }
@@ -99,7 +102,8 @@ public class AuctionController {
     @GetMapping("/all")
     public Resources<Resource<AuctionDomain>> all() {
         log(" try to get all auctions");
-        return assembler.toResourcesAuc(auctionService.getAll());
+        User user = userDetailsService.getUser();
+        return assembler.toResourcesAuc(auctionService.toAuctionDomainList(auctionService.getAll(), user));
     }
 
 
