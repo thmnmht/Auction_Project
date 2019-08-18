@@ -58,7 +58,7 @@ public class AuctionController {
     public Resource<AuctionDomain> add(@RequestBody AddAuctionDomain auctionDomain){
         log(" call add an auction");
         Auction auction = auctionService.addAuction(auctionDomain);
-        log(" auction added");
+        log(" added auction");
         return assembler.toResource(auctionService.toAuctionDomain(auction));
     }
 
