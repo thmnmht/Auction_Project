@@ -80,7 +80,7 @@ public class AuctionController {
     }
 
 
-    @RequestMapping(value = "/addBookmark", method = RequestMethod.POST)
+    @RequestMapping(value = "/bookmark", method = RequestMethod.POST)
     public Resource<AuctionDomain> addBookmark(@RequestParam("auctionId") Integer id) {
         log.info(userDetailsService.getUser().getName() + " try to add bookmark");
         User user = userDetailsService.getUser();

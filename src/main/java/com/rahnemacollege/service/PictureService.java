@@ -29,7 +29,7 @@ public class PictureService {
     @Autowired
     private UserRepository userRepository;
     private final Logger logger = LoggerFactory.getLogger(PictureService.class);
-    private final String IMAGE_PATH = "./usr/local/share/Auction_back/images";
+    private final String IMAGE_PATH = "./usr/local/share/images";
 
 
 

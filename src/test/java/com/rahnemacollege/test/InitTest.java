@@ -44,23 +44,17 @@ public class InitTest {
     protected final String ADD = "/auctions/add";
     protected final String ADD_PICTURE = "/auctions/add/picture/";
     protected final String FIND = "/auctions/find/";
-    protected final String ADD_BOOKMARK = "/auctions/addBookmark";
+    protected final String ADD_BOOKMARK = "/auctions/bookmark/";
     protected final String ALL = "/auctions/all";
     protected final String SEARCH = "/home/search/";
 
     protected final String Image_PATH = "Beautiful_Fantasy_Worlds_Wallpapers_31.jpg";
 
 
-    @BeforeClass
-    public static void signup() throws Exception{
+   /* @Test
+    public void signup() throws Exception{
         //??
-        /**/
-    }
-
-    /*@Test
-    public void s() throws Exception{
         gson = new Gson();
-        user = new User();
         User user = new User();
         user.setName("ali");
         user.setEmail("ali_alavi@gmail.com");
