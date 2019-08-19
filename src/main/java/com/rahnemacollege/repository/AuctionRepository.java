@@ -15,7 +15,7 @@ public interface AuctionRepository  extends CrudRepository<Auction, Integer> {
 
     //todo: consider limit for the hottest cards
     @Query(value = "SELECT * ,COUNT(bookmarks_id) AS number_of_bookmarks \n" +
-            "FROM auctions\n" +
+            "FROM Auctions\n" +
             "left join users_bookmarks\n" +
             "on (auctions.id = users_bookmarks.bookmarks_id)\n" +
             "group by\n" +
