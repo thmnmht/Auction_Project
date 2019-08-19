@@ -10,6 +10,4 @@ public class AddUserDomain {
     private String password;
 
 
-
-
 }

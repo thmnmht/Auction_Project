@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import org.springframework.data.rest.core.annotation.RestResource;
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
@@ -35,15 +34,13 @@ public class User {
     @ManyToMany(cascade = CascadeType.ALL)
 //    @RestResource(exported = false)
     @JoinTable(name = "users_bookmarks",
-            joinColumns = @JoinColumn(name = "user_id" , referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "bookmarks_id" , referencedColumnName = "id"))
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "bookmarks_id", referencedColumnName = "id"))
     private Set<Auction> bookmarks = new HashSet<Auction>();
 
 
     @OneToOne(mappedBy = "user")
     private ResetRequest resetRequest;
-
-
 
 
     public User() {
@@ -63,13 +60,7 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id.equals(user.id) &&
-                name.equals(user.name) &&
-                email.equals(user.email) &&
-                password.equals(user.password) &&
-                Objects.equals(picture, user.picture) &&
-                Objects.equals(bookmarks, user.bookmarks) &&
-                Objects.equals(resetRequest, user.resetRequest);
+        return id.equals(user.id);
     }
 
 

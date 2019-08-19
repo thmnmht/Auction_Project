@@ -1,7 +1,6 @@
 package com.rahnemacollege.service;
 
 import com.google.common.collect.Lists;
-import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.domain.SimpleUserDomain;
 import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.Auction;
@@ -10,7 +9,6 @@ import com.rahnemacollege.repository.UserRepository;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
-import org.springframework.data.domain.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +20,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,18 +31,12 @@ public class UserService {
 
     @Autowired
     private UserRepository repository;
-
     @Autowired
     private PasswordEncoder encoder;
     @Autowired
     private AuthenticationManager authenticationManager;
-
     @Autowired
     private TokenUtil tokenUtil;
-
-    @Autowired
-    private AuctionService auctionService;
-
 
 
     private final Logger logger;
@@ -62,9 +51,7 @@ public class UserService {
     }
 
     public boolean isExist(String user_email) {
-        if (repository.findByEmail(user_email).isPresent())
-            return true;
-        return false;
+        return repository.findByEmail(user_email).isPresent();
     }
 
     public SimpleUserDomain addUser(String name, String email, String password) {
@@ -83,7 +70,7 @@ public class UserService {
 
     public List<UserDomain> getAll() {
         ArrayList<UserDomain> users = new ArrayList<>();
-        Lists.newArrayList(repository.findAll()).stream().map(user -> toUserDomain(user)).forEach(users::add);
+        Lists.newArrayList(repository.findAll()).stream().map(this::toUserDomain).forEach(users::add);
         return users;
     }
 
@@ -114,7 +101,7 @@ public class UserService {
 
     public User edit(User user, String name, String email) throws InvalidInputException {
         if (email != null && email.length() > 1 && !user.getEmail().equals(email)) {
-            if(!email.matches(VALID_EMAIL_REGEX))
+            if (!email.matches(VALID_EMAIL_REGEX))
                 throw new InvalidInputException(Message.EMAIL_INVALID);
             user.setEmail(email);
         }
@@ -126,7 +113,7 @@ public class UserService {
 
     public UserDomain toUserDomain(User user) {
         UserDomain userDomain;
-        if(user.getPicture() != null && user.getPicture().length() > 1)
+        if (user.getPicture() != null && user.getPicture().length() > 1)
             userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), "http://" + ip + user.getPicture());
         else
             userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), user.getPicture());
@@ -134,12 +121,10 @@ public class UserService {
     }
 
     @Transactional
-    public Page<AuctionDomain> getUserBookmarks(String email, int page, int size) {
-        User user = repository.findByEmail(email).get();
-        List<Auction> bookmarks = new ArrayList<>(user.getBookmarks());
-        return auctionService.toPage(auctionService.toAuctionDomainList(bookmarks), page, size);
+    public List<Auction> getUserBookmarks(User user) {
+        user = repository.findByEmail(user.getEmail()).orElseThrow(() -> new InvalidInputException(Message.EMAIL_INVALID));
+        return new ArrayList<>(user.getBookmarks());
     }
-
 
 
 }

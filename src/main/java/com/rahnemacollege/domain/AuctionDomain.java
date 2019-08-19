@@ -11,28 +11,28 @@ public class AuctionDomain {
 
     private String title;
     private String description;
-    private int base_price = -1;
+    private int basePrice = -1;
     private long date = -1;
-    private int category_id;
-    private int max_number = -1;
-    private boolean is_bookmark = false;
-    private boolean isMine = false;
+    private int categoryId;
+    private int maxNumber = -1;
+    private boolean bookmark = false;
+    private boolean mine = false;
     private int id;
 
     private List<String> pictures;
 
     public AuctionDomain(String title,
                          String description,
-                         int base_price,
+                         int basePrice,
                          long date,
-                         int category_id,
-                         int max_number) {
+                         int categoryId,
+                         int maxNumber) {
         this.title = title;
         this.description = description;
-        this.base_price = base_price;
+        this.basePrice = basePrice;
         this.date = date;
-        this.category_id = category_id;
-        this.max_number = max_number;
+        this.categoryId = categoryId;
+        this.maxNumber = maxNumber;
     }
 
 }

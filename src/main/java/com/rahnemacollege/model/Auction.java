@@ -23,7 +23,7 @@ public class Auction {
     private String description;
     private int base_price;
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_Id")
     @RestResource(exported = false)
     private Category category;
     private Date date;
@@ -40,7 +40,7 @@ public class Auction {
     public Auction() {
     }
 
-    public Auction(String title, String description, int base_price, Category category, Date date, User user,
+    public Auction(String title, String description, int base_price, Category category, Date date, User owner,
                    int max_number) {
         this.title = title;
         this.description = description;
@@ -49,7 +49,7 @@ public class Auction {
         this.category = category;
         this.state = 0;
         this.winner = null;
-        this.owner = user;
+        this.owner = owner;
         this.max_number = max_number;
     }
 

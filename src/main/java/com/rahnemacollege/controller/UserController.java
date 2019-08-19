@@ -15,8 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,10 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/users")
@@ -144,21 +141,23 @@ public class UserController {
     }
 
     @GetMapping("/auctions")
-    public Resources<Resource<AuctionDomain>> allUserAuctions(PagedResourcesAssembler<AuctionDomain> assembler) {
+    public PagedResources<Resource<AuctionDomain>> allUserAuctions(@RequestParam("page") int page,
+                                                                             @RequestParam("size") int size,
+                                                                             PagedResourcesAssembler<AuctionDomain> assembler) {
         //TODO : change it
-        int page = 0;
-        int size = 1000;
         User user = detailsService.getUser();
-        return assembler.toResource(auctionService.findByOwner(user, page, size));
+        List<AuctionDomain> auctionDomains = auctionService.toAuctionDomainList(auctionService.findByOwner(user), user);
+        return assembler.toResource(auctionService.toPage(auctionDomains, page, size));
     }
 
 
     @GetMapping("/bookmarks")
-    public Resources<Resource<AuctionDomain>> userBookmarks(@RequestParam("page") int page,
+    public PagedResources<Resource<AuctionDomain>> userBookmarks(@RequestParam("page") int page,
                                                             @RequestParam("size") int size,
                                                             PagedResourcesAssembler<AuctionDomain> assembler) {
         User user = detailsService.getUser();
-        return assembler.toResource(userService.getUserBookmarks(user.getEmail(), page, size));
+        List<AuctionDomain> auctionDomains= auctionService.toAuctionDomainList(userService.getUserBookmarks(user), user);
+        return assembler.toResource(auctionService.toPage(auctionDomains, page, size));
     }
 
 
@@ -179,55 +178,38 @@ public class UserController {
             log.error("There's not account found for " + userEmail);
             throw new InvalidInputException(Message.EMAIL_NOT_FOUND);
         } else {
-            String token;
-            ResetRequest resetRequest;
-            if (requestService.findByUser(optional.get()).isPresent()) {
-                if (new Date().getTime() - requestService.findByUser(optional.get()).get().getDate().getTime() < 10800000) {
-                    token = requestService.findByUser(optional.get()).get().getToken();
-                } else {
-                    resetRequest = requestService.findByUser(optional.get()).get();
-                    token = UUID.randomUUID().toString();
-                    resetRequest.setToken(token);
-                    requestService.addRequest(resetRequest);
-                }
-            } else {
-                token = UUID.randomUUID().toString();
-                resetRequest = new ResetRequest(optional.get(), new Date(), token);
-                requestService.addRequest(resetRequest);
-            }
+            User user = optional.get();
             String appUrl = request.getScheme() + "://" + ip;
 //            String appUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
             try {
-                emailService.sendPassRecoveryMail(userEmail, appUrl, token);
+                emailService.sendPassRecoveryMail(userEmail, appUrl, requestService.registerResetRequest(user));
                 log.info("A password reset link has been sent to " + userEmail + " @" +
                         new Date());
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return assembler.toResource(userService.toUserDomain(optional.get()));
+            return assembler.toResource(userService.toUserDomain(user));
         }
     }
 
 
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
-    public Resource<UserDomain> setNewPassword(@RequestParam Map<String, String> requestParams) {
-        log.info("Reset password request received for token :\"" + requestParams.get("token") + "\"");
-        ResetRequest request = requestService.findByToken(requestParams.get("token")).orElseGet(() -> {
-            log.error("No request recorded for token: \"" + requestParams.get("token") + "\"");
+    public Resource<SimpleUserDomain> setNewPassword(@RequestParam Map<String, String> requestParams) {
+        String token = requestParams.get("token"), password = requestParams.get("validPassword");
+        log.info("Reset password request received for token :\"" + token + "\"");
+        ResetRequest request = requestService.findByToken(token).orElseGet(() -> {
+            log.error("No request recorded for token: \"" + token + "\"");
             throw new InvalidInputException(Message.TOKEN_NOT_FOUND);
         });
         User resetUser = request.getUser();
         if (resetUser != null ) {
-            if(requestParams.get("validPassword") == null || requestParams.get("validPassword").length() < 6)
+            if (password == null || password.length() < 6)
                 throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
-            if(requestParams.get("validPassword").length() > 100)
+            if (password.length() > 100)
                 throw new InvalidInputException(Message.PASSWORD_TOO_HIGH);
-            resetUser.setPassword(passwordService.getPasswordEncoder().encode(requestParams.get("validPassword")));
             requestService.removeRequest(request);
-            userService.addUser(resetUser);
             log.info(resetUser.getEmail()+ " successfully reset his/her password");
-            //TODO : redirect:login
-            return assembler.toResource(userService.toUserDomain(resetUser));
+            return assembler.toResource(userService.changePassword(resetUser, password));
         } else {
             log.error("Invalid password reset link.");
             throw new InvalidInputException(Message.NOT_RECORDED_REQUEST);

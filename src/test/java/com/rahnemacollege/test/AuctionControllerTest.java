@@ -45,7 +45,7 @@ public class AuctionControllerTest extends InitTest{
     @Test
     public void toggleBookMark() throws Exception{
         AuctionDomain auctionDomain = addAuction("test bookmark","",100,5,1,15660254847150L);
-        assertThat(auctionDomain.is_bookmark())
+        assertThat(auctionDomain.isBookmark())
                 .isEqualTo(false);
         mvc.perform(MockMvcRequestBuilders.post(ADD_BOOKMARK + "?auctionId=" + auctionDomain.getId()).header("auth",auth)).andExpect(status().isOk());
         String response = mvc.perform(MockMvcRequestBuilders
@@ -60,10 +60,10 @@ public class AuctionControllerTest extends InitTest{
     private AuctionDomain addAuction(String title,String description,int base_price,int max_number,int category_id,long date) throws Exception{
         AddAuctionDomain addAuctionDomain = new AddAuctionDomain();
         addAuctionDomain.setTitle(title);
-        addAuctionDomain.setBase_price(base_price);
-        addAuctionDomain.setCategory_id(category_id);
+        addAuctionDomain.setBasePrice(base_price);
+        addAuctionDomain.setCategoryId(category_id);
         addAuctionDomain.setDate(date);
-        addAuctionDomain.setMax_number(max_number);
+        addAuctionDomain.setMaxNumber(max_number);
         addAuctionDomain.setDescription(description);
         String request = gson.toJson(addAuctionDomain);
         String response = mvc.perform(MockMvcRequestBuilders.post(ADD)
