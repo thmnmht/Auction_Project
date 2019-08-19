@@ -8,6 +8,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -45,7 +47,14 @@ public class AuctionControllerTest extends InitTest{
         AuctionDomain auctionDomain = addAuction("test bookmark","",100,5,1,15660254847150L);
         assertThat(auctionDomain.is_bookmark())
                 .isEqualTo(false);
-        mvc.perform(MockMvcRequestBuilders.post(ADD_BOOKMARK + "?auctionId=" + auctionDomain.getId()).header("auth",auth));
+        mvc.perform(MockMvcRequestBuilders.post(ADD_BOOKMARK + "?auctionId=" + auctionDomain.getId()).header("auth",auth)).andExpect(status().isOk());
+        String response = mvc.perform(MockMvcRequestBuilders
+                .get(GET_BOOKMARKS + "?page=" + 0 + "&size=" + 40)
+                .header("auth",auth))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+//        Resources<Resource<AuctionDomain>> tmp =
+        System.out.println(response);
+
     }
 
     private AuctionDomain addAuction(String title,String description,int base_price,int max_number,int category_id,long date) throws Exception{

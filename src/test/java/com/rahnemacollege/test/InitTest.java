@@ -39,12 +39,13 @@ public class InitTest {
     protected final String EDIT_PICTURE = "/users/edit/picture";
     protected final String EDIT_PASSWORD = "/users/edit/password";
     protected final String FORGOT = "/users/forgot";
+    protected final String GET_BOOKMARKS = "/users/bookmarks";
     protected final String RESET = "/users/reset";
     protected final String CATEGORY = "/auctions/category";
     protected final String ADD = "/auctions/add";
     protected final String ADD_PICTURE = "/auctions/add/picture/";
     protected final String FIND = "/auctions/find/";
-    protected final String ADD_BOOKMARK = "/auctions/bookmark/";
+    protected final String ADD_BOOKMARK = "/auctions/bookmark";
     protected final String ALL = "/auctions/all";
     protected final String SEARCH = "/home/search/";
 
