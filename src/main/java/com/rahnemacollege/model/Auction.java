@@ -27,7 +27,7 @@ public class Auction {
     @RestResource(exported = false)
     private Category category;
     private Date date;
-    private int state;
+    private int state = 0;
     @ManyToOne
     @JoinColumn(name = "winner_id")
     private User winner;
