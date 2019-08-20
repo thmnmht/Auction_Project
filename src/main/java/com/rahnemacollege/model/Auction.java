@@ -23,7 +23,7 @@ public class Auction {
     private String description;
     private int base_price;
     @ManyToOne
-    @JoinColumn(name = "category_Id")
+    @JoinColumn(name = "category_id")
     @RestResource(exported = false)
     private Category category;
     private Date date;

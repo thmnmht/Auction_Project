@@ -51,6 +51,13 @@ public class InitTest {
 
     protected final String Image_PATH = "Beautiful_Fantasy_Worlds_Wallpapers_31.jpg";
 
+    //length : 1676
+    protected final String LONG_STRING = "MySQL is an open source relational database management system (RDBMS) with a wide-range of applications in business infrastructure. The huge amounts transactions processed by any MySQL server on a day to day basis and the importance of maintaining smooth continuity of these transactions for uninterrupted business service delivery makes it essential for business organizations to have a proper MySQL Management system in place. Also, while most MySQL monitor tools generate notifications in case of performance issues, an ideal MySQL monitoring tool will not only alert you but also provides comprehensive insight into the root cause of the issues and helps you troubleshoot them quickly. \n" +
+            "\n" +
+            "Applications Manager's MySQL Management software helps database administrators in managing and monitoring the performance and availability of their SQL databases. With the help of MySQL Performance Monitor, DB Admins can monitor critical performance parameters of their database and maintain maximum uptime and health. It is one among the best MySQL management tool which provides an intuitive web client that helps you ease your MySQL Management efforts and allows you to visualize, manage and monitor database farms effectively. \n" +
+            "\n" +
+            "Unlike most database monitoring tools for MySQL which offers only health and availability stats for your database, Applications Manager's MySQL Monitor provides in-depth MySQL performance monitoring with numerous performance metrics and triggers notifications in case of downtimes. Also, the MySQL performance monitor keeps track of usage patterns, offers insights to plan capacity and helps you get notified about impending problems in your database.";
+
 
    /* @Test
     public void signup() throws Exception{

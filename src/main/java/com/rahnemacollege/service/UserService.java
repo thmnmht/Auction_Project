@@ -74,9 +74,9 @@ public class UserService {
         return users;
     }
 
-    public void authenticate(String email, String password) throws InvalidInputException {
+    public void authenticate(int id, String password) throws InvalidInputException {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(id, password));
         } catch (DisabledException e) {
             logger.error(e.getMessage());
         } catch (BadCredentialsException e) {

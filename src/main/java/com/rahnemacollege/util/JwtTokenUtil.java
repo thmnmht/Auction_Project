@@ -18,13 +18,13 @@ import io.jsonwebtoken.SignatureAlgorithm;
 public class JwtTokenUtil implements TokenUtil {
 
     private static final long serialVersionUID = -2550185165626007488L;
-    public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+    public static final long JWT_TOKEN_VALIDITY = 31 * 24 * 60 * 60;
 
     @Value("${jwt.secret}")
     private String secret;
 
     @Override
-    public String getEmailFromToken(String token) {
+    public String getIdFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
@@ -68,7 +68,7 @@ public class JwtTokenUtil implements TokenUtil {
 
     @Override
     public Boolean validateToken(String token, UserDetails userDetails) {
-        final String email = getEmailFromToken(token);
-        return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        final String id = getIdFromToken(token);
+        return (id.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 }

@@ -132,5 +132,6 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
                             HttpServletResponse response) {
         logger.error("something is null -_-");
         logger.error(ex.getMessage());
+        response.setStatus(497);
     }
 }

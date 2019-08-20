@@ -14,7 +14,7 @@ public interface TokenUtil extends Serializable {
      * @param token
      * @return
      */
-    public String getEmailFromToken(String token);
+    public String getIdFromToken(String token);
 
     /**
      * retrieve expiration date from token

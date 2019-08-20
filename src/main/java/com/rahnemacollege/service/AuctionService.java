@@ -49,7 +49,7 @@ public class AuctionService {
     public Auction addAuction(AddAuctionDomain auctionDomain, User user){
         validation(auctionDomain);
         Auction auction = toAuction(auctionDomain, user);
-        auctionRepository.save(auction);
+        auction = auctionRepository.save(auction);
         return auction;
     }
 
@@ -58,7 +58,7 @@ public class AuctionService {
             throw new InvalidInputException(Message.TITLE_NULL);
         if (auctionDomain.getTitle().length() > 50)
             throw new InvalidInputException(Message.TITLE_TOO_LONG);
-        if (auctionDomain.getDescription().length() > 1000)
+        if (auctionDomain.getDescription() != null && auctionDomain.getDescription().length() > 1000)
             throw new InvalidInputException(Message.DESCRIPTION_TOO_LONG);
         if (auctionDomain.getDate() < 1)
             throw new InvalidInputException(Message.DATE_NULL);
