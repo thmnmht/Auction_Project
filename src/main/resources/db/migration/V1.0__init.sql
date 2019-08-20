@@ -28,7 +28,7 @@ CREATE TABLE Auctions
     description VARCHAR(1000),
     base_price  INT         NOT NULL,
     category_id INT         NOT NULL,
-    date        DATE        NOT NULL,
+    date        TIMESTAMP    NOT NULL,
     state       INT         NOT NULL,
     winner_id   INT,
     owner_id    INT         NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE Pictures
     id         INT          NOT NULL AUTO_INCREMENT,
     filename   VARCHAR(100) NOT NULL,
     auction_id INT          NOT NULL,
-    date       DATE         NOT NULL,
+    date       TIMESTAMP     NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (auction_id)
         REFERENCES Auctions (id)
@@ -62,9 +62,9 @@ CREATE TABLE Pictures
 
 CREATE TABLE Login_infos
 (
-    id      INT  NOT NULL AUTO_INCREMENT,
-    user_id INT  NOT NULL,
-    date    DATE NOT NULL,
+    id      INT      NOT NULL AUTO_INCREMENT,
+    user_id INT      NOT NULL,
+    date    TIMESTAMP NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (user_id)
         REFERENCES Users (id)
@@ -74,11 +74,11 @@ CREATE TABLE Login_infos
 
 CREATE TABLE Bids
 (
-    id         INT  NOT NULL AUTO_INCREMENT,
-    auction_id INT  NOT NULL,
-    user_id    INT  NOT NULL,
-    price      INT  NOT NULL,
-    date       DATE NOT NULL,
+    id         INT      NOT NULL AUTO_INCREMENT,
+    auction_id INT      NOT NULL,
+    user_id    INT      NOT NULL,
+    price      INT      NOT NULL,
+    date       TIMESTAMP NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (user_id)
         REFERENCES Users (id)

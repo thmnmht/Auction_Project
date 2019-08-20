@@ -8,10 +8,6 @@ import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 
 
 @Data
@@ -38,14 +34,11 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "bookmarks_id", referencedColumnName = "id"))
     private Set<Auction> bookmarks = new HashSet<Auction>();
 
-
     @OneToOne(mappedBy = "user")
     private ResetRequest resetRequest;
 
-
     public User() {
     }
-
 
     public User(String name, String email, String password) {
         this.name = name;
@@ -62,7 +55,6 @@ public class User {
         User user = (User) o;
         return id.equals(user.id);
     }
-
 
     @Override
     public int hashCode() {

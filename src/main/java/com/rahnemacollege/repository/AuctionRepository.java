@@ -15,11 +15,11 @@ public interface AuctionRepository  extends CrudRepository<Auction, Integer> {
 
     //todo: consider limit for the hottest cards
     @Query(value = "SELECT * ,COUNT(bookmarks_id) AS number_of_bookmarks \n" +
-            "FROM auctions\n" +
+            "FROM Auctions\n" +
             "left join users_bookmarks\n" +
-            "on (auctions.id = users_bookmarks.bookmarks_id)\n" +
+            "on (Auctions.id = users_bookmarks.bookmarks_id AND Auctions.state=0)\n" +
             "group by\n" +
-            "    auctions.id\n " +
+            "Auctions.id\n " +
             "ORDER BY number_of_bookmarks DESC", nativeQuery = true)
     Page<Auction> findHottest(Pageable pageable);
 
