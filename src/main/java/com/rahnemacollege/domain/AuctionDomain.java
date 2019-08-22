@@ -21,6 +21,8 @@ public class AuctionDomain {
 
     private List<String> pictures;
 
+
+
     public AuctionDomain(String title,
                          String description,
                          int basePrice,

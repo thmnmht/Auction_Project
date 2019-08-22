@@ -41,7 +41,8 @@ public class AuctionControllerTest extends InitTest{
 
     @Test
     public void addAuction() throws Exception{
-        String request = createAddAuctionRequest("testADDAuction","",100,5,1,15660254847150L);
+        String request = createAddAuctionRequest("testADDAuction","",100,5,1,1566392188391L);
+        System.err.println(request);
         String response = mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth",auth)

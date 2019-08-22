@@ -2,14 +2,12 @@ package com.rahnemacollege.controller;
 
 
 import com.rahnemacollege.domain.AddAuctionDomain;
+import com.rahnemacollege.domain.AuctionDetail;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.model.User;
-import com.rahnemacollege.service.AuctionService;
-import com.rahnemacollege.service.PictureService;
-import com.rahnemacollege.service.UserDetailsServiceImpl;
-import com.rahnemacollege.service.UserService;
+import com.rahnemacollege.service.*;
 import com.rahnemacollege.util.ResourceAssembler;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
@@ -25,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import org.slf4j.Logger;
 
-
 @RestController
 @RequestMapping("/auctions")
 
@@ -36,16 +33,24 @@ public class AuctionController {
     private UserDetailsServiceImpl userDetailsService;
     private final UserService userService;
     private final PictureService pictureService;
+    private final BidService bidService;
     private final Logger log;
 
 
-    public AuctionController(AuctionService auctionService, ResourceAssembler assembler, UserDetailsServiceImpl userDetailsService, UserService userService, PictureService pictureService) {
+    public AuctionController(AuctionService auctionService, ResourceAssembler assembler, UserDetailsServiceImpl userDetailsService, UserService userService, PictureService pictureService, BidService bidService) {
         this.auctionService = auctionService;
         this.assembler = assembler;
         this.userDetailsService = userDetailsService;
         this.userService = userService;
         this.pictureService = pictureService;
+        this.bidService = bidService;
         log = LoggerFactory.getLogger(AuctionController.class);
+    }
+
+
+    @GetMapping("/bid")
+    public String temp() {
+        return "bid.html";
     }
 
     @GetMapping("/category")
@@ -76,10 +81,16 @@ public class AuctionController {
     }
 
     @GetMapping("/find/{id}")
-    public Resource<AuctionDomain> one(@PathVariable int id) {
+    public ResponseEntity<AuctionDetail> one(@PathVariable int id) {
         log(" try to find an auction");
         User user = userDetailsService.getUser();
-        return assembler.toResource(auctionService.toAuctionDomain(auctionService.findById(id), user));
+        Auction auction = auctionService.findById(id);
+        log(" find the auction with title " + auction.getTitle());
+        int lastPrice = bidService.findLastPrice(auction);
+        int members = bidService.getMembers(auction);
+        AuctionDomain auctionDomain = auctionService.toAuctionDomain(auction,user);
+        System.out.println("to auctionDomain ");
+        return new ResponseEntity<>(new AuctionDetail(auctionDomain,members,lastPrice),HttpStatus.OK);
     }
 
 
@@ -106,11 +117,11 @@ public class AuctionController {
         return assembler.toResourcesAuc(auctionService.toAuctionDomainList(auctionService.getAll(), user));
     }
 
-
     private void log(String action){
         log.info(userDetailsService.getUser().getName() + " with id " + userDetailsService.getUser().getId() + action);
     }
 
 }
+
 
 

@@ -127,11 +127,11 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
         logger.error(ex.getMessage());
     }
 
-    @ExceptionHandler(value = {NullPointerException.class})
+   /* @ExceptionHandler(value = {NullPointerException.class})
     protected void nullValue(NullPointerException ex,
                             HttpServletResponse response) {
         logger.error("something is null -_-");
         logger.error(ex.getMessage());
         response.setStatus(497);
-    }
+    }*/
 }

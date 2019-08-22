@@ -92,6 +92,9 @@ public class UserService {
     public Optional<User> findUserByEmail(String email) {
         return repository.findByEmail(email);
     }
+    public Optional<User> findUserId(int id) {
+        return repository.findById(id);
+    }
 
     public SimpleUserDomain changePassword(User user, String newPassword) {
         user.setPassword(encoder.encode(newPassword));

@@ -3,14 +3,12 @@ package com.rahnemacollege.service;
 
 import com.google.common.collect.Lists;
 import com.rahnemacollege.domain.AddAuctionDomain;
+import com.rahnemacollege.domain.AuctionDetail;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.model.User;
-import com.rahnemacollege.repository.AuctionRepository;
-import com.rahnemacollege.repository.CategoryRepository;
-import com.rahnemacollege.repository.UserRepository;
-import com.rahnemacollege.repository.PictureRepository;
+import com.rahnemacollege.repository.*;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,6 +121,11 @@ public class AuctionService {
     public Auction findById(int id) {
         Auction auction = auctionRepository.findById(id).orElseThrow(() -> new InvalidInputException(Message.AUCTION_NOT_FOUND));
         return auction;
+    }
+
+    public AuctionDetail getAuctionDetail(AuctionDomain auction,int lastPrice, int members){
+        return new AuctionDetail(auction, members, lastPrice);
+
     }
 
     public List<Auction> findByTitle(String title, int category_id) {

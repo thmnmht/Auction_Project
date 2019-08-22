@@ -37,6 +37,15 @@ public class Auction {
     private int max_number;
 
 
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof Auction)
+            if (((Auction) o).id == id)
+                return true;
+            return false;
+    }
+
+
     public Auction() {
     }
 
@@ -52,6 +61,7 @@ public class Auction {
         this.owner = owner;
         this.max_number = max_number;
     }
+
 
 
 }

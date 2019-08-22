@@ -25,4 +25,16 @@ public class Bid {
     private Date date;
 
 
+    public Bid(){
+
+    }
+
+    public Bid(Auction auction,User user,int price,Date date){
+        this.auction = auction;
+        this.user = user;
+        this.price = price;
+        this.date = date;
+    }
+
+
 }

@@ -1,14 +1,15 @@
+/*
 # initial users
-INSERT INTO Users (name, email, password)
-VALUES ("علیرضا دیزجی", "Alirezadizaji@yahoo.com", "a.dizaji");
-INSERT INTO Users (name, email, password)
-VALUES ("یلدا یارندی", "yalda.yarandi@gmail.com", "y.yarandi");
-INSERT INTO Users (name, email, password)
-VALUES ("امید سیفان", "seyfanomid@ymail.com", "o.seyfan");
-INSERT INTO Users (name, email, password)
-VALUES ("تهمینه محاطی", "tmohati@gmail.com", "t.mohati");
-INSERT INTO Users (name, email, password)
-VALUES ("سبحان ابراهیمی", "sobhanebrahimi82@gmail.com", "s.ebrahimi");
+INSERT INTO Users (name, email, password,id)
+VALUES ("علیرضا دیزجی", "Alirezadizaji@yahoo.com", "a.dizaji",-1);
+INSERT INTO Users (name, email, password,id)
+VALUES ("یلدا یارندی", "yalda.yarandi@gmail.com", "y.yarandi",-2);
+INSERT INTO Users (name, email, password,id)
+VALUES ("امید سیفان", "seyfanomid@ymail.com", "o.seyfan",-3);
+INSERT INTO Users (name, email, password,id)
+VALUES ("تهمینه محاطی", "tmohati@gmail.com", "t.mohati",-4);
+INSERT INTO Users (name, email, password,id)
+VALUES ("سبحان ابراهیمی", "sobhanebrahimi82@gmail.com", "s.ebrahimi",-5);
 
 
 # initial auctions
@@ -52,3 +53,4 @@ VALUES ("ست لباس ورزشی", "هدیه گرفتم تا حالا نپوش�
 
 
 
+*/
