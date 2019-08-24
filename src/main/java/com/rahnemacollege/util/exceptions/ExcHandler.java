@@ -137,11 +137,10 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
         logger.error(ex.getMessage());
     }
 
-   /* @ExceptionHandler(value = {NullPointerException.class})
-    protected void nullValue(NullPointerException ex,
+    @ExceptionHandler(value = {EnterDeniedException.class})
+    protected void enterDenied(EnterDeniedException ex,
                             HttpServletResponse response) {
-        logger.error("something is null -_-");
-        logger.error(ex.getMessage());
+        logger.error("SOMEONE TRY TO BID OUT OF AUCTION -_-");
         response.setStatus(497);
-    }*/
+    }
 }

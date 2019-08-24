@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -98,9 +100,13 @@ public class AuctionService {
         return auctionRepository.findById(id).orElseThrow(() -> new InvalidInputException(Message.AUCTION_NOT_FOUND));
     }
 
-    public AuctionDomain toAuctionDomain(Auction auction, User user) {
-        AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(), auction.getDescription(), auction.getBasePrice(), auction.getDate().getTime(), auction.getCategory().getId(), auction.getMaxNumber());
-        auctionDomain.setId(auction.getId());
+    public AuctionDomain toAuctionDomain(Auction auction, User user,int current) {
+        AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(),
+                auction.getDate().getTime(),
+                auction.getCategory().getId(),
+                auction.getMaxNumber(),
+                auction.getId(),
+                current);
         if (auction.getOwner().getId() == user.getId())
             auctionDomain.setMine(true);
         String userEmail = user.getEmail();
@@ -140,22 +146,25 @@ public class AuctionService {
         return auction;
     }
 
-    public AuctionDetail getAuctionDetail(AuctionDomain auction,int lastPrice, int members){
-        return new AuctionDetail(auction, members, lastPrice);
-
-    }
-
     public List<Auction> findByTitle(String title, int category_id) {
         List<Auction> auctions = new ArrayList<>();
-        if (category_id == 0)
+        if (category_id == 0) {
             auctions = getAllAliveAuctions();
+        }
         else {
             List<Auction> tmp = getAllAliveAuctions().stream().filter(c -> c.getCategory().getId() == category_id).collect(Collectors.toList());
             auctions.addAll(tmp);
         }
-        auctions = auctions.stream()
-                .filter(a -> a.getTitle().toLowerCase().contains(title.toLowerCase()))
-                .collect(Collectors.toList());
+        System.err.println(title);
+        if(title != null && title.length() > 0){
+            Pattern pattern = Pattern.compile(title, Pattern.CASE_INSENSITIVE);
+            auctions = auctions.stream()
+                    .filter(a -> {
+                        Matcher m = pattern.matcher(a.getTitle());
+                        return m.find();
+                    })
+                    .collect(Collectors.toList());
+        }
         return auctions;
     }
 
@@ -163,17 +172,6 @@ public class AuctionService {
         List<Auction> auctions = auctionRepository.findByOwner_id(user.getId());
         return auctions;
     }
-
-    public List<AuctionDomain> toAuctionDomainList(List<Auction> auctions, User user) {
-        return Lists.newArrayList(auctions.stream()
-                .map(a -> toAuctionDomain(a, user))
-                .collect(Collectors.toList()));
-    }
-
-
-//    public Page<AuctionDomain> getAllAuctions(int page, int size) {
-//        return toPage(getAll(), page, size);
-//    }
 
     public Page<AuctionDomain> toPage(List<AuctionDomain> list, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -187,15 +185,8 @@ public class AuctionService {
         return auctionRepository.findHottest(request);
     }
 
-    public Page<AuctionDomain> toAuctionDomainPage(Page<Auction> auctionPage, User user) {
-        List<AuctionDomain> auctionDomainList = new ArrayList<>();
-        auctionPage.forEach(auction -> auctionDomainList.add(toAuctionDomain(auction, user)));
-        return new PageImpl<>(auctionDomainList);
-    }
-
-
     @Transactional
-    public void addBookmark(User user, int id) {
+    public Auction addBookmark(User user, int id) {
         user = userRepository.findByEmail(user.getEmail()).get();
         Set<Auction> bookmarks = user.getBookmarks();
         Auction newBookmark = auctionRepository.findById(id).orElseThrow(() -> new InvalidInputException(Message.AUCTION_NOT_FOUND));
@@ -205,6 +196,7 @@ public class AuctionService {
             bookmarks.add(newBookmark);
         user.setBookmarks(bookmarks);
         userRepository.save(user);
+        return newBookmark;
     }
 
     public void schedule(Bid bidRequest) {

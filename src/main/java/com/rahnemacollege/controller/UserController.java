@@ -1,6 +1,7 @@
 package com.rahnemacollege.controller;
 
 import com.rahnemacollege.domain.*;
+import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.ResetRequest;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.*;
@@ -26,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -41,6 +43,7 @@ public class UserController {
     private final PictureService pictureService;
     private final TokenUtil tokenUtil;
     private final AuctionService auctionService;
+    private final BidService bidService;
 
     private final Logger log;
     @Value("${server_ip}")
@@ -51,7 +54,7 @@ public class UserController {
                           UserDetailsServiceImpl userDetailService,
                           UserDetailsServiceImpl detailsService,
                           ResetRequestService requestService,
-                          EmailService emailService, PictureService pictureService, TokenUtil tokenUtil, AuctionService auctionService) {
+                          EmailService emailService, PictureService pictureService, TokenUtil tokenUtil, AuctionService auctionService, BidService bidService) {
         this.userService = userService;
         this.assembler = assembler;
         this.passwordService = passwordService;
@@ -62,6 +65,7 @@ public class UserController {
         this.pictureService = pictureService;
         this.tokenUtil = tokenUtil;
         this.auctionService = auctionService;
+        this.bidService = bidService;
         log = LoggerFactory.getLogger(UserController.class);
     }
 
@@ -147,7 +151,9 @@ public class UserController {
                                                                              PagedResourcesAssembler<AuctionDomain> assembler) {
         //TODO : change it
         User user = detailsService.getUser();
-        List<AuctionDomain> auctionDomains = auctionService.toAuctionDomainList(auctionService.findByOwner(user), user);
+        List<Auction> auctions = auctionService.findByOwner(user);
+        List<AuctionDomain> auctionDomains = auctions.stream().map(a ->
+                auctionService.toAuctionDomain(a,user,bidService.getMembers(a))).collect(Collectors.toList());
         return assembler.toResource(auctionService.toPage(auctionDomains, page, size));
     }
 
@@ -157,7 +163,9 @@ public class UserController {
                                                             @RequestParam("size") int size,
                                                             PagedResourcesAssembler<AuctionDomain> assembler) {
         User user = detailsService.getUser();
-        List<AuctionDomain> auctionDomains= auctionService.toAuctionDomainList(userService.getUserBookmarks(user), user);
+        List<Auction> auctions = userService.getUserBookmarks(user);
+        List<AuctionDomain> auctionDomains = auctions.stream().map(a ->
+                auctionService.toAuctionDomain(a,user,bidService.getMembers(a))).collect(Collectors.toList());
         return assembler.toResource(auctionService.toPage(auctionDomains, page, size));
     }
 

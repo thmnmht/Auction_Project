@@ -49,13 +49,10 @@ public class BidController {
     public void bid(BidRequest request, org.springframework.messaging.Message<?> message){
         logger.info("someone try to bid");
         StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        User user = userRepository.findById(Integer.valueOf(headerAccessor.getUser().getName())).orElseThrow(() -> new InvalidInputException(Message.INVALID_ID));
+        User user = userRepository.findById(Integer.valueOf(headerAccessor.getUser().getName())).orElseThrow(() -> new InvalidInputException(Message.TOKEN_NOT_FOUND));
         logger.info(user.getEmail() + " with id " + user.getId() + " wants to bid auction " + request.getAuctionId());
         Bid bid = bidService.add(request,user);
-
-
         auctionService.schedule(bid);
-
         logger.info("bid accepted");
         template.convertAndSend("/auction/" + request.getAuctionId(),bid.getPrice());
     }
