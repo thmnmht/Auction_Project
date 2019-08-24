@@ -81,6 +81,7 @@ CREATE TABLE Bids
     price      INT      NOT NULL,
     date       TIMESTAMP NOT NULL,
     PRIMARY KEY (id),
+    INDEX (auction_id),
     FOREIGN KEY (user_id)
         REFERENCES Users (id)
         ON UPDATE CASCADE ON DELETE RESTRICT,

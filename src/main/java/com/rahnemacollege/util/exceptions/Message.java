@@ -36,5 +36,6 @@ public enum Message {
     PRICE_TOO_LOW,
 
     BID_ON_FINISHED_AUCTION,
-    SCHEDULER_ERROR
+    SCHEDULER_ERROR,
+    ALREADY_BID
 }

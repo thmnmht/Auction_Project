@@ -114,6 +114,9 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
             case SCHEDULER_ERROR:
                 response.setStatus(602);
                 break;
+            case ALREADY_BID:
+                response.setStatus(603);
+                break;
         }
 
         logger.error(ex.getMessageStatus().toString());
