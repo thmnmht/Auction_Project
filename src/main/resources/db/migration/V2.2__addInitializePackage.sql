@@ -1,15 +1,14 @@
-/*
-# initial users
-INSERT INTO Users (name, email, password,id)
-VALUES ("علیرضا دیزجی", "Alirezadizaji@yahoo.com", "a.dizaji",-1);
-INSERT INTO Users (name, email, password,id)
-VALUES ("یلدا یارندی", "yalda.yarandi@gmail.com", "y.yarandi",-2);
-INSERT INTO Users (name, email, password,id)
-VALUES ("امید سیفان", "seyfanomid@ymail.com", "o.seyfan",-3);
-INSERT INTO Users (name, email, password,id)
-VALUES ("تهمینه محاطی", "tmohati@gmail.com", "t.mohati",-4);
-INSERT INTO Users (name, email, password,id)
-VALUES ("سبحان ابراهیمی", "sobhanebrahimi82@gmail.com", "s.ebrahimi",-5);
+# initial users decoded passwords in order : a.dizaji , y.yarandi , o.seyfan , t.mohati , s.ebrahimi
+INSERT INTO Users (name, email, password)
+VALUES ("علیرضا دیزجی", "Alirezadizaji@yahoo.com", "$2a$10$OraZDACEgxzTyF5jK8XTo.ID/bcMEknBWMi3lXwYcCwIpDMfJndaG");
+INSERT INTO Users (name, email, password)
+VALUES ("یلدا یارندی", "yalda.yarandi@gmail.com", "$2a$10$NpanvpOxS9tL3hHSy2JKquiA8iFqwhHCmhRPM9K3a.tzxzjRCXCTK");
+INSERT INTO Users (name, email, password)
+VALUES ("امید سیفان", "seyfanomid@ymail.com", "$2a$10$CDcfMF5fHv5LuczO50wxuOvnMvEiCFLmpJN.WPLHs006aWwpGFWbi");
+INSERT INTO Users (name, email, password)
+VALUES ("تهمینه محاطی", "tmohati@gmail.com", "$2a$10$DarBf7KvL.QK4/FResFZ.OvYw5NTV0ieuaqq975DSrOmeh/wScckG");
+INSERT INTO Users (name, email, password)
+VALUES ("سبحان ابراهیمی", "sobhanebrahimi82@gmail.com", "$2a$10$JGM95m2hq9ut0QwcltxvOu29BdWJbbGM2Pe8nRJL1QbHs8Q2jZNSq");
 
 
 # initial auctions
@@ -53,4 +52,3 @@ VALUES ("ست لباس ورزشی", "هدیه گرفتم تا حالا نپوش�
 
 
 
-*/

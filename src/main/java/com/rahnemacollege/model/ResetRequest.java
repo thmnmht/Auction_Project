@@ -10,6 +10,7 @@ import java.util.Date;
 public class ResetRequest {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @OneToOne
     @MapsId

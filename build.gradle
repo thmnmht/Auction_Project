@@ -138,7 +138,9 @@ dependencies {
     providedCompile 'javax.servlet:servlet-api:2.5'
     providedCompile 'org.apache.tomcat:tomcat-jsp-api:8.5.43'
     
-    providedCompile 'org.apache.tomcat:tomcat-jsp-api:8.5.43'
+    // https://mvnrepository.com/artifact/org.quartz-scheduler/quartz
+    compile group: 'org.quartz-scheduler', name: 'quartz', version: '2.3.0'
+
 
 }
 
