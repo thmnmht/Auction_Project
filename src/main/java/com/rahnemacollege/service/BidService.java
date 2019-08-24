@@ -34,6 +34,7 @@ public class BidService {
     private OnlinePeopleRepository peopleRepository;
 
 
+
     private Logger logger;
 
 
@@ -93,4 +94,7 @@ public class BidService {
     public Map<Integer, List<User>> getOnlinePeople() {
         return peopleRepository.getOnlinePeople();
     }
+
+
+
 }

@@ -51,17 +51,17 @@ public class Auction {
     public Auction() {
     }
 
-    public Auction(String title, String description, int basePrice, Category category, Date date, User owner,
-                   int maxNumber) {
+    public Auction(String title, String description, int base_price, Category category, Date date, User owner,
+                   int max_number) {
         this.title = title;
         this.description = description;
-        this.basePrice = basePrice;
+        this.basePrice = base_price;
         this.date = date;
         this.category = category;
         this.state = 0;
         this.winner = null;
         this.owner = owner;
-        this.maxNumber = maxNumber;
+        this.maxNumber = max_number;
     }
 
 

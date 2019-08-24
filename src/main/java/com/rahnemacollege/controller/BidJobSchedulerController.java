@@ -17,16 +17,17 @@ import java.util.Date;
 
 @RestController
 public class BidJobSchedulerController {
-    private static final Logger logger = LoggerFactory.getLogger(BidJobSchedulerController.class);
+    private final Logger logger = LoggerFactory.getLogger(BidJobSchedulerController.class);
+    @Autowired
+    private AuctionService auctionService;
 
     @Autowired
     private Scheduler scheduler;
-    @Autowired
-    private AuctionService auctionService;
+
     private final long auctionActiveSession = 30000L;
 
-    @PostMapping("/scheduleEmail")
-    public ResponseEntity<Auction> scheduleEmail(@RequestBody Bid bidRequest) {
+    @PostMapping("/schedule")
+    public ResponseEntity<Auction> schedule(@RequestBody Bid bidRequest) {
         if (auctionService.findAuctionById(bidRequest.getAuction().getId()).getState() == 1)
             return ResponseEntity.badRequest().body(bidRequest.getAuction());
         try {

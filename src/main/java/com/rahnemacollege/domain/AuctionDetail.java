@@ -1,5 +1,9 @@
 package com.rahnemacollege.domain;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+
+import javax.persistence.Entity;
 import java.util.List;
 
 public class AuctionDetail {

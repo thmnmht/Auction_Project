@@ -35,4 +35,6 @@ public class FinalizeAuctionJob extends QuartzJobBean {
         logger.info("User : " + user.getEmail() + " just won auction with id : " + auction.getId());
     }
 
+
+
 }

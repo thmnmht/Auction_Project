@@ -107,6 +107,13 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
                 break;
             case PICTURE_NULL:
                 response.setStatus(498);
+                break;
+            case BID_ON_FINISHED_AUCTION:
+                response.setStatus(601);
+                break;
+            case SCHEDULER_ERROR:
+                response.setStatus(602);
+                break;
         }
 
         logger.error(ex.getMessageStatus().toString());

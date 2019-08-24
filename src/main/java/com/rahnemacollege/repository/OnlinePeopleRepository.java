@@ -23,6 +23,7 @@ public class OnlinePeopleRepository {
     }
 
     public void add(Auction auction, User user){
+        System.err.println("maxN:"+auction.getMaxNumber());
         if (onlinePeople.containsKey(auction.getId())) {
             int maxNumber = auction.getMaxNumber();
             int onlineNumber = onlinePeople.get(auction.getId()).size();

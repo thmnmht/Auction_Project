@@ -3,13 +3,22 @@ package com.rahnemacollege.service;
 
 import com.google.common.collect.Lists;
 import com.rahnemacollege.domain.AddAuctionDomain;
+import com.rahnemacollege.domain.AuctionDetail;
 import com.rahnemacollege.domain.AuctionDomain;
+import com.rahnemacollege.job.FinalizeAuctionJob;
 import com.rahnemacollege.model.Auction;
+import com.rahnemacollege.model.Bid;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.model.User;
-import com.rahnemacollege.repository.*;
+import com.rahnemacollege.repository.AuctionRepository;
+import com.rahnemacollege.repository.CategoryRepository;
+import com.rahnemacollege.repository.PictureRepository;
+import com.rahnemacollege.repository.UserRepository;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
+import org.quartz.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -19,7 +28,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -31,9 +43,15 @@ public class AuctionService {
     private final AuctionRepository auctionRepository;
     private final CategoryRepository categoryRepository;
     private final PictureRepository pictureRepository;
+    private final Logger logger;
 
     @Value("${server_ip}")
     private String ip;
+
+    @Autowired
+    private Scheduler scheduler;
+
+    private final long auctionActiveSession = 30000L;
 
     @Autowired
     public AuctionService(UserRepository userRepository, AuctionRepository auctionRepository, CategoryRepository categoryRepository,
@@ -42,6 +60,7 @@ public class AuctionService {
         this.auctionRepository = auctionRepository;
         this.categoryRepository = categoryRepository;
         this.pictureRepository = pictureRepository;
+        this.logger = LoggerFactory.getLogger(AuctionService.class);
     }
 
     public Auction addAuction(AddAuctionDomain auctionDomain, User user){
@@ -178,6 +197,56 @@ public class AuctionService {
         user.setBookmarks(bookmarks);
         userRepository.save(user);
         return newBookmark;
+    }
+
+    public void schedule(Bid bidRequest) {
+        int auctionId = bidRequest.getAuction().getId();
+        if (findAuctionById(auctionId).getState() == 1) {
+            logger.error("cannot schedule, auction Id#" + auctionId + " is already finished.");
+            throw new InvalidInputException(Message.BID_ON_FINISHED_AUCTION);
+        }
+        try {
+            if (scheduler.checkExists(TriggerKey.triggerKey("FTrigger-" + auctionId, "finalizeAuction-triggers"))
+                    || scheduler.checkExists(JobKey.jobKey(String.valueOf(bidRequest.getId()), "finalizeAuction-jobs"))) {
+//                scheduler.unscheduleJob(TriggerKey.triggerKey("FTrigger-" + auctionId, "finalizeAuction-triggers"));
+                scheduler.deleteJob(JobKey.jobKey(String.valueOf(bidRequest.getId()), "finalizeAuction-jobs"));
+            }
+        } catch (SchedulerException e) {
+            logger.error("Error scheduling bid", e);
+            throw new InvalidInputException(Message.SCHEDULER_ERROR);
+        }
+        try {
+            Date finishDate = new Date(System.currentTimeMillis() + auctionActiveSession);
+            JobDetail jobDetail = buildJobDetail(bidRequest);
+            Trigger trigger = buildJobTrigger(jobDetail, finishDate, auctionId);
+            scheduler.scheduleJob(jobDetail, trigger);
+            logger.info("auction Id#" + auctionId + " will be finished @ " + finishDate);
+        } catch (SchedulerException e) {
+            logger.error("Error scheduling bid", e);
+            throw new InvalidInputException(Message.SCHEDULER_ERROR);
+        }
+    }
+
+    private JobDetail buildJobDetail(Bid bid) {
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("auction", bid.getAuction());
+        jobDataMap.put("bidder", bid.getUser());
+        return JobBuilder.newJob(FinalizeAuctionJob.class)
+                .withIdentity(JobKey.jobKey(String.valueOf(bid.getId()), "finalizeAuction-jobs"))
+                .withDescription("Finalize Auction Job")
+                .usingJobData(jobDataMap)
+                .storeDurably()
+                .build();
+    }
+
+    private Trigger buildJobTrigger(JobDetail jobDetail, Date startAt, Integer auctionId) {
+        return TriggerBuilder.newTrigger()
+                .forJob(jobDetail)
+                .withIdentity(TriggerKey.triggerKey("FTrigger-" + auctionId, "finalizeAuction-triggers"))
+                .withDescription("Finalize Auction Trigger")
+                .startAt(startAt)
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
+                .build();
     }
 
 }
