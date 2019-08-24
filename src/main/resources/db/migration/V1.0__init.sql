@@ -30,6 +30,7 @@ CREATE TABLE Auctions
     category_id INT         NOT NULL,
     date        TIMESTAMP    NOT NULL,
     state       INT         NOT NULL,
+    max_number   INT         NOT NULL,
     winner_id   INT,
     owner_id    INT         NOT NULL,
     PRIMARY KEY (id),

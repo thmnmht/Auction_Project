@@ -2,6 +2,7 @@ package com.rahnemacollege.util;
 
 import com.rahnemacollege.controller.AuctionController;
 import com.rahnemacollege.controller.UserController;
+import com.rahnemacollege.domain.AddAuctionDomain;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.domain.SimpleUserDomain;
 import com.rahnemacollege.domain.UserDomain;
@@ -38,6 +39,9 @@ public class ResourceAssembler {
 
 
     public Resource<AuctionDomain> toResource(AuctionDomain auction){
+        return new Resource<>(auction);
+    }
+    public Resource<AddAuctionDomain> toResource(AddAuctionDomain auction){
         return new Resource<>(auction);
     }
 

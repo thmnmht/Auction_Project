@@ -21,7 +21,8 @@ public class Auction {
     private int id;
     private String title;
     private String description;
-    private int base_price;
+    @Column(name = "base_price")
+    private int basePrice;
     @ManyToOne
     @JoinColumn(name = "category_id")
     @RestResource(exported = false)
@@ -34,7 +35,8 @@ public class Auction {
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
-    private int max_number;
+    @Column(name = "max_number")
+    private int maxNumber;
 
 
     @Override
@@ -49,17 +51,17 @@ public class Auction {
     public Auction() {
     }
 
-    public Auction(String title, String description, int base_price, Category category, Date date, User owner,
-                   int max_number) {
+    public Auction(String title, String description, int basePrice, Category category, Date date, User owner,
+                   int maxNumber) {
         this.title = title;
         this.description = description;
-        this.base_price = base_price;
+        this.basePrice = basePrice;
         this.date = date;
         this.category = category;
         this.state = 0;
         this.winner = null;
         this.owner = owner;
-        this.max_number = max_number;
+        this.maxNumber = maxNumber;
     }
 
 
