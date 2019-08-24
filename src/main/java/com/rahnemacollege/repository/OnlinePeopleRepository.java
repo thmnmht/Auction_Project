@@ -23,8 +23,9 @@ public class OnlinePeopleRepository {
     }
 
     public void add(Auction auction, User user){
+        System.err.println("maxN:"+auction.getMaxNumber());
         if (onlinePeople.containsKey(auction.getId())) {
-            int maxNumber = auction.getMax_number();
+            int maxNumber = auction.getMaxNumber();
             int onlineNumber = onlinePeople.get(auction.getId()).size();
             if (maxNumber <= onlineNumber) {
 //                logger.error("the auction with id " + auction.getId() + "is full");

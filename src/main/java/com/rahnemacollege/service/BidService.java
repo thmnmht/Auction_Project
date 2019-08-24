@@ -34,6 +34,7 @@ public class BidService {
     private OnlinePeopleRepository peopleRepository;
 
 
+
     private Logger logger;
 
 
@@ -61,7 +62,7 @@ public class BidService {
 //        List<Bid> lastBid = Lists.newArrayList(bidRepository.findLastBid(String.valueOf(auction.getId())));
         List<Bid> lastBid = Lists.newArrayList(bidRepository.findAll()).stream().filter(b -> b.getAuction().equals(auction)).collect(Collectors.toList());
 
-        int lastPrice = auction.getBase_price();
+        int lastPrice = auction.getBasePrice();
         if (lastBid.size() > 0)
             lastPrice = lastBid.get(lastBid.size() - 1).getPrice();
         return lastPrice;
@@ -93,4 +94,7 @@ public class BidService {
     public Map<Integer, List<User>> getOnlinePeople() {
         return peopleRepository.getOnlinePeople();
     }
+
+
+
 }

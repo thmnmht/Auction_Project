@@ -28,10 +28,11 @@ CREATE TABLE Auctions
     description VARCHAR(1000),
     base_price  INT         NOT NULL,
     category_id INT         NOT NULL,
-    date        TIMESTAMP    NOT NULL,
+    date        TIMESTAMP   NOT NULL,
     state       INT         NOT NULL,
     winner_id   INT,
     owner_id    INT         NOT NULL,
+    max_number  INT         NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (winner_id)
         REFERENCES Users (id)
