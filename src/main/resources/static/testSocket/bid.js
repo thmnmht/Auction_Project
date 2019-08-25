@@ -6,8 +6,7 @@ function setConnected(connected) {
     $("#disconnect").prop("disabled", !connected);
     if (connected) {
         $("#conversation").show();
-    }
-    else {
+    } else {
         $("#conversation").hide();
     }
     $("#chats").html("");
@@ -19,10 +18,18 @@ function connect() {
     //if you connect through WebSocket (without SockJS)
     // var socket = new WebSocket('/socket');
     stompClient = Stomp.over(socket);
-    stompClient.connect({auth: "Bearer " + $("#token").val()},function (frame) {
+    stompClient.connect({auth: "Bearer " + $("#token").val()}, function (frame) {
         console.log(frame);
         setConnected(true);
         console.log('Connected: ' + frame);
+    });
+}
+
+function initSubscribe() {
+    console.log("try to subscribe /app");
+    stompClient.subscribe('/app', function (auctionId) {
+        showChat("someone enter in auction " + auctionId.body);
+        $("#chatHeader").append("someone enter in auction " + auctionId.body + " ");
     });
 }
 
@@ -38,23 +45,23 @@ var lastSubId;
 
 function join() {
     auctionId = $("#auctionId").val();
-	$("#chatHeader").append(auctionId + " ");
-	lastSubId = stompClient.subscribe('/auction/' + auctionId, function (greeting) {
-		showChat(JSON.parse(greeting.body));
-	});
+    $("#chatHeader").append(auctionId + " ");
+    lastSubId = stompClient.subscribe('/auction/' + auctionId, function (greeting) {
+        showChat(JSON.parse(greeting.body));
+    });
 }
 
 function disjoin() {
     auctionId = $("#auctionId").val();
-    $("#chatHeader").append(' Exit from' + auctionId +"! ");
-    stompClient.unsubscribe("sub-0");
+    $("#chatHeader").append(' Exit from' + auctionId + "! ");
+    stompClient.unsubscribe(lastSubId);
     // auctionId = null;
 }
 
 function send() {
     stompClient.send("/app/bid", {}, JSON.stringify({
-    	'price': $("#message").val(),
-    	'auctionId': auctionId
+        'price': $("#message").val(),
+        'auctionId': auctionId
     }));
 }
 
@@ -67,9 +74,22 @@ $(function () {
     $("form").on('submit', function (e) {
         e.preventDefault();
     });
-    $( "#connect" ).click(function() { connect(); });
-    $( "#disconnect" ).click(function() { disconnect(); });
-    $( "#join" ).click(function() { join(); });
-    $( "#disjoin" ).click(function() { disjoin(); });
-    $( "#send" ).click(function() { send(); });
+    $("#connect").click(function () {
+        connect();
+    });
+    $("#disconnect").click(function () {
+        disconnect();
+    });
+    $("#join").click(function () {
+        join();
+    });
+    $("#disjoin").click(function () {
+        disjoin();
+    });
+    $("#init").click(function () {
+        initSubscribe();
+    });
+    $("#send").click(function () {
+        send();
+    });
 });

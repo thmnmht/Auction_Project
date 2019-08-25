@@ -33,7 +33,6 @@ CREATE TABLE Auctions
     max_number   INT         NOT NULL,
     winner_id   INT,
     owner_id    INT         NOT NULL,
-    max_number  INT         NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (winner_id)
         REFERENCES Users (id)

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+
 import org.slf4j.Logger;
 
 @RestController
@@ -59,22 +60,23 @@ public class AuctionController {
     }
 
     @PostMapping(value = "/add")
-    public Resource<AddAuctionDomain> add(@RequestBody AddAuctionDomain auctionDomain){
+    public ResponseEntity<AuctionDomain> add(@RequestBody AddAuctionDomain addAuctionDomain) {
         log(" call add an auction");
         User user = userDetailsService.getUser();
-        Auction auction = auctionService.addAuction(auctionDomain, user);
+        Auction auction = auctionService.addAuction(addAuctionDomain, user);
         log(" added auction");
-        AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);
-        return assembler.toResource(addAuctionDomain);
+        int current = bidService.getMembers(auction);
+        AuctionDomain auctionDomain = auctionService.toAuctionDomain(auction, user, current);
+        return new ResponseEntity<>(auctionDomain, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/add/picture/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Resource<AddAuctionDomain> addPicture(@PathVariable int id, @RequestBody MultipartFile[] images){
+    @PostMapping(value = "/add/picture/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Resource<AddAuctionDomain> addPicture(@PathVariable int id, @RequestBody MultipartFile[] images) {
         log(" try to add pictures for her/his auction.");
         Auction auction = auctionService.findById(id);
-        if(images == null || images.length < 1)
+        if (images == null || images.length < 1)
             throw new InvalidInputException(Message.PICTURE_NULL);
-        pictureService.setAuctionPictures(auction,images);
+        pictureService.setAuctionPictures(auction, images);
         log(" added picture for auction " + auction.getId());
         AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);
         return assembler.toResource(addAuctionDomain);
@@ -88,9 +90,9 @@ public class AuctionController {
         log(" find the auction with title " + auction.getTitle());
         int lastPrice = bidService.findLastPrice(auction);
         int members = bidService.getMembers(auction);
-        AuctionDomain auctionDomain = auctionService.toAuctionDomain(auction,user,members);
+        AuctionDomain auctionDomain = auctionService.toAuctionDomain(auction, user, members);
         System.out.println("to auctionDomain ");
-        return new ResponseEntity<>(new AuctionDetail(auctionDomain,auction.getDescription(),auction.getBasePrice(),lastPrice),HttpStatus.OK);
+        return new ResponseEntity<>(new AuctionDetail(auctionDomain, auction.getDescription(), auction.getBasePrice(), lastPrice), HttpStatus.OK);
     }
 
 
@@ -99,7 +101,7 @@ public class AuctionController {
         log.info(userDetailsService.getUser().getName() + " try to add bookmark");
         User user = userDetailsService.getUser();
         if (id != null) {
-            if (auctionService.findAuctionById(id)!= null){
+            if (auctionService.findAuctionById(id) != null) {
                 Auction auction = auctionService.addBookmark(user, id);
                 AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);
                 return assembler.toResource(addAuctionDomain);
@@ -119,7 +121,7 @@ public class AuctionController {
         return assembler.toResource(addAuctionDomain);
     }*/
 
-    private void log(String action){
+    private void log(String action) {
         log.info(userDetailsService.getUser().getName() + " with id " + userDetailsService.getUser().getId() + action);
     }
 

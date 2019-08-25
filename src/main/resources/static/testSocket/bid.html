@@ -10,53 +10,54 @@
     <script src="/testSocket/bid.js"></script>
 </head>
 <body>
-	<noscript>
-		<h2 style="color: #ff0000">
-			Seems your browser doesn't support Javascript! Websocket relies on Javascript being enabled. 
-			Please enable Javascript and reload this page!
-		</h2>
-	</noscript>
-	
-	<div id="main-content" class="container">
-        <div class="col-md-6">
-            <form class="form-inline">
-                <div class="form-group">
-                    <label for="connect">WebSocket connection:</label>
-                    <button id="connect" class="btn btn-default" type="submit">Connect</button>
-                    <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Disconnect</button>
-                </div>
-            </form>
-        </div>
-        <div class="col-md-6">
-            <form class="form-inline">
-                <div class="form-group">
-                    <label for="auctionId">What is your auctionId?</label>
-                    <input type="text" id="auctionId" class="form-control" placeholder="Your auctionId here...">
-                </div>
-                <button id="join" class="btn btn-default" type="submit">Join</button>
-                <button id="disjoin" class="btn btn-default" type="submit">Disjoin</button>
-            </form>
-        </div>
-        <div class="col-md-12" style="margin-top:15px">
-            <form class="form-inline">
-                <div class="form-group">
-                    <input type="text" id="message" class="form-control" placeholder="Say your price...">
-	                <button id="send" class="btn btn-default" type="submit">Send</button>
-                    <input type="text" id="token" class="form-control" placeholder="set your token here">
-                </div>
-            </form>
-        </div>
-        <div class="col-md-12">
-            <table id="conversation" class="table table-striped">
-                <thead>
-                <tr>
-                    <th id="chatHeader">Auction </th>
-                </tr>
-                </thead>
-                <tbody id="chats">
-                </tbody>
-            </table>
-        </div>
-	</div>
+<noscript>
+    <h2 style="color: #ff0000">
+        Seems your browser doesn't support Javascript! Websocket relies on Javascript being enabled.
+        Please enable Javascript and reload this page!
+    </h2>
+</noscript>
+
+<div id="main-content" class="container">
+    <div class="col-md-6">
+        <form class="form-inline">
+            <div class="form-group">
+                <label for="connect">WebSocket connection:</label>
+                <button id="connect" class="btn btn-default" type="submit">Connect</button>
+                <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Disconnect</button>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-6">
+        <form class="form-inline">
+            <div class="form-group">
+                <label for="auctionId">What is your auctionId?</label>
+                <input type="text" id="auctionId" class="form-control" placeholder="Your auctionId here...">
+            </div>
+            <button id="join" class="btn btn-default" type="submit">Join</button>
+            <button id="disjoin" class="btn btn-default" type="submit">Disjoin</button>
+            <button id="init" class="btn btn-default" type="submit">subscribe /app</button>
+        </form>
+    </div>
+    <div class="col-md-12" style="margin-top:15px">
+        <form class="form-inline">
+            <div class="form-group">
+                <input type="text" id="message" class="form-control" placeholder="Say your price...">
+                <button id="send" class="btn btn-default" type="submit">Send</button>
+                <input type="text" id="token" class="form-control" placeholder="set your token here">
+            </div>
+        </form>
+    </div>
+    <div class="col-md-12">
+        <table id="conversation" class="table table-striped">
+            <thead>
+            <tr>
+                <th id="chatHeader">Auction</th>
+            </tr>
+            </thead>
+            <tbody id="chats">
+            </tbody>
+        </table>
+    </div>
+</div>
 </body>
 </html>

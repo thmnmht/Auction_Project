@@ -34,7 +34,6 @@ public class BidService {
     private OnlinePeopleRepository peopleRepository;
 
 
-
     private Logger logger;
 
 
@@ -47,6 +46,8 @@ public class BidService {
         Auction auction = auctionRepository
                 .findById(request.getAuctionId()).orElseThrow(() ->
                         new InvalidInputException(Message.AUCTION_NOT_FOUND));
+        if (auction.getDate().getTime() >= new Date().getTime())
+            throw new EnterDeniedException();
         if (!peopleRepository.isInAuction(auction, user))
             throw new EnterDeniedException();
         int lastPrice = findLastPrice(auction);
@@ -74,13 +75,13 @@ public class BidService {
             logger.warn("the user with id " + user.getId() + "was in auction with id " + auction.getId());
             return;
         }
-        peopleRepository.add(auction,user);
+        peopleRepository.add(auction, user);
     }
 
 
-    public int getMembers(Auction auction){
+    public int getMembers(Auction auction) {
         List<User> users = peopleRepository.getMembers(auction.getId());
-        if(users == null)
+        if (users == null)
             return 0;
         return users.size();
     }
@@ -91,10 +92,18 @@ public class BidService {
     }
 
     // TODO: 8/22/19 remove it
-    public Map<Integer, List<User>> getOnlinePeople() {
-        return peopleRepository.getOnlinePeople();
+    public Map<Integer, List<User>> getUsersInAuction() {
+        return peopleRepository.getUsersInAuction();
     }
 
+
+    public void addSubscriptionId(String subscriptionId, int auctionId) {
+        peopleRepository.addSubscriptionId(subscriptionId, auctionId);
+    }
+
+    public int getAuctionId(String subscriptionId) {
+        return peopleRepository.getAuctionId(subscriptionId);
+    }
 
 
 }

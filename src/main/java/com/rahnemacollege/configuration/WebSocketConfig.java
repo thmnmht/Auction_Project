@@ -16,7 +16,6 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 
-
 @Configuration
 @EnableWebSocketMessageBroker
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -36,19 +35,20 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/auction");
-        config.setApplicationDestinationPrefixes("/app");
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
+        registry.setApplicationDestinationPrefixes("/auction", "/app") //socket_subscriber
+                .enableSimpleBroker("/app", "/auction"); //socket_publisher
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/socket").setAllowedOrigins("*")
+        registry.addEndpoint("/socket")
+                .setAllowedOrigins("*")
                 .withSockJS();
     }
 
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.setInterceptors(new ChannelImp(tokenUtil,bidService,userService));
+        registration.setInterceptors(new ChannelImp(tokenUtil, bidService, userService));
     }
 
 }
