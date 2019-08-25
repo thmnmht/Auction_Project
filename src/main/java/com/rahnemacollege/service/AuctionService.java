@@ -198,7 +198,7 @@ public class AuctionService {
         try {
             if (scheduler.checkExists(TriggerKey.triggerKey("FTrigger-" + auctionId, "finalizeAuction-triggers"))
                     || scheduler.checkExists(JobKey.jobKey(String.valueOf(bidRequest.getId()), "finalizeAuction-jobs"))) {
-//                scheduler.unscheduleJob(TriggerKey.triggerKey("FTrigger-" + auctionId, "finalizeAuction-triggers"));
+                scheduler.unscheduleJob(TriggerKey.triggerKey("FTrigger-" + auctionId, "finalizeAuction-triggers"));
                 scheduler.deleteJob(JobKey.jobKey(String.valueOf(bidRequest.getId()), "finalizeAuction-jobs"));
             }
         } catch (SchedulerException e) {
