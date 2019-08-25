@@ -16,18 +16,18 @@ public class Auction {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private int id;
     private String title;
     private String description;
     private int base_price;
     @ManyToOne
-    @JoinColumn(name = "category_Id")
+    @JoinColumn(name = "category_id")
     @RestResource(exported = false)
     private Category category;
     private Date date;
-    private int state;
+    private int state = 0;
     @ManyToOne
     @JoinColumn(name = "winner_id")
     private User winner;
@@ -35,6 +35,15 @@ public class Auction {
     @JoinColumn(name = "owner_id")
     private User owner;
     private int max_number;
+
+
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof Auction)
+            if (((Auction) o).id == id)
+                return true;
+            return false;
+    }
 
 
     public Auction() {
@@ -52,6 +61,7 @@ public class Auction {
         this.owner = owner;
         this.max_number = max_number;
     }
+
 
 
 }

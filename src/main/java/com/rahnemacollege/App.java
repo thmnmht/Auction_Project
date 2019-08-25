@@ -16,7 +16,7 @@ import java.util.Date;
 @SpringBootApplication(exclude = {JacksonAutoConfiguration.class}, scanBasePackages = {
         "com.rahnemacollege"})
 @EnableJpaRepositories("com.rahnemacollege.repository")
-public class App extends SpringBootServletInitializer {
+public class App extends SpringBootServletInitializer{
 
     public static void main(String[] args) {
         System.err.println(new Date().getTime());

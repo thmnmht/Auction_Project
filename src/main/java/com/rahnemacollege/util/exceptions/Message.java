@@ -31,6 +31,7 @@ public enum Message {
     REALLY_BAD_SITUATION,
 
     FORBIDDEN_REQUEST,
-    PICTURE_NULL
-}
+    PICTURE_NULL,
 
+    PRICE_TOO_LOW
+}

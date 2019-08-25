@@ -12,7 +12,7 @@ import java.util.Date;
 public class Bid {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @ManyToOne
     @JoinColumn(name = "auction_id")
@@ -23,6 +23,18 @@ public class Bid {
     @Min(value = 0, message = "Price could not be negative value.")
     private int price;
     private Date date;
+
+
+    public Bid(){
+
+    }
+
+    public Bid(Auction auction,User user,int price,Date date){
+        this.auction = auction;
+        this.user = user;
+        this.price = price;
+        this.date = date;
+    }
 
 
 }

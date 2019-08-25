@@ -69,18 +69,19 @@ public class UserController {
     @PostMapping("/login")
     public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws InvalidInputException {
         log.info(authenticationRequest.getEmail() + " wants to login *_*");
-        String email = authenticationRequest.getEmail();
         String password = authenticationRequest.getPassword();
-        if (!userService.isExist(email))
-            throw new InvalidInputException(Message.EMAIL_NOT_FOUND);
-        userService.authenticate(email, password);
-        final UserDetails userDetails = detailsService.loadUserByUsername(email);
+        int id  = userService.findUserByEmail(authenticationRequest.getEmail())
+                .orElseThrow(() -> new InvalidInputException(Message.EMAIL_NOT_FOUND))
+                .getId();
+        userService.authenticate(id, password);
+        final UserDetails userDetails = detailsService.loadUserByUsername(String.valueOf(id));
         final String token = tokenUtil.generateToken(userDetails);
+        log.info("the token will expired : " + tokenUtil.getExpirationDateFromToken(token));
         return new AuthenticationResponse(token);
     }
 
     @PostMapping("/edit")
-    public AuthenticationResponse edit(@RequestBody SimpleUserDomain userDomain) {
+    public ResponseEntity<SimpleUserDomain> edit(@RequestBody SimpleUserDomain userDomain) {
         log.info(detailsService.getUser().getName() + " with id " + detailsService.getUser().getId() + " try to edit his name or email");
         String email = userDomain.getEmail();
         String name = userDomain.getName();
@@ -88,8 +89,8 @@ public class UserController {
             email = email.toLowerCase();
         User user = userService.edit(detailsService.getUser(), name, email);
         log.info(user.getName() + " changed his/her infos :)");
-        final UserDetails userDetails = detailsService.loadUserByUsername(user.getEmail());
-        return new AuthenticationResponse(tokenUtil.generateToken(userDetails));
+        SimpleUserDomain simpleUserDomain = new SimpleUserDomain(user.getName(),user.getEmail());
+        return new ResponseEntity<>(simpleUserDomain,HttpStatus.OK);
     }
 
     @PostMapping("/edit/picture")

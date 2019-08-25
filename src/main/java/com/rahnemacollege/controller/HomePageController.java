@@ -15,7 +15,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.*;
 
-import javax.ws.rs.PathParam;
+import javax.websocket.server.PathParam;
 import java.util.List;
 
 @RestController

@@ -6,7 +6,7 @@ import java.util.Date;
 
 import org.springframework.security.core.userdetails.UserDetails;
 
-public interface TokenUtil extends Serializable {
+public interface    TokenUtil extends Serializable {
 
     /**
      * retrieve username from given token
@@ -14,7 +14,7 @@ public interface TokenUtil extends Serializable {
      * @param token
      * @return
      */
-    public String getEmailFromToken(String token);
+    public String getIdFromToken(String token);
 
     /**
      * retrieve expiration date from token

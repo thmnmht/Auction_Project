@@ -17,9 +17,9 @@ public interface AuctionRepository  extends CrudRepository<Auction, Integer> {
     @Query(value = "SELECT * ,COUNT(bookmarks_id) AS number_of_bookmarks \n" +
             "FROM Auctions\n" +
             "left join users_bookmarks\n" +
-            "on (Auctions.id = users_bookmarks.bookmarks_id)\n" +
+            "on (Auctions.id = users_bookmarks.bookmarks_id AND Auctions.state=0)\n" +
             "group by\n" +
-            "    Auctions.id\n " +
+            "Auctions.id\n " +
             "ORDER BY number_of_bookmarks DESC", nativeQuery = true)
     Page<Auction> findHottest(Pageable pageable);
 

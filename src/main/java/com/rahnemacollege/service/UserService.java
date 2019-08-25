@@ -74,9 +74,9 @@ public class UserService {
         return users;
     }
 
-    public void authenticate(String email, String password) throws InvalidInputException {
+    public void authenticate(int id, String password) throws InvalidInputException {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(id, password));
         } catch (DisabledException e) {
             logger.error(e.getMessage());
         } catch (BadCredentialsException e) {
@@ -91,6 +91,9 @@ public class UserService {
 
     public Optional<User> findUserByEmail(String email) {
         return repository.findByEmail(email);
+    }
+    public Optional<User> findUserId(int id) {
+        return repository.findById(id);
     }
 
     public SimpleUserDomain changePassword(User user, String newPassword) {
