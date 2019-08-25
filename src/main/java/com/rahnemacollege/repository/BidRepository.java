@@ -3,14 +3,16 @@ package com.rahnemacollege.repository;
 import com.rahnemacollege.model.Bid;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 
 
 @Repository
 public interface BidRepository extends CrudRepository<Bid, Integer> {
 
-    @Query(value = "from Bid a join a.auction_id c where c.id=:id",nativeQuery = true)
-    Iterable<Bid> findLastBid(@Param("id") String id);
+    //    @Query(value = "SELECT id,auction_id,user_id,price,MAX(date) FROM Bids WHERE auction_id=?1",nativeQuery = true)
+    @Query(value = "SELECT t1.* FROM Bids t1 WHERE t1.date = (SELECT MAX(t2.date) FROM Bids t2 " +
+            "WHERE t2.auction_id = ?1)", nativeQuery = true)
+    Optional<Bid> findLatestBid(Integer auctionId);
 }

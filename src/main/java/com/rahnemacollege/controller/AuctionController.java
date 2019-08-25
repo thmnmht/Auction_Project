@@ -13,7 +13,6 @@ import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -60,24 +59,25 @@ public class AuctionController {
     }
 
     @PostMapping(value = "/add")
-    public Resource<AuctionDomain> add(@RequestBody AddAuctionDomain auctionDomain){
+    public Resource<AddAuctionDomain> add(@RequestBody AddAuctionDomain auctionDomain){
         log(" call add an auction");
         User user = userDetailsService.getUser();
         Auction auction = auctionService.addAuction(auctionDomain, user);
         log(" added auction");
-        return assembler.toResource(auctionService.toAuctionDomain(auction, user));
+        AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);
+        return assembler.toResource(addAuctionDomain);
     }
 
     @PostMapping(value = "/add/picture/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Resource<AuctionDomain> addPicture(@PathVariable int id, @RequestBody MultipartFile[] images){
+    public Resource<AddAuctionDomain> addPicture(@PathVariable int id, @RequestBody MultipartFile[] images){
         log(" try to add pictures for her/his auction.");
         Auction auction = auctionService.findById(id);
         if(images == null || images.length < 1)
             throw new InvalidInputException(Message.PICTURE_NULL);
         pictureService.setAuctionPictures(auction,images);
         log(" added picture for auction " + auction.getId());
-        User user = userDetailsService.getUser();
-        return assembler.toResource(auctionService.toAuctionDomain(auction, user));
+        AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);
+        return assembler.toResource(addAuctionDomain);
     }
 
     @GetMapping("/find/{id}")
@@ -88,20 +88,21 @@ public class AuctionController {
         log(" find the auction with title " + auction.getTitle());
         int lastPrice = bidService.findLastPrice(auction);
         int members = bidService.getMembers(auction);
-        AuctionDomain auctionDomain = auctionService.toAuctionDomain(auction,user);
+        AuctionDomain auctionDomain = auctionService.toAuctionDomain(auction,user,members);
         System.out.println("to auctionDomain ");
-        return new ResponseEntity<>(new AuctionDetail(auctionDomain,members,lastPrice),HttpStatus.OK);
+        return new ResponseEntity<>(new AuctionDetail(auctionDomain,auction.getDescription(),auction.getBasePrice(),lastPrice),HttpStatus.OK);
     }
 
 
     @RequestMapping(value = "/bookmark", method = RequestMethod.POST)
-    public Resource<AuctionDomain> addBookmark(@RequestParam("auctionId") Integer id) {
+    public Resource<AddAuctionDomain> addBookmark(@RequestParam("auctionId") Integer id) {
         log.info(userDetailsService.getUser().getName() + " try to add bookmark");
         User user = userDetailsService.getUser();
         if (id != null) {
             if (auctionService.findAuctionById(id)!= null){
-                auctionService.addBookmark(user, id);
-                return assembler.toResource(auctionService.toAuctionDomain(auctionService.findAuctionById(id), user));
+                Auction auction = auctionService.addBookmark(user, id);
+                AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);
+                return assembler.toResource(addAuctionDomain);
             }
             throw new InvalidInputException(Message.REALLY_BAD_SITUATION);
         }
@@ -109,13 +110,14 @@ public class AuctionController {
     }
 
 
-    //TODO : delete it
+   /* //TODO : delete it
     @GetMapping("/all")
-    public Resources<Resource<AuctionDomain>> all() {
+    public Resources<Resource<AddAuctionDomain>> all() {
         log(" try to get all auctions");
         User user = userDetailsService.getUser();
-        return assembler.toResourcesAuc(auctionService.toAuctionDomainList(auctionService.getAll(), user));
-    }
+        AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);
+        return assembler.toResource(addAuctionDomain);
+    }*/
 
     private void log(String action){
         log.info(userDetailsService.getUser().getName() + " with id " + userDetailsService.getUser().getId() + action);

@@ -1,5 +1,9 @@
 package com.rahnemacollege.domain;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+
+import javax.persistence.Entity;
 import java.util.List;
 
 public class AuctionDetail {
@@ -13,16 +17,17 @@ public class AuctionDetail {
     private boolean bookmark = false;
     private boolean mine = false;
     private int id;
-
     private List<String> pictures;
-
-    private int members;
+    private int current;
     private int lastPrice;
 
-    public AuctionDetail(AuctionDomain auctionDomain,int members,int lastPrice) {
+    public AuctionDetail(AuctionDomain auctionDomain,
+                         String description,
+                         int basePrice,
+                         int lastPrice) {
         this.title = auctionDomain.getTitle();
-        this.description = auctionDomain.getDescription();
-        this.basePrice = auctionDomain.getBasePrice();
+        this.description = description;
+        this.basePrice = basePrice;
         this.date = auctionDomain.getDate();
         this.categoryId = auctionDomain.getCategoryId();
         this.maxNumber = auctionDomain.getMaxNumber();
@@ -30,7 +35,7 @@ public class AuctionDetail {
         this.mine = auctionDomain.isMine();
         this.bookmark = auctionDomain.isBookmark();
         this.id = auctionDomain.getId();
-        this.members = members;
+        this.current = auctionDomain.getCurrent();
         this.lastPrice = lastPrice;
     }
 

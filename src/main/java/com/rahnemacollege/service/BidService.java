@@ -1,7 +1,6 @@
 package com.rahnemacollege.service;
 
 
-import com.google.common.collect.Lists;
 import com.rahnemacollege.domain.BidRequest;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Bid;
@@ -17,8 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import javax.validation.constraints.NotNull;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class BidService {
@@ -34,6 +35,7 @@ public class BidService {
     private OnlinePeopleRepository peopleRepository;
 
 
+
     private Logger logger;
 
 
@@ -42,12 +44,16 @@ public class BidService {
     }
 
 
-    public Bid add(BidRequest request, User user) {
+    public Bid add(@NotNull BidRequest request, @NotNull User user) {
         Auction auction = auctionRepository
                 .findById(request.getAuctionId()).orElseThrow(() ->
                         new InvalidInputException(Message.AUCTION_NOT_FOUND));
         if (!peopleRepository.isInAuction(auction, user))
             throw new EnterDeniedException();
+        if (bidRepository.findLatestBid(auction.getId()).isPresent()
+                && bidRepository.findLatestBid(auction.getId()).get().getUser().getId().equals(user.getId())) {
+            throw new InvalidInputException(Message.ALREADY_BID);
+        }
         int lastPrice = findLastPrice(auction);
         if (request.getPrice() < 1)
             throw new InvalidInputException(Message.PRICE_TOO_LOW);
@@ -57,14 +63,7 @@ public class BidService {
     }
 
     public int findLastPrice(Auction auction) {
-        // TODO: 8/21/19 get last bid with query
-//        List<Bid> lastBid = Lists.newArrayList(bidRepository.findLastBid(String.valueOf(auction.getId())));
-        List<Bid> lastBid = Lists.newArrayList(bidRepository.findAll()).stream().filter(b -> b.getAuction().equals(auction)).collect(Collectors.toList());
-
-        int lastPrice = auction.getBase_price();
-        if (lastBid.size() > 0)
-            lastPrice = lastBid.get(lastBid.size() - 1).getPrice();
-        return lastPrice;
+        return bidRepository.findLatestBid(auction.getId()).map(Bid::getPrice).orElseGet(auction::getBasePrice);
     }
 
     public void enter(int auctionId, User user) {
@@ -93,4 +92,7 @@ public class BidService {
     public Map<Integer, List<User>> getOnlinePeople() {
         return peopleRepository.getOnlinePeople();
     }
+
+
+
 }

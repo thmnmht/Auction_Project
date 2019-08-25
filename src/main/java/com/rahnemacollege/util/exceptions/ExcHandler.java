@@ -107,6 +107,16 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
                 break;
             case PICTURE_NULL:
                 response.setStatus(498);
+                break;
+            case BID_ON_FINISHED_AUCTION:
+                response.setStatus(601);
+                break;
+            case SCHEDULER_ERROR:
+                response.setStatus(602);
+                break;
+            case ALREADY_BID:
+                response.setStatus(603);
+                break;
         }
 
         logger.error(ex.getMessageStatus().toString());
@@ -127,11 +137,10 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
         logger.error(ex.getMessage());
     }
 
-   /* @ExceptionHandler(value = {NullPointerException.class})
-    protected void nullValue(NullPointerException ex,
+    @ExceptionHandler(value = {EnterDeniedException.class})
+    protected void enterDenied(EnterDeniedException ex,
                             HttpServletResponse response) {
-        logger.error("something is null -_-");
-        logger.error(ex.getMessage());
+        logger.error("SOMEONE TRY TO BID OUT OF AUCTION -_-");
         response.setStatus(497);
-    }*/
+    }
 }
