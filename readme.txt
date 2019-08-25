@@ -6,10 +6,6 @@ header "auth" : "Bearer 'Token'"
 
 ************************************************************************************************************************
 
--/auctions/all GET : to receive all auctions
-
-************************************************************************************************************************
-
 -/auctions/category   GET   : get categories
 
 ************************************************************************************************************************
@@ -25,7 +21,7 @@ header "auth" : "Bearer 'Token'"
 -/auctions/add  POST : add a new Auction
 
         {
-            title,description,base_price,date,category_id,max_number
+            title,description,basePrice,date,categoryId,maxNumber
         }
 
 
@@ -40,8 +36,8 @@ header "auth" : "Bearer 'Token'"
         435 : if max_number > 15
         453 : if size of image is too high (>300MB)
 
-        response => Resource<AuctionDomain> : AuctionDomain{
-                   title,description,base_price,date,category_id,max_number,pictures,state
+        response => Resource<addAuctionDomain> : addAuctionDomain{
+                   title,description,basePrice,date,categoryId,maxNumber
         }
 
 
@@ -54,6 +50,9 @@ header "auth" : "Bearer 'Token'"
     454 if auctionId = null
     455 if no auction found by Id
     456 if server DB contains null auction
+************************************************************************************************************************
+-auctions/bid
+
 
 ************************************************************************************************************************
 ************************************************************************************************************************
@@ -120,16 +119,6 @@ header "auth" : "Bearer 'Token'"
 -/home/search/{category} POST : search by title
         @PathParam("title") String title, @PathVariable int category, @RequestParam("page") int page, @RequestParam("size") int size,
         if category was 0 it search with all categories :)
-
-************************************************************************************************************************
-
--/home/filter/{category_id} GET : filter some categories
-        @RequestParam("page") int page, @RequestParam("size") int size
-
-************************************************************************************************************************
-
--/home/all GET : to receive auctions (number of pages start with zero)
-        @RequestParam("page") int page, @RequestParam("size") int size
 
 ************************************************************************************************************************
 

@@ -11,7 +11,7 @@ import java.util.List;
 
 
 @Repository
-public interface AuctionRepository  extends CrudRepository<Auction, Integer> {
+public interface AuctionRepository extends CrudRepository<Auction, Integer> {
 
     //todo: consider limit for the hottest cards
     @Query(value = "SELECT * ,COUNT(bookmarks_id) AS number_of_bookmarks \n" +
@@ -23,7 +23,11 @@ public interface AuctionRepository  extends CrudRepository<Auction, Integer> {
             "ORDER BY number_of_bookmarks DESC", nativeQuery = true)
     Page<Auction> findHottest(Pageable pageable);
 
-    List<Auction> findByOwner_id(int user_id);
+    List<Auction> findByStateAndOwner_idOrderByIdDesc(int state, int user_id);
+
+    List<Auction> findByStateOrderByIdDesc(int state);
+
+    List<Auction> findByStateAndCategory_idOrderByIdDesc(int state, int CategoryId);
 
 
 }

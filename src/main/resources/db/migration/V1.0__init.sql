@@ -30,7 +30,6 @@ CREATE TABLE Auctions
     category_id INT         NOT NULL,
     date        TIMESTAMP   NOT NULL,
     state       INT         NOT NULL,
-    max_number   INT         NOT NULL,
     winner_id   INT,
     owner_id    INT         NOT NULL,
     PRIMARY KEY (id),
@@ -81,6 +80,7 @@ CREATE TABLE Bids
     price      INT      NOT NULL,
     date       TIMESTAMP NOT NULL,
     PRIMARY KEY (id),
+    INDEX (auction_id),
     FOREIGN KEY (user_id)
         REFERENCES Users (id)
         ON UPDATE CASCADE ON DELETE RESTRICT,

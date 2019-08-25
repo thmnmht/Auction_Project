@@ -11,6 +11,7 @@ import com.rahnemacollege.service.*;
 import com.rahnemacollege.util.ResourceAssembler;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
@@ -30,11 +31,11 @@ public class AuctionController {
 
     private final AuctionService auctionService;
     private final ResourceAssembler assembler;
-    private UserDetailsServiceImpl userDetailsService;
     private final UserService userService;
     private final PictureService pictureService;
     private final BidService bidService;
     private final Logger log;
+    private UserDetailsServiceImpl userDetailsService;
 
 
     public AuctionController(AuctionService auctionService, ResourceAssembler assembler, UserDetailsServiceImpl userDetailsService, UserService userService, PictureService pictureService, BidService bidService) {
@@ -47,11 +48,6 @@ public class AuctionController {
         log = LoggerFactory.getLogger(AuctionController.class);
     }
 
-
-    @GetMapping("/bid")
-    public String temp() {
-        return "bid.html";
-    }
 
     @GetMapping("/category")
     public ResponseEntity<List<Category>> getCategory() {
@@ -89,21 +85,24 @@ public class AuctionController {
         Auction auction = auctionService.findById(id);
         log(" find the auction with title " + auction.getTitle());
         int lastPrice = bidService.findLastPrice(auction);
+        Long latestBidTime = bidService.findLatestBidTime(auction);
         int members = bidService.getMembers(auction);
         AuctionDomain auctionDomain = auctionService.toAuctionDomain(auction, user, members);
         System.out.println("to auctionDomain ");
-        return new ResponseEntity<>(new AuctionDetail(auctionDomain, auction.getDescription(), auction.getBasePrice(), lastPrice), HttpStatus.OK);
+        return new ResponseEntity<>(new AuctionDetail(auctionDomain, auction.getDescription(), auction.getBasePrice(), lastPrice, latestBidTime), HttpStatus.OK);
     }
 
 
     @RequestMapping(value = "/bookmark", method = RequestMethod.POST)
     public Resource<AddAuctionDomain> addBookmark(@RequestParam("auctionId") Integer id) {
-        log.info(userDetailsService.getUser().getName() + " try to add bookmark");
-        User user = userDetailsService.getUser();
+        User user = userService.findUserId(userDetailsService.getUser().getId()).get();
+        log.info(user.getEmail() + " tried to add bookmark");
         if (id != null) {
-            if (auctionService.findAuctionById(id) != null) {
-                Auction auction = auctionService.addBookmark(user, id);
+            Auction auction = auctionService.findAuctionById(id);
+            if (auction != null) {
+                auctionService.addBookmark(user, auction);
                 AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);
+                log.info("Auction Id#" + auction.getId() + " just added to " + user.getEmail() + "'s bookmarks");
                 return assembler.toResource(addAuctionDomain);
             }
             throw new InvalidInputException(Message.REALLY_BAD_SITUATION);
@@ -111,15 +110,6 @@ public class AuctionController {
         throw new InvalidInputException(Message.INVALID_ID);
     }
 
-
-   /* //TODO : delete it
-    @GetMapping("/all")
-    public Resources<Resource<AddAuctionDomain>> all() {
-        log(" try to get all auctions");
-        User user = userDetailsService.getUser();
-        AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);
-        return assembler.toResource(addAuctionDomain);
-    }*/
 
     private void log(String action) {
         log.info(userDetailsService.getUser().getName() + " with id " + userDetailsService.getUser().getId() + action);
