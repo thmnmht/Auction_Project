@@ -89,13 +89,11 @@ public class UserService {
 
     public Optional<User> findUserByEmail(String email) {
         Optional<User> user = repository.findByEmail(email);
-        user.ifPresent(value -> value.getBookmarks().size());
         return user;
     }
 
     public Optional<User> findUserId(int id) {
         Optional<User> user = repository.findById(id);
-        user.ifPresent(value -> value.getBookmarks().size());
         return user;
     }
 

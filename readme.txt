@@ -21,7 +21,7 @@ header "auth" : "Bearer 'Token'"
 -/auctions/add  POST : add a new Auction
 
         {
-            title,description,base_price,date,category_id,max_number
+            title,description,basePrice,date,categoryId,maxNumber
         }
 
 
@@ -36,8 +36,8 @@ header "auth" : "Bearer 'Token'"
         435 : if max_number > 15
         453 : if size of image is too high (>300MB)
 
-        response => Resource<AuctionDomain> : AuctionDomain{
-                   title,description,base_price,date,category_id,max_number,pictures,state
+        response => Resource<addAuctionDomain> : addAuctionDomain{
+                   title,description,basePrice,date,categoryId,maxNumber
         }
 
 
@@ -50,6 +50,9 @@ header "auth" : "Bearer 'Token'"
     454 if auctionId = null
     455 if no auction found by Id
     456 if server DB contains null auction
+************************************************************************************************************************
+-auctions/bid
+
 
 ************************************************************************************************************************
 ************************************************************************************************************************

@@ -20,6 +20,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class BidService {
@@ -33,7 +34,6 @@ public class BidService {
 
     @Autowired
     private OnlinePeopleRepository peopleRepository;
-
 
 
     private Logger logger;
@@ -66,19 +66,29 @@ public class BidService {
         return bidRepository.findLatestBid(auction.getId()).map(Bid::getPrice).orElseGet(auction::getBasePrice);
     }
 
+    public Long findLatestBidTime(Auction auction) {
+        Optional<Date> date = bidRepository.findLatestBid(auction.getId()).map(Bid::getDate);
+        if (date.isPresent()) {
+            return date.get().getTime();
+        } else {
+            return null;
+        }
+
+    }
+
     public void enter(int auctionId, User user) {
         Auction auction = auctionRepository.findById(auctionId).orElseThrow(() -> new InvalidInputException(Message.INVALID_ID));
         if (peopleRepository.isInAuction(auction, user)) {
             logger.warn("the user with id " + user.getId() + "was in auction with id " + auction.getId());
             return;
         }
-        peopleRepository.add(auction,user);
+        peopleRepository.add(auction, user);
     }
 
 
-    public int getMembers(Auction auction){
+    public int getMembers(Auction auction) {
         List<User> users = peopleRepository.getMembers(auction.getId());
-        if(users == null)
+        if (users == null)
             return 0;
         return users.size();
     }
@@ -92,7 +102,6 @@ public class BidService {
     public Map<Integer, List<User>> getOnlinePeople() {
         return peopleRepository.getOnlinePeople();
     }
-
 
 
 }

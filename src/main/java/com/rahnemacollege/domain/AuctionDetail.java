@@ -19,11 +19,12 @@ public class AuctionDetail {
     private List<String> pictures;
     private int current;
     private int lastPrice;
+    private Long latestBidTime = null;
 
     public AuctionDetail(AuctionDomain auctionDomain,
                          String description,
                          int basePrice,
-                         int lastPrice) {
+                         int lastPrice, Long latestBidTime) {
         this.title = auctionDomain.getTitle();
         this.description = description;
         this.basePrice = basePrice;
@@ -36,6 +37,7 @@ public class AuctionDetail {
         this.id = auctionDomain.getId();
         this.current = auctionDomain.getCurrent();
         this.lastPrice = lastPrice;
+        this.latestBidTime = latestBidTime;
     }
 
 

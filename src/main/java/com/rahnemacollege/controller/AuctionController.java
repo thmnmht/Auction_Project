@@ -47,11 +47,6 @@ public class AuctionController {
     }
 
 
-    @GetMapping("/bid")
-    public String temp() {
-        return "bid.html";
-    }
-
     @GetMapping("/category")
     public ResponseEntity<List<Category>> getCategory() {
         log(" call get category");
@@ -87,10 +82,11 @@ public class AuctionController {
         Auction auction = auctionService.findById(id);
         log(" find the auction with title " + auction.getTitle());
         int lastPrice = bidService.findLastPrice(auction);
+        Long latestBidTime = bidService.findLatestBidTime(auction);
         int members = bidService.getMembers(auction);
         AuctionDomain auctionDomain = auctionService.toAuctionDomain(auction, user, members);
         System.out.println("to auctionDomain ");
-        return new ResponseEntity<>(new AuctionDetail(auctionDomain, auction.getDescription(), auction.getBasePrice(), lastPrice), HttpStatus.OK);
+        return new ResponseEntity<>(new AuctionDetail(auctionDomain, auction.getDescription(), auction.getBasePrice(), lastPrice, latestBidTime), HttpStatus.OK);
     }
 
 
@@ -99,11 +95,11 @@ public class AuctionController {
         User user = userService.findUserId(userDetailsService.getUser().getId()).get();
         log.info(user.getEmail() + " tried to add bookmark");
         if (id != null) {
-            Auction auction= auctionService.findAuctionById(id);
+            Auction auction = auctionService.findAuctionById(id);
             if (auction != null) {
                 auctionService.addBookmark(user, auction);
                 AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);
-                log.info("Auction Id#"+auction.getId()+ " just added to "+user.getEmail()+"'s bookmarks");
+                log.info("Auction Id#" + auction.getId() + " just added to " + user.getEmail() + "'s bookmarks");
                 return assembler.toResource(addAuctionDomain);
             }
             throw new InvalidInputException(Message.REALLY_BAD_SITUATION);
