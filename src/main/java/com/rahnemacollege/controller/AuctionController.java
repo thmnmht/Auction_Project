@@ -110,15 +110,6 @@ public class AuctionController {
     }
 
 
-   /* //TODO : delete it
-    @GetMapping("/all")
-    public Resources<Resource<AddAuctionDomain>> all() {
-        log(" try to get all auctions");
-        User user = userDetailsService.getUser();
-        AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);
-        return assembler.toResource(addAuctionDomain);
-    }*/
-
     private void log(String action){
         log.info(userDetailsService.getUser().getName() + " with id " + userDetailsService.getUser().getId() + action);
     }

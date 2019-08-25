@@ -6,10 +6,6 @@ header "auth" : "Bearer 'Token'"
 
 ************************************************************************************************************************
 
--/auctions/all GET : to receive all auctions
-
-************************************************************************************************************************
-
 -/auctions/category   GET   : get categories
 
 ************************************************************************************************************************
@@ -120,16 +116,6 @@ header "auth" : "Bearer 'Token'"
 -/home/search/{category} POST : search by title
         @PathParam("title") String title, @PathVariable int category, @RequestParam("page") int page, @RequestParam("size") int size,
         if category was 0 it search with all categories :)
-
-************************************************************************************************************************
-
--/home/filter/{category_id} GET : filter some categories
-        @RequestParam("page") int page, @RequestParam("size") int size
-
-************************************************************************************************************************
-
--/home/all GET : to receive auctions (number of pages start with zero)
-        @RequestParam("page") int page, @RequestParam("size") int size
 
 ************************************************************************************************************************
 

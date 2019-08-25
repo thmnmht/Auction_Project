@@ -3,7 +3,6 @@ package com.rahnemacollege.service;
 
 import com.google.common.collect.Lists;
 import com.rahnemacollege.domain.AddAuctionDomain;
-import com.rahnemacollege.domain.AuctionDetail;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.job.FinalizeAuctionJob;
 import com.rahnemacollege.model.Auction;
@@ -63,14 +62,14 @@ public class AuctionService {
         this.logger = LoggerFactory.getLogger(AuctionService.class);
     }
 
-    public Auction addAuction(AddAuctionDomain auctionDomain, User user){
+    public Auction addAuction(AddAuctionDomain auctionDomain, User user) {
         validation(auctionDomain);
         Auction auction = toAuction(auctionDomain, user);
         auction = auctionRepository.save(auction);
         return auction;
     }
 
-    private void validation(AddAuctionDomain auctionDomain){
+    private void validation(AddAuctionDomain auctionDomain) {
         if (auctionDomain.getTitle() == null || auctionDomain.getTitle().length() < 1)
             throw new InvalidInputException(Message.TITLE_NULL);
         if (auctionDomain.getTitle().length() > 50)
@@ -100,7 +99,7 @@ public class AuctionService {
         return auctionRepository.findById(id).orElseThrow(() -> new InvalidInputException(Message.AUCTION_NOT_FOUND));
     }
 
-    public AuctionDomain toAuctionDomain(Auction auction, User user,int current) {
+    public AuctionDomain toAuctionDomain(Auction auction, User user, int current) {
         AuctionDomain auctionDomain = new AuctionDomain(auction.getTitle(),
                 auction.getDate().getTime(),
                 auction.getCategory().getId(),
@@ -111,7 +110,7 @@ public class AuctionService {
             auctionDomain.setMine(true);
         String userEmail = user.getEmail();
         user = userRepository.findByEmail(userEmail).get();
-        if(user.getBookmarks().contains(auction)) {
+        if (user.getBookmarks().contains(auction)) {
             auctionDomain.setBookmark(true);
         }
         List<String> auctionPictures = Lists.newArrayList(pictureRepository.findAll()).stream().filter(picture ->
@@ -132,10 +131,6 @@ public class AuctionService {
 //        return toPage(auctions, page, size);
 //    }
 
-    public List<Auction> getAllAliveAuctions() {
-        return Lists.newArrayList(auctionRepository.findAll()).stream().filter(auction -> auction.getState() == 0).sorted((a,b) -> b.getId() - a.getId())
-                .collect(Collectors.toList());
-    }
 
     public List<Auction> getAll() {
         return new ArrayList<>(Lists.newArrayList(auctionRepository.findAll()));
@@ -146,17 +141,17 @@ public class AuctionService {
         return auction;
     }
 
-    public List<Auction> findByTitle(String title, int category_id) {
+
+    public List<Auction> findByTitle(String title, int categoryId) {
         List<Auction> auctions = new ArrayList<>();
-        if (category_id == 0) {
-            auctions = getAllAliveAuctions();
-        }
-        else {
-            List<Auction> tmp = getAllAliveAuctions().stream().filter(c -> c.getCategory().getId() == category_id).collect(Collectors.toList());
-            auctions.addAll(tmp);
+        if (categoryId == 0) {
+            auctions = auctionRepository.findByStateOrderByIdDesc(0);
+        } else {
+
+            auctions = auctionRepository.findByStateAndCategory_idOrderByIdDesc(0, categoryId);
         }
         System.err.println(title);
-        if(title != null && title.length() > 0){
+        if (title != null && title.length() > 0) {
             Pattern pattern = Pattern.compile(title, Pattern.CASE_INSENSITIVE);
             auctions = auctions.stream()
                     .filter(a -> {
@@ -169,8 +164,7 @@ public class AuctionService {
     }
 
     public List<Auction> findByOwner(User user) {
-        List<Auction> auctions = auctionRepository.findByOwner_id(user.getId());
-        return auctions;
+        return auctionRepository.findByStateAndOwner_idOrderByIdDesc(0, user.getId());
     }
 
     public Page<AuctionDomain> toPage(List<AuctionDomain> list, int page, int size) {
@@ -190,7 +184,7 @@ public class AuctionService {
         user = userRepository.findByEmail(user.getEmail()).get();
         Set<Auction> bookmarks = user.getBookmarks();
         Auction newBookmark = auctionRepository.findById(id).orElseThrow(() -> new InvalidInputException(Message.AUCTION_NOT_FOUND));
-        if(bookmarks.contains(newBookmark))
+        if (bookmarks.contains(newBookmark))
             bookmarks.remove(newBookmark);
         else
             bookmarks.add(newBookmark);

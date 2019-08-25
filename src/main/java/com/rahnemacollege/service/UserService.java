@@ -6,7 +6,6 @@ import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.UserRepository;
-import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.InvalidInputException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.slf4j.Logger;
@@ -24,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -35,8 +35,6 @@ public class UserService {
     private PasswordEncoder encoder;
     @Autowired
     private AuthenticationManager authenticationManager;
-    @Autowired
-    private TokenUtil tokenUtil;
 
 
     private final Logger logger;
@@ -84,14 +82,15 @@ public class UserService {
         }
     }
 
-    public User addUser(User user) {
-        repository.save(user);
-        return user;
-    }
+//    public User addUser(User user) {
+//        repository.save(user);
+//        return user;
+//    }
 
     public Optional<User> findUserByEmail(String email) {
         return repository.findByEmail(email);
     }
+
     public Optional<User> findUserId(int id) {
         return repository.findById(id);
     }
@@ -126,7 +125,8 @@ public class UserService {
     @Transactional
     public List<Auction> getUserBookmarks(User user) {
         user = repository.findByEmail(user.getEmail()).orElseThrow(() -> new InvalidInputException(Message.EMAIL_INVALID));
-        return new ArrayList<>(user.getBookmarks());
+        return new ArrayList<>(user.getBookmarks()).stream().filter(a -> a.getState() == 0)
+                .sorted((a, b) -> b.getId() - a.getId()).collect(Collectors.toList());
     }
 
 
