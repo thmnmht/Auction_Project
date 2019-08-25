@@ -1,11 +1,10 @@
 package com.rahnemacollege.domain;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import lombok.Data;
 
-import javax.persistence.Entity;
 import java.util.List;
 
+@Data
 public class AuctionDetail {
 
     private String title;

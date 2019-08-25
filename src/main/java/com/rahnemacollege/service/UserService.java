@@ -88,11 +88,15 @@ public class UserService {
 //    }
 
     public Optional<User> findUserByEmail(String email) {
-        return repository.findByEmail(email);
+        Optional<User> user = repository.findByEmail(email);
+        user.ifPresent(value -> value.getBookmarks().size());
+        return user;
     }
 
     public Optional<User> findUserId(int id) {
-        return repository.findById(id);
+        Optional<User> user = repository.findById(id);
+        user.ifPresent(value -> value.getBookmarks().size());
+        return user;
     }
 
     public SimpleUserDomain changePassword(User user, String newPassword) {

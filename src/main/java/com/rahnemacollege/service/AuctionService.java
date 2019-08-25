@@ -180,17 +180,13 @@ public class AuctionService {
     }
 
     @Transactional
-    public Auction addBookmark(User user, int id) {
-        user = userRepository.findByEmail(user.getEmail()).get();
+    public void addBookmark(User user, Auction auction) {
         Set<Auction> bookmarks = user.getBookmarks();
-        Auction newBookmark = auctionRepository.findById(id).orElseThrow(() -> new InvalidInputException(Message.AUCTION_NOT_FOUND));
-        if (bookmarks.contains(newBookmark))
-            bookmarks.remove(newBookmark);
+        if (bookmarks.contains(auction))
+            bookmarks.remove(auction);
         else
-            bookmarks.add(newBookmark);
-        user.setBookmarks(bookmarks);
+            bookmarks.add(auction);
         userRepository.save(user);
-        return newBookmark;
     }
 
     public void schedule(Bid bidRequest) {
