@@ -39,13 +39,11 @@ public class AuthenticationSocket extends ChannelInterceptorAdapter {
             String header = message.getHeaders().get("nativeHeaders").toString().replace("{", "").replace("}", "");
             String[] values = header.split(",");
             String jwtToken = Arrays.stream(values).filter(v -> v.startsWith("auth")).findFirst().get().substring(13).replace("]", "");
-            System.out.println(jwtToken);
             String id = tokenUtil.getIdFromToken(jwtToken);
             User user = userService.findUserId(Integer.valueOf(id));
-            System.out.println(id);
             Authentication u = new UsernamePasswordAuthenticationToken(user.getId().toString(), user.getPassword(), new ArrayList<>());
             headerAccessor.setUser(u);
-            logger.info("the user with session id " + headerAccessor.getSessionId() + "connected");
+            logger.info("the user with session id " + headerAccessor.getSessionId() + " connected");
         }
         return message;
     }

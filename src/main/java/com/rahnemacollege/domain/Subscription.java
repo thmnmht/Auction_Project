@@ -17,4 +17,8 @@ public class Subscription {
         this.user = user;
         this.auction = auction;
     }
+
+    public String toString(){
+        return user.getEmail();
+    }
 }

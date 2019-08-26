@@ -1,11 +1,8 @@
 package com.rahnemacollege.controller;
 
 
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.rahnemacollege.domain.BidRequest;
-import com.rahnemacollege.domain.SubscribeAlert;
-import com.rahnemacollege.domain.Subscription;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Bid;
 import com.rahnemacollege.model.User;
@@ -15,7 +12,6 @@ import com.rahnemacollege.service.UserDetailsServiceImpl;
 import com.rahnemacollege.service.UserService;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.EnterDeniedException;
-import com.rahnemacollege.util.exceptions.InvalidInputException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +20,6 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
@@ -67,27 +62,35 @@ public class BidController {
         template.convertAndSend("/auction/" + request.getAuctionId(), bid.getPrice());
     }
 
-    @SubscribeMapping("/{auctionId}")
-    public void getViewSchema(@DestinationVariable("auctionId") int auctionId,
+    @SubscribeMapping("/id/{auctionId}")
+    public void enterAuction(@DestinationVariable("auctionId") int auctionId,
                               Message<?> message) throws Exception {
         logger.info("someone try to enter auction " + auctionId);
         StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         Auction auction = auctionService.findById(auctionId);
         User user = userService.findUserId(Integer.valueOf(headerAccessor.getUser().getName()));
-        bidService.addSubscriptionId(headerAccessor.getSubscriptionId(), auction, user);
         bidService.removeFromAllAuction(user);
+        bidService.addSubscriptionId(headerAccessor.getSubscriptionId(), auction, user);
         int current = bidService.enter(auction, user);
         bidService.getUsersInAuction().keySet().forEach(a -> bidService.getUsersInAuction().get(a).forEach(u ->
                 logger.info("user " + u.getId() + " is in auction " + a)));
-        template.convertAndSend("/app", new SubscribeAlert(auction.getId(),current));
+
+        JsonObject subAlert = new JsonObject();
+        subAlert.addProperty("type", 1);
+        subAlert.addProperty("auctionId", auctionId);
+        subAlert.addProperty("current", current);
+        template.convertAndSend("/app/all",subAlert.toString());
     }
 
     @MessageExceptionHandler
-    @SendToUser("/app/error")
-    public String handleException(EnterDeniedException e){
-        System.err.println(e.getDescription());
-//        template.convertAndSendToUser();
-        return e.getDescription();
+    public void handleException(EnterDeniedException e, Message<?> message) throws Exception{
+        System.err.println("the exception is : " + e.getDescription());
+        StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+        String user = headerAccessor.getUser().getName();
+        JsonObject errAlert = new JsonObject();
+        errAlert.addProperty("type",2);
+        errAlert.addProperty("message",e.getDescription());
+        template.convertAndSendToUser(user,"/app/all",errAlert.toString());
     }
 
 

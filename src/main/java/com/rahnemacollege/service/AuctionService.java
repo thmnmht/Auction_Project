@@ -150,7 +150,6 @@ public class AuctionService {
 
             auctions = auctionRepository.findByStateAndCategory_idOrderByIdDesc(0, categoryId);
         }
-        System.err.println(title);
         if (title != null && title.length() > 0) {
             Pattern pattern = Pattern.compile(title, Pattern.CASE_INSENSITIVE);
             auctions = auctions.stream()

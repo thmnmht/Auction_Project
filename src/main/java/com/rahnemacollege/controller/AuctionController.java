@@ -1,6 +1,7 @@
 package com.rahnemacollege.controller;
 
 
+import com.google.gson.Gson;
 import com.rahnemacollege.domain.AddAuctionDomain;
 import com.rahnemacollege.domain.AuctionDetail;
 import com.rahnemacollege.domain.AuctionDomain;
@@ -88,8 +89,9 @@ public class AuctionController {
         Long latestBidTime = bidService.findLatestBidTime(auction);
         int members = bidService.getMembers(auction);
         AuctionDomain auctionDomain = auctionService.toAuctionDomain(auction, user, members);
-        System.out.println("to auctionDomain ");
-        return new ResponseEntity<>(new AuctionDetail(auctionDomain, auction.getDescription(), auction.getBasePrice(), lastPrice, latestBidTime), HttpStatus.OK);
+        AuctionDetail auctionDetail = new AuctionDetail(auctionDomain, auction.getDescription(), auction.getBasePrice(), lastPrice, latestBidTime);
+        System.out.println(new Gson().toJson(auctionDetail));
+        return new ResponseEntity<>(auctionDetail, HttpStatus.OK);
     }
 
 

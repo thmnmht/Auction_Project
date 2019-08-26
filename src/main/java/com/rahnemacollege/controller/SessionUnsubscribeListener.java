@@ -1,6 +1,6 @@
 package com.rahnemacollege.controller;
 
-import com.rahnemacollege.domain.SubscribeAlert;
+import com.google.gson.JsonObject;
 import com.rahnemacollege.domain.Subscription;
 import com.rahnemacollege.service.BidService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +27,10 @@ public class SessionUnsubscribeListener implements ApplicationListener<SessionUn
         Subscription subscription = bidService.getSubscription(subscriptionId);
         bidService.removeFromAllAuction(subscription.getUser());
         int current = bidService.getMembers(subscription.getAuction());
-        template.convertAndSend("/app", new SubscribeAlert(subscription.getAuction().getId(), current));
+        JsonObject subAlert = new JsonObject();
+        subAlert.addProperty("type", 1);
+        subAlert.addProperty("auctionId", subscription.getAuction().getId());
+        subAlert.addProperty("current", current);
+        template.convertAndSend("/app/all",subAlert.toString());
     }
 }

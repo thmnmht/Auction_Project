@@ -29,9 +29,21 @@ function connect() {
 
 function initSubscribe() {
     console.log("try to subscribe /app");
-    stompClient.subscribe('/app', function (auctionId) {
-        showChat("someone enter in auction " + auctionId.body);
-        $("#chatHeader").append("someone enter in auction " + auctionId.body + " ");
+    stompClient.subscribe('/user/app/all', function (auctionId) {
+        console.log("new message");
+        showChat(auctionId.body);
+    },function (error) {
+        console.log("error -_-");
+        console.log(JSON.stringify(error));
+        console.log(error);
+    });
+    stompClient.subscribe('/app/all', function (auctionId) {
+        console.log("new message");
+        showChat(auctionId.body);
+    },function (error) {
+        console.log("error -_-");
+        console.log(JSON.stringify(error));
+        console.log(error);
     });
 }
 
@@ -48,11 +60,12 @@ var lastSubId;
 function join() {
     auctionId = $("#auctionId").val();
     $("#chatHeader").append(auctionId + " ");
-    lastSubId = stompClient.subscribe('/auction/' + auctionId, function (greeting) {
+    lastSubId = stompClient.subscribe('/auction/id/' + auctionId, function (greeting) {
         showChat(JSON.parse(greeting.body));
     },function (error) {
         console.log(JSON.stringify(error));
-    });
+    }).id;
+    console.log(lastSubId);
 }
 
 function disjoin() {

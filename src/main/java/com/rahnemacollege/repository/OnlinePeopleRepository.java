@@ -4,7 +4,6 @@ import com.rahnemacollege.domain.Subscription;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.util.exceptions.EnterDeniedException;
-import org.springframework.stereotype.Repository;
 
 import java.util.*;
 
@@ -33,7 +32,6 @@ public class OnlinePeopleRepository {
     }
 
     public void add(Auction auction, User user) {
-        System.err.println("maxN:" + auction.getMaxNumber());
         if (usersInAuction.containsKey(auction.getId())) {
             int maxNumber = auction.getMaxNumber();
             int onlineNumber = usersInAuction.get(auction.getId()).size();
