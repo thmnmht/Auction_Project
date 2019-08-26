@@ -1,7 +1,6 @@
 package com.rahnemacollege.util;
 
 import com.rahnemacollege.model.User;
-import com.rahnemacollege.service.BidService;
 import com.rahnemacollege.service.UserService;
 import org.slf4j.Logger;
 import org.springframework.messaging.Message;
@@ -14,7 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Objects;
 
 public class AuthenticationSocket extends ChannelInterceptorAdapter {
 
@@ -35,14 +34,9 @@ public class AuthenticationSocket extends ChannelInterceptorAdapter {
         StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
             logger.info("try to connect");
-            // TODO: 8/22/19 bad generate!
-            String header = message.getHeaders().get("nativeHeaders").toString().replace("{", "").replace("}", "");
-            String[] values = header.split(",");
-            String jwtToken = Arrays.stream(values).filter(v -> v.startsWith("auth")).findFirst().get().substring(13).replace("]", "");
-            System.out.println(jwtToken);
+            String jwtToken = Objects.requireNonNull(headerAccessor.getFirstNativeHeader("auth")).substring(7);
             String id = tokenUtil.getIdFromToken(jwtToken);
             User user = userService.findUserId(Integer.valueOf(id));
-            System.out.println(id);
             Authentication u = new UsernamePasswordAuthenticationToken(user.getId().toString(), user.getPassword(), new ArrayList<>());
             headerAccessor.setUser(u);
             logger.info("the user with session id " + headerAccessor.getSessionId() + "connected");
