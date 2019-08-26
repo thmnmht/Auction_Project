@@ -38,7 +38,6 @@ public class BidController {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
-    // TODO: 8/21/19 remove user repository
     @Autowired
     private UserService userService;
 
@@ -59,7 +58,7 @@ public class BidController {
         Bid bid = bidService.add(request, user);
         auctionService.schedule(bid);
         logger.info("bid accepted");
-        template.convertAndSend("/auction/" + request.getAuctionId(), bid.getPrice());
+        template.convertAndSend("/auction/id/" + request.getAuctionId(), bid.getPrice());
     }
 
     @SubscribeMapping("/id/{auctionId}")
@@ -81,7 +80,6 @@ public class BidController {
         subAlert.addProperty("current", current);
         template.convertAndSend("/app/all",subAlert.toString());
     }
-
     @MessageExceptionHandler
     public void handleException(EnterDeniedException e, Message<?> message) throws Exception{
         System.err.println("the exception is : " + e.getDescription());
@@ -92,7 +90,5 @@ public class BidController {
         errAlert.addProperty("message",e.getDescription());
         template.convertAndSendToUser(user,"/app/all",errAlert.toString());
     }
-
-
 
 }
