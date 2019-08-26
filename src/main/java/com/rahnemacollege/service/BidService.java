@@ -48,10 +48,12 @@ public class BidService {
         Auction auction = auctionRepository
                 .findById(request.getAuctionId()).orElseThrow(() ->
                         new InvalidInputException(Message.AUCTION_NOT_FOUND));
+        if(user.equals(auction.getOwner()))
+            throw new EnterDeniedException("the user is the owner of the auction");
         if (auction.getDate().getTime() >= new Date().getTime())
-            throw new EnterDeniedException();
+            throw new EnterDeniedException("the auction didn't start yet");
         if (!peopleRepository.isInAuction(auction, user))
-            throw new EnterDeniedException();
+            throw new EnterDeniedException("the user isn't in auction");
         if (bidRepository.findLatestBid(auction.getId()).isPresent()
                 && bidRepository.findLatestBid(auction.getId()).get().getUser().getId().equals(user.getId())) {
             throw new InvalidInputException(Message.ALREADY_BID);
@@ -84,6 +86,10 @@ public class BidService {
             logger.warn("the user with id " + user.getId() + "was in auction with id " + auction.getId());
             return;
         }
+        if(auction.getOwner().equals(user))
+            throw new EnterDeniedException("the user is the owner of the auction");
+        if(auction.getState() == 1)
+            throw new EnterDeniedException("the auction was finished");
         peopleRepository.add(auction, user);
     }
 

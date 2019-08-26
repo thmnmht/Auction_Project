@@ -33,8 +33,7 @@ public class OnlinePeopleRepository {
             int maxNumber = auction.getMaxNumber();
             int onlineNumber = usersInAuction.get(auction.getId()).size();
             if (maxNumber <= onlineNumber) {
-//                logger.error("the auction with id " + auction.getId() + "is full");
-                throw new EnterDeniedException();
+                throw new EnterDeniedException("the auction is full");
             }
             usersInAuction.get(auction.getId()).add(user);
         } else {

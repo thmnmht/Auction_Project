@@ -1,6 +1,8 @@
 package com.rahnemacollege.controller;
 
 
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.google.gson.Gson;
 import com.rahnemacollege.domain.BidRequest;
 import com.rahnemacollege.model.Bid;
 import com.rahnemacollege.model.User;
@@ -64,7 +66,6 @@ public class BidController {
                               Message<?> message) throws Exception {
         logger.info("someone try to enter auction " + auctionId);
         StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        System.err.println("subId : " + headerAccessor.getSubscriptionId());
         bidService.addSubscriptionId(headerAccessor.getSubscriptionId(), auctionId);
         User user = userService.findUserId(Integer.valueOf(headerAccessor.getUser().getName())).orElseThrow(
                 () -> new InvalidInputException(com.rahnemacollege.util.exceptions.Message.INVALID_ID));
