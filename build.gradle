@@ -141,6 +141,15 @@ dependencies {
     // https://mvnrepository.com/artifact/org.quartz-scheduler/quartz
     compile group: 'org.quartz-scheduler', name: 'quartz', version: '2.3.0'
 
+    // https://mvnrepository.com/artifact/org.springframework/spring-test
+    testCompile group: 'org.springframework', name: 'spring-test', version: '5.1.4.RELEASE'
+
+    // https://mvnrepository.com/artifact/org.springframework.data/spring-data-jpa
+    compile group: 'org.springframework.data', name: 'spring-data-jpa', version: '2.1.10.RELEASE'
+
+    // https://mvnrepository.com/artifact/org.hibernate/hibernate-entitymanager
+    compile group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.4.2.Final'
+    
 
 }
 
