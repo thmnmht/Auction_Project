@@ -1,5 +1,7 @@
 package com.rahnemacollege.controller;
 
+import com.rahnemacollege.domain.SubscribeAlert;
+import com.rahnemacollege.domain.Subscription;
 import com.rahnemacollege.service.BidService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -18,13 +20,13 @@ public class SessionUnsubscribeListener implements ApplicationListener<SessionUn
     @Autowired
     private BidService bidService;
 
-
     @Override
     public void onApplicationEvent(SessionUnsubscribeEvent event) {
         GenericMessage message = (GenericMessage) event.getMessage();
         String subscriptionId = message.getHeaders().get("simpSubscriptionId").toString();
-        System.err.println("subId in unSub " + subscriptionId);
-        int auctionId = bidService.getAuctionId(subscriptionId);
-        template.convertAndSend("/app", auctionId);
+        Subscription subscription = bidService.getSubscription(subscriptionId);
+        bidService.removeFromAllAuction(subscription.getUser());
+        int current = bidService.getMembers(subscription.getAuction());
+        template.convertAndSend("/app", new SubscribeAlert(subscription.getAuction().getId(), current));
     }
 }

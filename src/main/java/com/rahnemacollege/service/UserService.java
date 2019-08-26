@@ -92,9 +92,8 @@ public class UserService {
         return user;
     }
 
-    public Optional<User> findUserId(int id) {
-        Optional<User> user = repository.findById(id);
-        return user;
+    public User findUserId(int id) {
+        return  repository.findById(id).orElseThrow(() -> new InvalidInputException(Message.INVALID_ID));
     }
 
     public SimpleUserDomain changePassword(User user, String newPassword) {

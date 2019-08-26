@@ -95,7 +95,7 @@ public class AuctionController {
 
     @RequestMapping(value = "/bookmark", method = RequestMethod.POST)
     public Resource<AddAuctionDomain> addBookmark(@RequestParam("auctionId") Integer id) {
-        User user = userService.findUserId(userDetailsService.getUser().getId()).get();
+        User user = userService.findUserId(userDetailsService.getUser().getId());
         log.info(user.getEmail() + " tried to add bookmark");
         if (id != null) {
             Auction auction = auctionService.findAuctionById(id);

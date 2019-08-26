@@ -3,7 +3,6 @@ package com.rahnemacollege.util;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.BidService;
 import com.rahnemacollege.service.UserService;
-import com.rahnemacollege.util.exceptions.InvalidInputException;
 import org.slf4j.Logger;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -14,23 +13,19 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ChannelImp extends ChannelInterceptorAdapter {
+public class AuthenticationSocket extends ChannelInterceptorAdapter {
 
-    private static Logger logger = org.slf4j.LoggerFactory.getLogger(ChannelImp.class);
-
-    private BidService bidService;
+    private static Logger logger = org.slf4j.LoggerFactory.getLogger(AuthenticationSocket.class);
 
     private UserService userService;
 
     private JwtTokenUtil tokenUtil;
 
 
-    public ChannelImp(JwtTokenUtil tokenUtil, BidService bidService, UserService userService) {
-        this.bidService = bidService;
+    public AuthenticationSocket(JwtTokenUtil tokenUtil, UserService userService) {
         this.tokenUtil = tokenUtil;
         this.userService = userService;
     }
@@ -46,22 +41,11 @@ public class ChannelImp extends ChannelInterceptorAdapter {
             String jwtToken = Arrays.stream(values).filter(v -> v.startsWith("auth")).findFirst().get().substring(13).replace("]", "");
             System.out.println(jwtToken);
             String id = tokenUtil.getIdFromToken(jwtToken);
-            User user = userService.findUserId(Integer.valueOf(id)).orElseThrow(
-                    () -> new InvalidInputException(com.rahnemacollege.util.exceptions.Message.INVALID_ID)
-            );
+            User user = userService.findUserId(Integer.valueOf(id));
             System.out.println(id);
             Authentication u = new UsernamePasswordAuthenticationToken(user.getId().toString(), user.getPassword(), new ArrayList<>());
             headerAccessor.setUser(u);
             logger.info("the user with session id " + headerAccessor.getSessionId() + "connected");
-
-        } else {
-            Principal principal = headerAccessor.getUser();
-            User user = userService.findUserId(Integer.valueOf(principal.getName())).orElseThrow(
-                    () -> new InvalidInputException(com.rahnemacollege.util.exceptions.Message.INVALID_ID)
-            );
-            if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
-                bidService.removeFromAllAuction(user);
-            }
         }
         return message;
     }

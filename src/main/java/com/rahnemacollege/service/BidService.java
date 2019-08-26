@@ -2,6 +2,7 @@ package com.rahnemacollege.service;
 
 
 import com.rahnemacollege.domain.BidRequest;
+import com.rahnemacollege.domain.Subscription;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Bid;
 import com.rahnemacollege.model.User;
@@ -32,7 +33,6 @@ public class BidService {
     @Autowired
     private AuctionRepository auctionRepository;
 
-    @Autowired
     private OnlinePeopleRepository peopleRepository;
 
 
@@ -41,6 +41,7 @@ public class BidService {
 
     public BidService() {
         logger = LoggerFactory.getLogger(BidService.class);
+        peopleRepository = OnlinePeopleRepository.getInstance();
     }
 
 
@@ -77,20 +78,19 @@ public class BidService {
         } else {
             return null;
         }
-
     }
 
-    public void enter(int auctionId, User user) {
-        Auction auction = auctionRepository.findById(auctionId).orElseThrow(() -> new InvalidInputException(Message.INVALID_ID));
+    public int enter(Auction auction, User user) {
         if (peopleRepository.isInAuction(auction, user)) {
             logger.warn("the user with id " + user.getId() + "was in auction with id " + auction.getId());
-            return;
+            return peopleRepository.getMembers(auction.getId()).size();
         }
         if(auction.getOwner().equals(user))
             throw new EnterDeniedException("the user is the owner of the auction");
         if(auction.getState() == 1)
             throw new EnterDeniedException("the auction was finished");
         peopleRepository.add(auction, user);
+        return peopleRepository.getMembers(auction.getId()).size();
     }
 
 
@@ -106,17 +106,15 @@ public class BidService {
         peopleRepository.ExitUser(user);
     }
 
-    // TODO: 8/22/19 remove it
     public Map<Integer, List<User>> getUsersInAuction() {
         return peopleRepository.getUsersInAuction();
     }
 
-
-    public void addSubscriptionId(String subscriptionId, int auctionId) {
-        peopleRepository.addSubscriptionId(subscriptionId, auctionId);
+    public void addSubscriptionId(String subscriptionId, Auction auction,User user ) {
+        peopleRepository.addSubscriptionId(subscriptionId, new Subscription(auction,user));
     }
 
-    public int getAuctionId(String subscriptionId) {
+    public Subscription getSubscription(String subscriptionId) {
         return peopleRepository.getAuctionId(subscriptionId);
     }
 

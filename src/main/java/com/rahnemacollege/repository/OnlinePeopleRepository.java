@@ -1,5 +1,6 @@
 package com.rahnemacollege.repository;
 
+import com.rahnemacollege.domain.Subscription;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.util.exceptions.EnterDeniedException;
@@ -8,15 +9,19 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 
 
-@Repository
 public class OnlinePeopleRepository {
 
+    private static OnlinePeopleRepository instance = new OnlinePeopleRepository();
     private Map<Integer, List<User>> usersInAuction;
-    private Map<String, Integer> subscriptionIds;
+    private Map<String, Subscription> subscriptionIds;
 
-    public OnlinePeopleRepository() {
+    private OnlinePeopleRepository() {
         usersInAuction = new HashMap<>();
         subscriptionIds = new HashMap<>();
+    }
+
+    public static OnlinePeopleRepository getInstance(){
+        return instance;
     }
 
     public Map<Integer, List<User>> getUsersInAuction() {
@@ -56,11 +61,11 @@ public class OnlinePeopleRepository {
         auctions.forEach(a -> usersInAuction.get(a).remove(user));
     }
 
-    public void addSubscriptionId(String subscriptionId, int auctionId) {
-        subscriptionIds.put(subscriptionId, auctionId);
+    public void addSubscriptionId(String subscriptionId, Subscription subscription) {
+        subscriptionIds.put(subscriptionId, subscription);
     }
 
-    public int getAuctionId(String subscriptionId) {
+    public Subscription getAuctionId(String subscriptionId) {
         return subscriptionIds.get(subscriptionId);
     }
 }

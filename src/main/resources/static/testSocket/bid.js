@@ -22,6 +22,8 @@ function connect() {
         console.log(frame);
         setConnected(true);
         console.log('Connected: ' + frame);
+    },function (error) {
+        console.log(JSON.stringify(error));
     });
 }
 
@@ -48,6 +50,8 @@ function join() {
     $("#chatHeader").append(auctionId + " ");
     lastSubId = stompClient.subscribe('/auction/' + auctionId, function (greeting) {
         showChat(JSON.parse(greeting.body));
+    },function (error) {
+        console.log(JSON.stringify(error));
     });
 }
 
