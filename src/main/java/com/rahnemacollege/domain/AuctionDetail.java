@@ -18,16 +18,14 @@ public class AuctionDetail {
     private int id;
     private List<String> pictures;
     private int current;
-    private int lastPrice;
     private Long latestBidTime = null;
 
     public AuctionDetail(AuctionDomain auctionDomain,
                          String description,
-                         int basePrice,
                          int lastPrice, Long latestBidTime) {
         this.title = auctionDomain.getTitle();
         this.description = description;
-        this.basePrice = basePrice;
+        this.basePrice = lastPrice;
         this.date = auctionDomain.getDate();
         this.categoryId = auctionDomain.getCategoryId();
         this.maxNumber = auctionDomain.getMaxNumber();
@@ -36,7 +34,6 @@ public class AuctionDetail {
         this.bookmark = auctionDomain.isBookmark();
         this.id = auctionDomain.getId();
         this.current = auctionDomain.getCurrent();
-        this.lastPrice = lastPrice;
         this.latestBidTime = latestBidTime;
     }
 

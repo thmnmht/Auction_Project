@@ -45,6 +45,10 @@ AuthenticationFilter extends OncePerRequestFilter {
         String id = null;
         String jwtToken = null;
         if (requestTokenHeader == null) {
+//            request.getHeaderNames().asIterator().forEachRemaining(s -> {
+//                System.err.println(s.toString());
+//                System.out.println(request.getHeader(s).toString());
+//            });
             logger.error("no header!!!!!");
         }
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {

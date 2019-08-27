@@ -4,7 +4,7 @@ import com.rahnemacollege.service.BidService;
 import com.rahnemacollege.service.UserDetailsServiceImpl;
 import com.rahnemacollege.service.UserService;
 import com.rahnemacollege.util.JwtTokenUtil;
-import com.rahnemacollege.util.ChannelImp;
+import com.rahnemacollege.util.AuthenticationSocket;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -18,20 +18,17 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
-@Order(Ordered.HIGHEST_PRECEDENCE)
+//@Order(Ordered.HIGHEST_PRECEDENCE + 99)
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
-    @Autowired
-    private BidService bidService;
-
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
 
     @Autowired
     private JwtTokenUtil tokenUtil;
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private BidService bidService;
 
 
     @Override
@@ -48,7 +45,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.setInterceptors(new ChannelImp(tokenUtil, bidService, userService));
+        registration.setInterceptors(new AuthenticationSocket(bidService, tokenUtil, userService));
     }
 
 }

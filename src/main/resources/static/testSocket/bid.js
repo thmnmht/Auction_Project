@@ -14,7 +14,7 @@ function setConnected(connected) {
 
 
 function connect() {
-    var socket = new SockJS('/socket');
+    var socket = new SockJS('/socket',null , {auth : "Bearer " + $("#token").val()});
     //if you connect through WebSocket (without SockJS)
     // var socket = new WebSocket('/socket');
     stompClient = Stomp.over(socket);
@@ -22,14 +22,28 @@ function connect() {
         console.log(frame);
         setConnected(true);
         console.log('Connected: ' + frame);
+    },function (error) {
+        console.log(JSON.stringify(error));
     });
 }
 
 function initSubscribe() {
     console.log("try to subscribe /app");
-    stompClient.subscribe('/app', function (auctionId) {
-        showChat("someone enter in auction " + auctionId.body);
-        $("#chatHeader").append("someone enter in auction " + auctionId.body + " ");
+    stompClient.subscribe('/user/app/all', function (auctionId) {
+        console.log("new message");
+        showChat(auctionId.body);
+    },function (error) {
+        console.log("error -_-");
+        console.log(JSON.stringify(error));
+        console.log(error);
+    });
+    stompClient.subscribe('/app/all', function (auctionId) {
+        console.log("new message");
+        showChat(auctionId.body);
+    },function (error) {
+        console.log("error -_-");
+        console.log(JSON.stringify(error));
+        console.log(error);
     });
 }
 
@@ -46,9 +60,12 @@ var lastSubId;
 function join() {
     auctionId = $("#auctionId").val();
     $("#chatHeader").append(auctionId + " ");
-    lastSubId = stompClient.subscribe('/auction/' + auctionId, function (greeting) {
+    lastSubId = stompClient.subscribe('/auction/id/' + auctionId, function (greeting) {
         showChat(JSON.parse(greeting.body));
-    });
+    },function (error) {
+        console.log(JSON.stringify(error));
+    }).id;
+    console.log(lastSubId);
 }
 
 function disjoin() {

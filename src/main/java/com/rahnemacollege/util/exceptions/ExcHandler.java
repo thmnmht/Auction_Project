@@ -14,8 +14,8 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
 
     private Logger logger = LoggerFactory.getLogger(ExcHandler.class);
 
-    @ExceptionHandler(value = {InvalidInputException.class})
-    protected void inputInvalid(InvalidInputException ex,
+    @ExceptionHandler(value = {MessageException.class})
+    protected void inputInvalid(MessageException ex,
                                 HttpServletResponse response) {
         switch (ex.getMessageStatus()) {
             //add auction
@@ -108,7 +108,7 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
             case PICTURE_NULL:
                 response.setStatus(498);
                 break;
-            case BID_ON_FINISHED_AUCTION:
+            case FINISHED_AUCTION:
                 response.setStatus(601);
                 break;
             case SCHEDULER_ERROR:
@@ -128,19 +128,5 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
         if (ex.getMessage().contains("SizeLimitExceededException"))
             response.setStatus(455);
         logger.error(ex.getMessage());
-    }
-
-    @ExceptionHandler(value = {NotFoundException.class})
-    protected void notFound(NotFoundException ex,
-                            HttpServletResponse response) {
-        response.setStatus(447);
-        logger.error(ex.getMessage());
-    }
-
-    @ExceptionHandler(value = {EnterDeniedException.class})
-    protected void enterDenied(EnterDeniedException ex,
-                            HttpServletResponse response) {
-        logger.error("SOMEONE TRY TO BID OUT OF AUCTION -_-");
-        response.setStatus(497);
     }
 }

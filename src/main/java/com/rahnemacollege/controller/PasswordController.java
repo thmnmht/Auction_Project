@@ -2,7 +2,7 @@ package com.rahnemacollege.controller;
 
 import com.rahnemacollege.model.ResetRequest;
 import com.rahnemacollege.service.ResetRequestService;
-import com.rahnemacollege.util.exceptions.InvalidInputException;
+import com.rahnemacollege.util.exceptions.MessageException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ public class PasswordController {
         } else {
             log.error("Token: \"" + token + "\" is invalid to reset password");
             System.err.println("errorMessage : Oops!  This is an invalid validPassword reset link.");
-            throw new InvalidInputException(Message.INVALID_RESET_LINK);
+            throw new MessageException(Message.INVALID_RESET_LINK);
         }
     }
 

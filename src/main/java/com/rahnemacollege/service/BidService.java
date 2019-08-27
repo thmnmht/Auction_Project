@@ -2,14 +2,14 @@ package com.rahnemacollege.service;
 
 
 import com.rahnemacollege.domain.BidRequest;
+import com.rahnemacollege.domain.Subscription;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Bid;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.AuctionRepository;
 import com.rahnemacollege.repository.BidRepository;
 import com.rahnemacollege.repository.OnlinePeopleRepository;
-import com.rahnemacollege.util.exceptions.EnterDeniedException;
-import com.rahnemacollege.util.exceptions.InvalidInputException;
+import com.rahnemacollege.util.exceptions.MessageException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,6 @@ public class BidService {
     @Autowired
     private AuctionRepository auctionRepository;
 
-    @Autowired
     private OnlinePeopleRepository peopleRepository;
 
 
@@ -41,56 +40,59 @@ public class BidService {
 
     public BidService() {
         logger = LoggerFactory.getLogger(BidService.class);
+        peopleRepository = OnlinePeopleRepository.getInstance();
     }
 
 
     public Bid add(@NotNull BidRequest request, @NotNull User user) {
         Auction auction = auctionRepository
                 .findById(request.getAuctionId()).orElseThrow(() ->
-                        new InvalidInputException(Message.AUCTION_NOT_FOUND));
-        if(user.equals(auction.getOwner()))
-            throw new EnterDeniedException("the user is the owner of the auction");
+                        new MessageException(Message.AUCTION_NOT_FOUND));
+        if (auction.getState() == 1)
+            throw new MessageException(Message.FINISHED_AUCTION);
+        if (user.equals(auction.getOwner()))
+            throw new MessageException(Message.THE_USER_IS_THE_OWNER_OF_THE_AUCTION);
         if (auction.getDate().getTime() >= new Date().getTime())
-            throw new EnterDeniedException("the auction didn't start yet");
+            throw new MessageException(Message.THE_AUCTION_DIDNT_START_YET);
         if (!peopleRepository.isInAuction(auction, user))
-            throw new EnterDeniedException("the user isn't in auction");
-        if (bidRepository.findLatestBid(auction.getId()).isPresent()
-                && bidRepository.findLatestBid(auction.getId()).get().getUser().getId().equals(user.getId())) {
-            throw new InvalidInputException(Message.ALREADY_BID);
+            throw new MessageException(Message.THE_USER_IS_NOT_IN_AUCTION);
+        if (bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).isPresent()
+                && bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).get().getUser().getId().equals(user.getId())){
+            throw new MessageException(Message.ALREADY_BID);
         }
         int lastPrice = findLastPrice(auction);
-        if (request.getPrice() < 1)
-            throw new InvalidInputException(Message.PRICE_TOO_LOW);
-        Bid bid = new Bid(auction, user, lastPrice + request.getPrice(), new Date());
+        int bidPrice = request.getPrice();
+        if (bidPrice <= lastPrice)
+            throw new MessageException(Message.PRICE_TOO_LOW);
+        Bid bid = new Bid(auction, user, bidPrice, new Date());
         bid = bidRepository.save(bid);
         return bid;
     }
 
     public int findLastPrice(Auction auction) {
-        return bidRepository.findLatestBid(auction.getId()).map(Bid::getPrice).orElseGet(auction::getBasePrice);
+        return bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).map(Bid::getPrice).orElseGet(auction::getBasePrice);
     }
 
     public Long findLatestBidTime(Auction auction) {
-        Optional<Date> date = bidRepository.findLatestBid(auction.getId()).map(Bid::getDate);
+        Optional<Date> date = bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).map(Bid::getDate);
         if (date.isPresent()) {
             return date.get().getTime();
         } else {
             return null;
         }
-
     }
 
-    public void enter(int auctionId, User user) {
-        Auction auction = auctionRepository.findById(auctionId).orElseThrow(() -> new InvalidInputException(Message.INVALID_ID));
+    public int enter(Auction auction, User user) {
+        if (auction.getDate().getTime() > new Date().getTime())
+            throw new MessageException(Message.THE_AUCTION_DIDNT_START_YET);
         if (peopleRepository.isInAuction(auction, user)) {
             logger.warn("the user with id " + user.getId() + "was in auction with id " + auction.getId());
-            return;
+            return peopleRepository.getMembers(auction.getId()).size();
         }
-        if(auction.getOwner().equals(user))
-            throw new EnterDeniedException("the user is the owner of the auction");
-        if(auction.getState() == 1)
-            throw new EnterDeniedException("the auction was finished");
+        if (auction.getState() == 1)
+            throw new MessageException(Message.FINISHED_AUCTION);
         peopleRepository.add(auction, user);
+        return peopleRepository.getMembers(auction.getId()).size();
     }
 
 
@@ -106,17 +108,15 @@ public class BidService {
         peopleRepository.ExitUser(user);
     }
 
-    // TODO: 8/22/19 remove it
-    public Map<Integer, List<User>> getUsersInAuction() {
-        return peopleRepository.getUsersInAuction();
+    public void addSubscriptionId(String subscriptionId, Auction auction, User user) {
+        peopleRepository.addSubscriptionId(subscriptionId, new Subscription(auction, user));
     }
 
-
-    public void addSubscriptionId(String subscriptionId, int auctionId) {
-        peopleRepository.addSubscriptionId(subscriptionId, auctionId);
+    public void removeAuction(int auctionId) {
+        peopleRepository.removeAuction(auctionId);
     }
 
-    public int getAuctionId(String subscriptionId) {
+    public Subscription getSubscription(String subscriptionId) {
         return peopleRepository.getAuctionId(subscriptionId);
     }
 
