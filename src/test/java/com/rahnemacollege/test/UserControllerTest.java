@@ -61,8 +61,8 @@ public class UserControllerTest extends InitTest {
 
     @Test
     public void setPicture() throws Exception {
-        MockMultipartFile profilePicture = new MockMultipartFile("picture", Image_PATH, "text/plain", "some xml".getBytes());
-        mvc.perform(MockMvcRequestBuilders.multipart(EDIT_PICTURE).file(profilePicture).header("auth", auth)).andExpect(status().is(200));
+        MockMultipartFile profilePicture = new MockMultipartFile("picture", Image_PATH, "multipart/form-data", "some xml".getBytes());
+        mvc.perform(MockMvcRequestBuilders.multipart(EDIT_PICTURE).file(profilePicture).contentType(MediaType.MULTIPART_FORM_DATA).header("auth", auth)).andExpect(status().is(200));
     }
 
 }

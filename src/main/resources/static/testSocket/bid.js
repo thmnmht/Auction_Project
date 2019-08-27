@@ -61,7 +61,7 @@ function join() {
     auctionId = $("#auctionId").val();
     $("#chatHeader").append(auctionId + " ");
     lastSubId = stompClient.subscribe('/auction/id/' + auctionId, function (greeting) {
-        showChat(JSON.parse(greeting.body));
+        showChat(greeting.body);
     },function (error) {
         console.log(JSON.stringify(error));
     }).id;

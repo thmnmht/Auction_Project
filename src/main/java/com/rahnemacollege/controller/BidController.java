@@ -57,8 +57,15 @@ public class BidController {
         logger.info(user.getEmail() + " with id " + user.getId() + " wants to bid auction " + request.getAuctionId());
         Bid bid = bidService.add(request, user);
 //        auctionService.schedule(bid);
+        JsonObject bidAlert = new JsonObject();
+        bidAlert.addProperty("price", bid.getPrice());
         logger.info("bid accepted");
-        template.convertAndSend("/auction/id/" + request.getAuctionId(), bid.getPrice());
+        template.convertAndSend("/auction/id/" + request.getAuctionId(), bidAlert.toString());
+        JsonObject myBidAlert = new JsonObject();
+        myBidAlert.addProperty("type", 5);
+        myBidAlert.addProperty("price", bid.getPrice());
+        myBidAlert.addProperty("mine", true);
+        template.convertAndSendToUser(String.valueOf(user.getId()),"/app/all", myBidAlert.toString());
     }
 
     @SubscribeMapping("/id/{auctionId}")
@@ -69,7 +76,7 @@ public class BidController {
         Auction auction = auctionService.findById(auctionId);
         User user = userService.findUserId(Integer.valueOf(headerAccessor.getUser().getName()));
         bidService.removeFromAllAuction(user);
-        bidService.addSubscriptionId(headerAccessor.getSubscriptionId(), auction, user);
+        bidService.addSubscriptionId(String.valueOf(user.getId()), auction, user);
         int current = bidService.enter(auction, user);
         JsonObject subAlert = new JsonObject();
         subAlert.addProperty("type", 1);
@@ -77,6 +84,8 @@ public class BidController {
         subAlert.addProperty("current", current);
         template.convertAndSend("/app/all",subAlert.toString());
     }
+
+
     @MessageExceptionHandler
     public void enterDenied(MessageException e, Message<?> message) throws Exception{
         logger.error("the exception is : " + e.getMessage());
@@ -85,6 +94,7 @@ public class BidController {
         JsonObject errAlert = new JsonObject();
         errAlert.addProperty("type",2);
         errAlert.addProperty("message",e.getMessage());
+        errAlert.addProperty("code",e.getMessageStatus().ordinal());
         template.convertAndSendToUser(user,"/app/all",errAlert.toString());
 
     }

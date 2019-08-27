@@ -9,6 +9,8 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -130,8 +132,8 @@ public class AuctionControllerTest extends InitTest {
 
     /*@Test
     public void addPicture() throws Exception{
-        MockMultipartFile profilePicture = new MockMultipartFile("picture", Image_PATH, "text/plain", "some xml".getBytes());
-        mvc.perform(MockMvcRequestBuilders.multipart(ADD_PICTURE + auctionId).file(profilePicture).header("auth",auth)).andExpect(status().is(200));
+        MockMultipartFile profilePicture = new MockMultipartFile(Image_PATH, Image_PATH, "multipart/form-data", "some xml".getBytes());
+        mvc.perform(MockMvcRequestBuilders.multipart(ADD_PICTURE + auctionId).file(profilePicture).contentType(MediaType.MULTIPART_FORM_DATA_VALUE).header("auth",auth)).andExpect(status().is(200));
         AuctionDomain auctionDomain = getAuction(auctionId);
         mvc.perform(MockMvcRequestBuilders.get(auctionDomain.getPictures().get(0))).andExpect(status().isOk());
     }*/
@@ -141,6 +143,13 @@ public class AuctionControllerTest extends InitTest {
         mvc.perform(MockMvcRequestBuilders.post(ADD_BOOKMARK + "?auctionId=" + -1)
                 .header("auth", auth)).andExpect(status().is(458));
     }
+
+    /*public void findAuction() throws Exception{
+        mvc.perform(MockMvcRequestBuilders.get(FIND + auctionId)
+                .header("auth",auth)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andReturn().getResponse()
+    }*/
 
     private AuctionDomain getAuction(int id) throws Exception {
         String response = mvc.perform(MockMvcRequestBuilders.get(FIND + id)
