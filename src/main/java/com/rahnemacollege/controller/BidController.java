@@ -56,7 +56,7 @@ public class BidController {
         User user = userService.findUserId(Integer.valueOf(headerAccessor.getUser().getName()));
         logger.info(user.getEmail() + " with id " + user.getId() + " wants to bid auction " + request.getAuctionId());
         Bid bid = bidService.add(request, user);
-//        auctionService.schedule(bid);
+        auctionService.schedule(bid);
         JsonObject bidAlert = new JsonObject();
         bidAlert.addProperty("price", bid.getPrice());
         logger.info("bid accepted");
