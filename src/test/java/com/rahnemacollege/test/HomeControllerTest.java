@@ -18,15 +18,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class HomeControllerTest extends InitTest{
+public class HomeControllerTest extends InitTest {
 
     @Test
-    public void search() throws Exception{
-        UserDomain userDomain = getUserInfo();
+    public void search() throws Exception {
+        UserDomain userDomain = getFirstUserInfo();
         String response = mvc.perform(MockMvcRequestBuilders.post(SEARCH + "0" + "?page=" + 0 + "&size=" + 40)
-                .header("auth",auth).contentType(MediaType.APPLICATION_JSON)
-        .param("title","")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        PagedResources<Resource<AuctionDomain>> auctionDomainResource = gson.fromJson(response,PagedResources.class);
+                .header("auth", auth).contentType(MediaType.APPLICATION_JSON)
+                .param("title", "")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        PagedResources<Resource<AuctionDomain>> auctionDomainResource = gson.fromJson(response, PagedResources.class);
         System.out.println(response);
         //TODO
     }

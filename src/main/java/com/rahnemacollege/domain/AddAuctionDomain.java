@@ -22,4 +22,6 @@ public class AddAuctionDomain {
         maxNumber = auction.getMaxNumber();
     }
 
+    public AddAuctionDomain() {
+    }
 }

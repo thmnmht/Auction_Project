@@ -5,9 +5,6 @@ import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.ResetRequest;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.*;
-import com.rahnemacollege.service.AuctionService;
-import com.rahnemacollege.service.PasswordService;
-import com.rahnemacollege.service.UserDetailsServiceImpl;
 import com.rahnemacollege.util.ResourceAssembler;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.MessageException;
@@ -26,7 +23,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -107,7 +107,7 @@ public class UserController {
     }
 
     @RequestMapping(value = "/edit/password", method = RequestMethod.POST)
-    public Resource<SimpleUserDomain> setNewPassword(@RequestParam("oPassword") String oPassword, @RequestParam("nPassword") String nPassword) {
+    public ResponseEntity<SimpleUserDomain> setNewPassword(@RequestParam("oPassword") String oPassword, @RequestParam("nPassword") String nPassword) {
         log.info(detailsService.getUser().getEmail() + " tries to change password");
         User user = detailsService.getUser();
         if (nPassword == null || oPassword == null || nPassword.length() < 6) {
@@ -119,7 +119,7 @@ public class UserController {
             throw new MessageException(Message.PASSWORD_INCORRECT);
         }
         log.info("Password changed for : " + detailsService.getUser().getEmail());
-        return assembler.toResource(userService.changePassword(user, nPassword));
+        return new ResponseEntity<>(userService.changePassword(user, nPassword), HttpStatus.OK);
     }
 
 
@@ -179,7 +179,7 @@ public class UserController {
 
 
     @RequestMapping(value = "/forgot", method = RequestMethod.POST)
-    public Resource<UserDomain> processForgotPasswordForm(@RequestParam("email") String userEmail, HttpServletRequest request) {
+    public ResponseEntity<SimpleUserDomain> processForgotPasswordForm(@RequestParam("email") String userEmail, HttpServletRequest request) {
         userEmail = userEmail.toLowerCase();
         log.info(userEmail + " has just requested for password recovery email.");
         Optional<User> optional = userService.findUserByEmail(userEmail);
@@ -195,15 +195,15 @@ public class UserController {
                 log.info("A password reset link has been sent to " + userEmail + " @" +
                         new Date());
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("Failed to send email to " + userEmail + " ," + e);
             }
-            return assembler.toResource(userService.toUserDomain(user));
+            return new ResponseEntity<>(new SimpleUserDomain(user.getName(), userEmail), HttpStatus.OK);
         }
     }
 
 
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
-    public Resource<SimpleUserDomain> setNewPassword(@RequestParam Map<String, String> requestParams) {
+    public ResponseEntity<SimpleUserDomain> setNewPassword(@RequestParam Map<String, String> requestParams) {
         String token = requestParams.get("token"), password = requestParams.get("validPassword");
         log.info("Reset password request received for token :\"" + token + "\"");
         ResetRequest request = requestService.findByToken(token).orElseGet(() -> {
@@ -218,7 +218,7 @@ public class UserController {
                 throw new MessageException(Message.PASSWORD_TOO_HIGH);
             requestService.removeRequest(request);
             log.info(resetUser.getEmail()+ " successfully reset his/her password");
-            return assembler.toResource(userService.changePassword(resetUser, password));
+            return new ResponseEntity<>(userService.changePassword(resetUser, password), HttpStatus.OK);
         } else {
             log.error("Invalid password reset link.");
             throw new MessageException(Message.NOT_RECORDED_REQUEST);

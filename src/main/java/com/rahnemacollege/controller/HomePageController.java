@@ -44,7 +44,7 @@ public class HomePageController {
 
     @GetMapping("/hottest")
     PagedResources<Resource<AuctionDomain>> paged(@RequestParam("page") int page,
-                                                  @RequestParam(value = "size", defaultValue = "10") int size,
+                                                  @RequestParam(value = "size") int size,
                                                   PagedResourcesAssembler<AuctionDomain> assembler) {
         log.info("get hottest");
         User user = userDetailsService.getUser();
@@ -69,12 +69,6 @@ public class HomePageController {
                 auctionService.toAuctionDomain(a,user,bidService.getMembers(a))).collect(Collectors.toList());
         return assembler.toResource(auctionService.toPage(auctionDomains, page, size));
     }
-
-//    @GetMapping("/filter/{categoryId}")
-//    public Resources<Resource<AuctionDomain>> filter(@PathVariable int categoryId, @RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler) {
-//        log.info("filter");
-//        return assembler.toResource(auctionService.filter(categoryId, page, size));
-//    }
 
 //    @GetMapping("/all")
 //    public PagedResources<Resource<AuctionDomain>> getPage(@RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler) {

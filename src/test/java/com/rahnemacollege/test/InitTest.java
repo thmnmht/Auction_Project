@@ -1,13 +1,11 @@
 package com.rahnemacollege.test;
 
+
 import com.google.gson.Gson;
 import com.rahnemacollege.domain.AuthenticationResponse;
-import com.rahnemacollege.domain.SimpleUserDomain;
 import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.User;
 import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,9 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 
 
 @RunWith(SpringRunner.class)
@@ -30,8 +26,8 @@ public class InitTest {
 
     @Autowired
     protected MockMvc mvc;
-    protected String auth;
-    protected User user;
+    protected String auth, auth2;
+    protected User user, user2;
     protected Gson gson;
     protected final String EDIT = "/users/edit";
     protected final String ME = "/users/me";
@@ -58,30 +54,13 @@ public class InitTest {
             "\n" +
             "Unlike most database monitoring tools for MySQL which offers only health and availability stats for your database, Applications Manager's MySQL Monitor provides in-depth MySQL performance monitoring with numerous performance metrics and triggers notifications in case of downtimes. Also, the MySQL performance monitor keeps track of usage patterns, offers insights to plan capacity and helps you get notified about impending problems in your database.";
 
-
-   /* @Test
-    public void signup() throws Exception{
-        //??
-        gson = new Gson();
-        User user = new User();
-        user.setName("ali");
-        user.setEmail("ali_alavi@gmail.com");
-        user.setPassword("123456");
-
-        SimpleUserDomain userDomain = new SimpleUserDomain("ali","ali_alavi@gmail.com");
-        String response = gson.toJson(userDomain);
-        String request = gson.toJson(user);
-        mvc.perform(MockMvcRequestBuilders.post("/users/signup").contentType(MediaType.APPLICATION_JSON).content(request))
-                .andExpect(status().isOk()).andExpect(content().json(response));
-    }*/
-
-
     @Before
-    public void login() throws Exception{
+    public void login() throws Exception {
         gson = new Gson();
+
         user = new User();
-        user.setEmail("ali_alavi@gmail.com");
-        user.setPassword("123456");
+        user.setEmail("tmohati@gmail.com");
+        user.setPassword("t.mohati");
         String response = mvc.perform(MockMvcRequestBuilders.post(LOGIN)
                 .contentType(MediaType.APPLICATION_JSON).content(gson.toJson(user)))
                 .andExpect(status().isOk())
@@ -89,15 +68,32 @@ public class InitTest {
 
         auth = gson.fromJson(response, AuthenticationResponse.class).getToken();
         auth = "Bearer " + auth;
-        user.setName(getUserInfo().getName());
-    }
+        user.setName(getFirstUserInfo().getName());
 
-    protected UserDomain getUserInfo() throws Exception{
-        String response = mvc.perform(MockMvcRequestBuilders.get(ME).header("auth",auth))
+        user2 = new User();
+        user2.setEmail("yalda.yarandi@gmail.com");
+        user2.setPassword("y.yarandi");
+        response = mvc.perform(MockMvcRequestBuilders.post(LOGIN)
+                .contentType(MediaType.APPLICATION_JSON).content(gson.toJson(user2)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        UserDomain userDomain = gson.fromJson(response, UserDomain.class);
-        return  userDomain;
+        auth2 = gson.fromJson(response, AuthenticationResponse.class).getToken();
+        auth2 = "Bearer " + auth2;
+        user2.setName(getFirstUserInfo().getName());
+    }
+
+    protected UserDomain getFirstUserInfo() throws Exception {
+        String response = mvc.perform(MockMvcRequestBuilders.get(ME).header("auth", auth))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return gson.fromJson(response, UserDomain.class);
+    }
+
+    protected UserDomain getSecondUserInfo() throws Exception {
+        String response = mvc.perform(MockMvcRequestBuilders.get(ME).header("auth", auth2))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return gson.fromJson(response, UserDomain.class);
     }
 
 }
