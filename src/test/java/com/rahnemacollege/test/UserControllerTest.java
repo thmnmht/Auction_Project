@@ -5,7 +5,6 @@ package com.rahnemacollege.test;/*
 import com.rahnemacollege.domain.SimpleUserDomain;
 import com.rahnemacollege.domain.UserDomain;
 import org.assertj.core.api.AssertionsForClassTypes;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -14,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.io.FileInputStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -61,8 +62,10 @@ public class UserControllerTest extends InitTest {
 
     @Test
     public void setPicture() throws Exception {
-        MockMultipartFile profilePicture = new MockMultipartFile("picture", Image_PATH, "multipart/form-data", "some xml".getBytes());
-        mvc.perform(MockMvcRequestBuilders.multipart(EDIT_PICTURE).file(profilePicture).contentType(MediaType.MULTIPART_FORM_DATA).header("auth", auth)).andExpect(status().is(200));
+        FileInputStream fis = new FileInputStream(Image_PATH);
+        MockMultipartFile multipartFile = new MockMultipartFile("file", fis);
+        MockMultipartFile profilePicture = new MockMultipartFile("picture", "Beautiful_Fantasy_Worlds_Wallpapers_31.jpg", "multipart/form-data", multipartFile.getBytes());
+        mvc.perform(MockMvcRequestBuilders.multipart(EDIT_PICTURE).file(profilePicture).header("auth", auth)).andExpect(status().is(200));
     }
 
 }

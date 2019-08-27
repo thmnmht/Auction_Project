@@ -14,8 +14,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 public class FinalizeAuctionJob extends QuartzJobBean {
     private static final Logger logger = LoggerFactory.getLogger(FinalizeAuctionJob.class);
@@ -42,6 +40,7 @@ public class FinalizeAuctionJob extends QuartzJobBean {
     private void finalizeAuction(Auction auction, User user) {
         setWinner(auction,user);
         finishAuction(auction);
+        ownerAlert(auction);
     }
 
     private void setWinner(Auction auction,User user){
@@ -61,6 +60,13 @@ public class FinalizeAuctionJob extends QuartzJobBean {
         finishAlert.addProperty("auctionId",auction.getId());
         template.convertAndSend("/app/all", finishAlert.toString());
         bidService.removeAuction(auction.getId());
+    }
+
+    private void ownerAlert(Auction auction){
+        JsonObject alert = new JsonObject();
+        alert.addProperty("type",6);
+        alert.addProperty("auctionId",auction.getId());
+        template.convertAndSendToUser(String.valueOf(auction.getOwner().getId()),"/app/all", alert.toString());
     }
 
 

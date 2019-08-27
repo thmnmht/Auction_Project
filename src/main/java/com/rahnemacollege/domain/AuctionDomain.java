@@ -17,6 +17,7 @@ public class AuctionDomain {
     private boolean mine = false;
     private int id;
     private int current = 0;
+    private int state = 0;
 
     private List<String> pictures;
 
@@ -26,13 +27,15 @@ public class AuctionDomain {
                          int categoryId,
                          int maxNumber,
                          int id,
-                         int current) {
+                         int current,
+                         int state) {
         this.title = title;
         this.date = date;
         this.categoryId = categoryId;
         this.maxNumber = maxNumber;
         this.id = id;
         this.current = current;
+        this.state = state;
     }
 
 }

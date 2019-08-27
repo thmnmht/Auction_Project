@@ -3,7 +3,9 @@ package com.rahnemacollege.service;
 
 import com.google.common.collect.Lists;
 import com.rahnemacollege.domain.AddAuctionDomain;
+import com.rahnemacollege.domain.AuctionDetail;
 import com.rahnemacollege.domain.AuctionDomain;
+import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.job.FinalizeAuctionJob;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Bid;
@@ -105,7 +107,8 @@ public class AuctionService {
                 auction.getCategory().getId(),
                 auction.getMaxNumber(),
                 auction.getId(),
-                current);
+                current,
+                auction.getState());
         if (auction.getOwner().getId() == user.getId())
             auctionDomain.setMine(true);
         String userEmail = user.getEmail();

@@ -1,5 +1,6 @@
 package com.rahnemacollege.domain;
 
+import com.rahnemacollege.model.User;
 import lombok.Data;
 import org.springframework.data.rest.core.annotation.RestResource;
 
@@ -27,8 +28,10 @@ public class UserDomain{
     public UserDomain() {
     }
 
-    public UserDomain(String name, String email) {
-        this.name = name;
-        this.email = email;
+    public UserDomain(User user) {
+        this.name = user.getName();
+        this.email = user.getEmail();
+        this.id = user.getId();
+        this.picture = user.getPicture();
     }
 }
