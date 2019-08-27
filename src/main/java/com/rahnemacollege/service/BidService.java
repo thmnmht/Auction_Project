@@ -56,24 +56,25 @@ public class BidService {
             throw new MessageException(Message.THE_AUCTION_DIDNT_START_YET);
         if (!peopleRepository.isInAuction(auction, user))
             throw new MessageException(Message.THE_USER_IS_NOT_IN_AUCTION);
-        if (bidRepository.findLatestBid(auction.getId()).isPresent()
-                && bidRepository.findLatestBid(auction.getId()).get().getUser().getId().equals(user.getId())) {
+        if (bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).isPresent()
+                && bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).get().getUser().getId().equals(user.getId())){
             throw new MessageException(Message.ALREADY_BID);
         }
         int lastPrice = findLastPrice(auction);
-        if (request.getPrice() < 1)
+        int bidPrice = request.getPrice();
+        if (bidPrice <= lastPrice)
             throw new MessageException(Message.PRICE_TOO_LOW);
-        Bid bid = new Bid(auction, user, lastPrice + request.getPrice(), new Date());
+        Bid bid = new Bid(auction, user, bidPrice, new Date());
         bid = bidRepository.save(bid);
         return bid;
     }
 
     public int findLastPrice(Auction auction) {
-        return bidRepository.findLatestBid(auction.getId()).map(Bid::getPrice).orElseGet(auction::getBasePrice);
+        return bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).map(Bid::getPrice).orElseGet(auction::getBasePrice);
     }
 
     public Long findLatestBidTime(Auction auction) {
-        Optional<Date> date = bidRepository.findLatestBid(auction.getId()).map(Bid::getDate);
+        Optional<Date> date = bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).map(Bid::getDate);
         if (date.isPresent()) {
             return date.get().getTime();
         } else {
