@@ -18,7 +18,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
-@Order(Ordered.HIGHEST_PRECEDENCE)
+//@Order(Ordered.HIGHEST_PRECEDENCE + 99)
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Autowired
@@ -26,6 +26,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private BidService bidService;
 
 
     @Override
@@ -42,7 +45,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.setInterceptors(new AuthenticationSocket(tokenUtil, userService));
+        registration.setInterceptors(new AuthenticationSocket(bidService, tokenUtil, userService));
     }
 
 }

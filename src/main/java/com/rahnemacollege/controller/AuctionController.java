@@ -87,7 +87,7 @@ public class AuctionController {
         Long latestBidTime = bidService.findLatestBidTime(auction);
         int members = bidService.getMembers(auction);
         AuctionDomain auctionDomain = auctionService.toAuctionDomain(auction, user, members);
-        AuctionDetail auctionDetail = new AuctionDetail(auctionDomain, auction.getDescription(), auction.getBasePrice(), lastPrice, latestBidTime);
+        AuctionDetail auctionDetail = new AuctionDetail(auctionDomain, auction.getDescription(), lastPrice, latestBidTime);
         System.out.println(new Gson().toJson(auctionDetail));
         return new ResponseEntity<>(auctionDetail, HttpStatus.OK);
     }

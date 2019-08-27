@@ -192,7 +192,7 @@ public class AuctionService {
         int auctionId = bidRequest.getAuction().getId();
         if (findAuctionById(auctionId).getState() == 1) {
             logger.error("cannot schedule, auction Id#" + auctionId + " is already finished.");
-            throw new MessageException(Message.BID_ON_FINISHED_AUCTION);
+            throw new MessageException(Message.FINISHED_AUCTION);
         }
         try {
             if (scheduler.checkExists(TriggerKey.triggerKey("FTrigger-" + auctionId, "finalizeAuction-triggers"))

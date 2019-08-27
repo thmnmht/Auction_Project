@@ -14,7 +14,7 @@ function setConnected(connected) {
 
 
 function connect() {
-    var socket = new SockJS('/socket');
+    var socket = new SockJS('/socket',null , {auth : "Bearer " + $("#token").val()});
     //if you connect through WebSocket (without SockJS)
     // var socket = new WebSocket('/socket');
     stompClient = Stomp.over(socket);

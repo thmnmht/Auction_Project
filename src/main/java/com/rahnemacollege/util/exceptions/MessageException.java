@@ -13,4 +13,9 @@ public class MessageException extends RuntimeException {
     public Message getMessageStatus() {
         return message;
     }
+
+    @Override
+    public String getMessage() {
+        return message.toString();
+    }
 }

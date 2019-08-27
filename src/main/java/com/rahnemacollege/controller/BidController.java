@@ -11,7 +11,6 @@ import com.rahnemacollege.service.BidService;
 import com.rahnemacollege.service.UserDetailsServiceImpl;
 import com.rahnemacollege.service.UserService;
 import com.rahnemacollege.util.TokenUtil;
-import com.rahnemacollege.util.exceptions.EnterDeniedException;
 import com.rahnemacollege.util.exceptions.MessageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +56,7 @@ public class BidController {
         User user = userService.findUserId(Integer.valueOf(headerAccessor.getUser().getName()));
         logger.info(user.getEmail() + " with id " + user.getId() + " wants to bid auction " + request.getAuctionId());
         Bid bid = bidService.add(request, user);
-        auctionService.schedule(bid);
+//        auctionService.schedule(bid);
         logger.info("bid accepted");
         template.convertAndSend("/auction/id/" + request.getAuctionId(), bid.getPrice());
     }
@@ -72,9 +71,6 @@ public class BidController {
         bidService.removeFromAllAuction(user);
         bidService.addSubscriptionId(headerAccessor.getSubscriptionId(), auction, user);
         int current = bidService.enter(auction, user);
-        bidService.getUsersInAuction().keySet().forEach(a -> bidService.getUsersInAuction().get(a).forEach(u ->
-                logger.info("user " + u.getId() + " is in auction " + a)));
-
         JsonObject subAlert = new JsonObject();
         subAlert.addProperty("type", 1);
         subAlert.addProperty("auctionId", auctionId);
@@ -82,21 +78,15 @@ public class BidController {
         template.convertAndSend("/app/all",subAlert.toString());
     }
     @MessageExceptionHandler
-    public void enterDenied(EnterDeniedException e, Message<?> message) throws Exception{
-        logger.error("the exception is : " + e.getDescription());
+    public void enterDenied(MessageException e, Message<?> message) throws Exception{
+        logger.error("the exception is : " + e.getMessage());
         StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         String user = headerAccessor.getUser().getName();
         JsonObject errAlert = new JsonObject();
         errAlert.addProperty("type",2);
-        errAlert.addProperty("message",e.getDescription());
+        errAlert.addProperty("message",e.getMessage());
         template.convertAndSendToUser(user,"/app/all",errAlert.toString());
 
-    }
-
-    @MessageExceptionHandler
-    public void invalidInput(MessageException e, Message<?> message){
-        StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        String user = headerAccessor.getUser().getName();
     }
 
 
