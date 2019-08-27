@@ -23,7 +23,7 @@ public interface AuctionRepository extends CrudRepository<Auction, Integer> {
             "ORDER BY number_of_bookmarks DESC", nativeQuery = true)
     Page<Auction> findHottest(Pageable pageable);
 
-    List<Auction> findByStateAndOwner_idOrderByIdDesc(int state, int user_id);
+    List<Auction> findByOwner_idOrderByIdDesc(int user_id);
 
     List<Auction> findByStateOrderByIdDesc(int state);
 

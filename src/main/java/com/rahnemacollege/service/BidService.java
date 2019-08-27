@@ -49,30 +49,33 @@ public class BidService {
         Auction auction = auctionRepository
                 .findById(request.getAuctionId()).orElseThrow(() ->
                         new InvalidInputException(Message.AUCTION_NOT_FOUND));
-        if(user.equals(auction.getOwner()))
+        if (auction.getState() == 1)
+            throw new EnterDeniedException("the auction was finished");
+        if (user.equals(auction.getOwner()))
             throw new EnterDeniedException("the user is the owner of the auction");
         if (auction.getDate().getTime() >= new Date().getTime())
             throw new EnterDeniedException("the auction didn't start yet");
         if (!peopleRepository.isInAuction(auction, user))
             throw new EnterDeniedException("the user isn't in auction");
-        if (bidRepository.findLatestBid(auction.getId()).isPresent()
-                && bidRepository.findLatestBid(auction.getId()).get().getUser().getId().equals(user.getId())) {
+        if (bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).isPresent()
+                && bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).get().getUser().getId().equals(user.getId())) {
             throw new InvalidInputException(Message.ALREADY_BID);
         }
         int lastPrice = findLastPrice(auction);
-        if (request.getPrice() < 1)
+        int bidPrice = request.getPrice();
+        if (bidPrice <= lastPrice)
             throw new InvalidInputException(Message.PRICE_TOO_LOW);
-        Bid bid = new Bid(auction, user, lastPrice + request.getPrice(), new Date());
+        Bid bid = new Bid(auction, user, bidPrice, new Date());
         bid = bidRepository.save(bid);
         return bid;
     }
 
     public int findLastPrice(Auction auction) {
-        return bidRepository.findLatestBid(auction.getId()).map(Bid::getPrice).orElseGet(auction::getBasePrice);
+        return bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).map(Bid::getPrice).orElseGet(auction::getBasePrice);
     }
 
     public Long findLatestBidTime(Auction auction) {
-        Optional<Date> date = bidRepository.findLatestBid(auction.getId()).map(Bid::getDate);
+        Optional<Date> date = bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).map(Bid::getDate);
         if (date.isPresent()) {
             return date.get().getTime();
         } else {
@@ -85,9 +88,9 @@ public class BidService {
             logger.warn("the user with id " + user.getId() + "was in auction with id " + auction.getId());
             return peopleRepository.getMembers(auction.getId()).size();
         }
-        if(auction.getOwner().equals(user))
+        if (auction.getOwner().equals(user))
             throw new EnterDeniedException("the user is the owner of the auction");
-        if(auction.getState() == 1)
+        if (auction.getState() == 1)
             throw new EnterDeniedException("the auction was finished");
         peopleRepository.add(auction, user);
         return peopleRepository.getMembers(auction.getId()).size();
@@ -110,8 +113,8 @@ public class BidService {
         return peopleRepository.getUsersInAuction();
     }
 
-    public void addSubscriptionId(String subscriptionId, Auction auction,User user ) {
-        peopleRepository.addSubscriptionId(subscriptionId, new Subscription(auction,user));
+    public void addSubscriptionId(String subscriptionId, Auction auction, User user) {
+        peopleRepository.addSubscriptionId(subscriptionId, new Subscription(auction, user));
     }
 
     public Subscription getSubscription(String subscriptionId) {

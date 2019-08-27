@@ -163,7 +163,7 @@ public class AuctionService {
     }
 
     public List<Auction> findByOwner(User user) {
-        return auctionRepository.findByStateAndOwner_idOrderByIdDesc(0, user.getId());
+        return auctionRepository.findByOwner_idOrderByIdDesc(user.getId());
     }
 
     public Page<AuctionDomain> toPage(List<AuctionDomain> list, int page, int size) {
