@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -59,4 +60,16 @@ public class ResetRequestService {
     public void removeRequest(ResetRequest request) {
         repository.delete(request);
     }
+
+//    public void printAll() {
+//        System.err.println("Printing requests");
+//        for (ResetRequest request : repository.findAll()) {
+//            System.err.println("ResetRequest{ id# " + request.getId()
+//                    + ", user : " + request.getUser().getEmail()
+//                    + ", token : " + request.getToken()
+//                    + ", date : " + request.getDate() + "}");
+//        }
+//        System.err.println("End of requests");
+//    }
+
 }

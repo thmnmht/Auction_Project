@@ -5,6 +5,7 @@ package com.rahnemacollege.test;/*
 import com.rahnemacollege.domain.SimpleUserDomain;
 import com.rahnemacollege.domain.UserDomain;
 import org.assertj.core.api.AssertionsForClassTypes;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
