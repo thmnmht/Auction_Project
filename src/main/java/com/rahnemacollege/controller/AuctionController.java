@@ -10,7 +10,7 @@ import com.rahnemacollege.model.Category;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.*;
 import com.rahnemacollege.util.ResourceAssembler;
-import com.rahnemacollege.util.exceptions.InvalidInputException;
+import com.rahnemacollege.util.exceptions.MessageException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-
-import org.slf4j.Logger;
 
 @RestController
 @RequestMapping("/auctions")
@@ -72,7 +70,7 @@ public class AuctionController {
         log(" try to add pictures for her/his auction.");
         Auction auction = auctionService.findById(id);
         if (images == null || images.length < 1)
-            throw new InvalidInputException(Message.PICTURE_NULL);
+            throw new MessageException(Message.PICTURE_NULL);
         pictureService.setAuctionPictures(auction, images);
         log(" added picture for auction " + auction.getId());
         AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);
@@ -107,9 +105,9 @@ public class AuctionController {
                 log.info("Auction Id#" + auction.getId() + " just added to " + user.getEmail() + "'s bookmarks");
                 return assembler.toResource(addAuctionDomain);
             }
-            throw new InvalidInputException(Message.REALLY_BAD_SITUATION);
+            throw new MessageException(Message.REALLY_BAD_SITUATION);
         }
-        throw new InvalidInputException(Message.INVALID_ID);
+        throw new MessageException(Message.INVALID_ID);
     }
 
 

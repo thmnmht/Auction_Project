@@ -12,6 +12,7 @@ import com.rahnemacollege.service.UserDetailsServiceImpl;
 import com.rahnemacollege.service.UserService;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.EnterDeniedException;
+import com.rahnemacollege.util.exceptions.MessageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,14 +82,22 @@ public class BidController {
         template.convertAndSend("/app/all",subAlert.toString());
     }
     @MessageExceptionHandler
-    public void handleException(EnterDeniedException e, Message<?> message) throws Exception{
-        System.err.println("the exception is : " + e.getDescription());
+    public void enterDenied(EnterDeniedException e, Message<?> message) throws Exception{
+        logger.error("the exception is : " + e.getDescription());
         StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         String user = headerAccessor.getUser().getName();
         JsonObject errAlert = new JsonObject();
         errAlert.addProperty("type",2);
         errAlert.addProperty("message",e.getDescription());
         template.convertAndSendToUser(user,"/app/all",errAlert.toString());
+
     }
+
+    @MessageExceptionHandler
+    public void invalidInput(MessageException e, Message<?> message){
+        StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+        String user = headerAccessor.getUser().getName();
+    }
+
 
 }

@@ -14,8 +14,8 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
 
     private Logger logger = LoggerFactory.getLogger(ExcHandler.class);
 
-    @ExceptionHandler(value = {InvalidInputException.class})
-    protected void inputInvalid(InvalidInputException ex,
+    @ExceptionHandler(value = {MessageException.class})
+    protected void inputInvalid(MessageException ex,
                                 HttpServletResponse response) {
         switch (ex.getMessageStatus()) {
             //add auction

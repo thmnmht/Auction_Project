@@ -10,7 +10,7 @@ import com.rahnemacollege.repository.AuctionRepository;
 import com.rahnemacollege.repository.BidRepository;
 import com.rahnemacollege.repository.OnlinePeopleRepository;
 import com.rahnemacollege.util.exceptions.EnterDeniedException;
-import com.rahnemacollege.util.exceptions.InvalidInputException;
+import com.rahnemacollege.util.exceptions.MessageException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +48,7 @@ public class BidService {
     public Bid add(@NotNull BidRequest request, @NotNull User user) {
         Auction auction = auctionRepository
                 .findById(request.getAuctionId()).orElseThrow(() ->
-                        new InvalidInputException(Message.AUCTION_NOT_FOUND));
+                        new MessageException(Message.AUCTION_NOT_FOUND));
         if(user.equals(auction.getOwner()))
             throw new EnterDeniedException("the user is the owner of the auction");
         if (auction.getDate().getTime() >= new Date().getTime())
@@ -57,11 +57,11 @@ public class BidService {
             throw new EnterDeniedException("the user isn't in auction");
         if (bidRepository.findLatestBid(auction.getId()).isPresent()
                 && bidRepository.findLatestBid(auction.getId()).get().getUser().getId().equals(user.getId())) {
-            throw new InvalidInputException(Message.ALREADY_BID);
+            throw new MessageException(Message.ALREADY_BID);
         }
         int lastPrice = findLastPrice(auction);
         if (request.getPrice() < 1)
-            throw new InvalidInputException(Message.PRICE_TOO_LOW);
+            throw new MessageException(Message.PRICE_TOO_LOW);
         Bid bid = new Bid(auction, user, lastPrice + request.getPrice(), new Date());
         bid = bidRepository.save(bid);
         return bid;
@@ -112,6 +112,10 @@ public class BidService {
 
     public void addSubscriptionId(String subscriptionId, Auction auction,User user ) {
         peopleRepository.addSubscriptionId(subscriptionId, new Subscription(auction,user));
+    }
+
+    public void removeAuction(int auctionId){
+        peopleRepository.removeAuction(auctionId);
     }
 
     public Subscription getSubscription(String subscriptionId) {

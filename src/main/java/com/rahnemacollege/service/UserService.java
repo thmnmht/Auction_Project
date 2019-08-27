@@ -6,7 +6,7 @@ import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.UserRepository;
-import com.rahnemacollege.util.exceptions.InvalidInputException;
+import com.rahnemacollege.util.exceptions.MessageException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,13 +54,13 @@ public class UserService {
 
     public SimpleUserDomain addUser(String name, String email, String password) {
         if (!email.matches(VALID_EMAIL_REGEX))
-            throw new InvalidInputException(Message.EMAIL_INVALID);
+            throw new MessageException(Message.EMAIL_INVALID);
         if (isExist(email))
-            throw new InvalidInputException(Message.EMAIL_DUPLICATED);
+            throw new MessageException(Message.EMAIL_DUPLICATED);
         if (password.length() < 6)
-            throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
+            throw new MessageException(Message.PASSWORD_TOO_LOW);
         if (password.length() > 100)
-            throw new InvalidInputException(Message.PASSWORD_TOO_HIGH);
+            throw new MessageException(Message.PASSWORD_TOO_HIGH);
         User user = new User(name, email, encoder.encode(password));
         repository.save(user);
         return new SimpleUserDomain(name, email);
@@ -72,13 +72,13 @@ public class UserService {
         return users;
     }
 
-    public void authenticate(int id, String password) throws InvalidInputException {
+    public void authenticate(int id, String password) throws MessageException {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(id, password));
         } catch (DisabledException e) {
             logger.error(e.getMessage());
         } catch (BadCredentialsException e) {
-            throw new InvalidInputException(Message.PASSWORD_INCORRECT);
+            throw new MessageException(Message.PASSWORD_INCORRECT);
         }
     }
 
@@ -93,7 +93,7 @@ public class UserService {
     }
 
     public User findUserId(int id) {
-        return  repository.findById(id).orElseThrow(() -> new InvalidInputException(Message.INVALID_ID));
+        return  repository.findById(id).orElseThrow(() -> new MessageException(Message.INVALID_ID));
     }
 
     public SimpleUserDomain changePassword(User user, String newPassword) {
@@ -102,10 +102,10 @@ public class UserService {
         return new SimpleUserDomain(user.getName(), user.getEmail());
     }
 
-    public User edit(User user, String name, String email) throws InvalidInputException {
+    public User edit(User user, String name, String email) throws MessageException {
         if (email != null && email.length() > 1 && !user.getEmail().equals(email)) {
             if (!email.matches(VALID_EMAIL_REGEX))
-                throw new InvalidInputException(Message.EMAIL_INVALID);
+                throw new MessageException(Message.EMAIL_INVALID);
             user.setEmail(email);
         }
         if (name != null && name.length() > 0)
@@ -125,7 +125,7 @@ public class UserService {
 
     @Transactional
     public List<Auction> getUserBookmarks(User user) {
-        user = repository.findByEmail(user.getEmail()).orElseThrow(() -> new InvalidInputException(Message.EMAIL_INVALID));
+        user = repository.findByEmail(user.getEmail()).orElseThrow(() -> new MessageException(Message.EMAIL_INVALID));
         return new ArrayList<>(user.getBookmarks()).stream().filter(a -> a.getState() == 0)
                 .sorted((a, b) -> b.getId() - a.getId()).collect(Collectors.toList());
     }

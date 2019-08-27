@@ -10,7 +10,7 @@ import com.rahnemacollege.service.PasswordService;
 import com.rahnemacollege.service.UserDetailsServiceImpl;
 import com.rahnemacollege.util.ResourceAssembler;
 import com.rahnemacollege.util.TokenUtil;
-import com.rahnemacollege.util.exceptions.InvalidInputException;
+import com.rahnemacollege.util.exceptions.MessageException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,11 +71,11 @@ public class UserController {
 
 
     @PostMapping("/login")
-    public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws InvalidInputException {
+    public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws MessageException {
         log.info(authenticationRequest.getEmail() + " wants to login *_*");
         String password = authenticationRequest.getPassword();
         int id  = userService.findUserByEmail(authenticationRequest.getEmail())
-                .orElseThrow(() -> new InvalidInputException(Message.EMAIL_NOT_FOUND))
+                .orElseThrow(() -> new MessageException(Message.EMAIL_NOT_FOUND))
                 .getId();
         userService.authenticate(id, password);
         final UserDetails userDetails = detailsService.loadUserByUsername(String.valueOf(id));
@@ -101,7 +101,7 @@ public class UserController {
     public ResponseEntity<SimpleUserDomain> setUserPicture(@RequestPart MultipartFile picture){
         log.info(detailsService.getUser().getName() + " with id " + detailsService.getUser().getId() + " try to set a profile picture");
         if(picture == null)
-            throw new InvalidInputException(Message.PICTURE_NULL);
+            throw new MessageException(Message.PICTURE_NULL);
         User user = detailsService.getUser();
         return new ResponseEntity<>(pictureService.setProfilePicture(user,picture),HttpStatus.OK);
     }
@@ -112,11 +112,11 @@ public class UserController {
         User user = detailsService.getUser();
         if (nPassword == null || oPassword == null || nPassword.length() < 6) {
             log.error("Invalid password input to be changed.");
-            throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
+            throw new MessageException(Message.PASSWORD_TOO_LOW);
         }
         if (!passwordService.getPasswordEncoder().matches(oPassword, user.getPassword())) {
             log.error("OldPassword doesn't match user's password");
-            throw new InvalidInputException(Message.PASSWORD_INCORRECT);
+            throw new MessageException(Message.PASSWORD_INCORRECT);
         }
         log.info("Password changed for : " + detailsService.getUser().getEmail());
         return assembler.toResource(userService.changePassword(user, nPassword));
@@ -127,11 +127,11 @@ public class UserController {
     public ResponseEntity<SimpleUserDomain> add(@RequestBody AddUserDomain userDomain) {
         log.info("someone try to sign up ._.");
         if (userDomain.getName() == null || userDomain.getName().length() < 1)
-            throw new InvalidInputException(Message.NAME_NULL);
+            throw new MessageException(Message.NAME_NULL);
         if (userDomain.getEmail() == null)
-            throw new InvalidInputException(Message.EMAIL_NULL);
+            throw new MessageException(Message.EMAIL_NULL);
         if (userDomain.getPassword() == null)
-            throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
+            throw new MessageException(Message.PASSWORD_TOO_LOW);
         userDomain.setEmail(userDomain.getEmail().toLowerCase());
         SimpleUserDomain user = userService.addUser(userDomain.getName(), userDomain.getEmail(), userDomain.getPassword());
         log.info(user.getName() + " added to DB :)");
@@ -185,7 +185,7 @@ public class UserController {
         Optional<User> optional = userService.findUserByEmail(userEmail);
         if (!optional.isPresent()) {
             log.error("There's not account found for " + userEmail);
-            throw new InvalidInputException(Message.EMAIL_NOT_FOUND);
+            throw new MessageException(Message.EMAIL_NOT_FOUND);
         } else {
             User user = optional.get();
             String appUrl = request.getScheme() + "://" + ip;
@@ -208,20 +208,20 @@ public class UserController {
         log.info("Reset password request received for token :\"" + token + "\"");
         ResetRequest request = requestService.findByToken(token).orElseGet(() -> {
             log.error("No request recorded for token: \"" + token + "\"");
-            throw new InvalidInputException(Message.TOKEN_NOT_FOUND);
+            throw new MessageException(Message.TOKEN_NOT_FOUND);
         });
         User resetUser = request.getUser();
         if (resetUser != null ) {
             if (password == null || password.length() < 6)
-                throw new InvalidInputException(Message.PASSWORD_TOO_LOW);
+                throw new MessageException(Message.PASSWORD_TOO_LOW);
             if (password.length() > 100)
-                throw new InvalidInputException(Message.PASSWORD_TOO_HIGH);
+                throw new MessageException(Message.PASSWORD_TOO_HIGH);
             requestService.removeRequest(request);
             log.info(resetUser.getEmail()+ " successfully reset his/her password");
             return assembler.toResource(userService.changePassword(resetUser, password));
         } else {
             log.error("Invalid password reset link.");
-            throw new InvalidInputException(Message.NOT_RECORDED_REQUEST);
+            throw new MessageException(Message.NOT_RECORDED_REQUEST);
         }
     }
 

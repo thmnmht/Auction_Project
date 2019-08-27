@@ -54,6 +54,10 @@ public class OnlinePeopleRepository {
         return false;
     }
 
+    public void removeAuction(int auctionId){
+        usersInAuction.remove(auctionId);
+    }
+
     public void ExitUser(User user) {
         Set<Integer> auctions = usersInAuction.keySet();
         auctions.forEach(a -> usersInAuction.get(a).remove(user));

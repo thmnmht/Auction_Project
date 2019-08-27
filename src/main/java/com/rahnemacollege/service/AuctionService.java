@@ -13,7 +13,7 @@ import com.rahnemacollege.repository.AuctionRepository;
 import com.rahnemacollege.repository.CategoryRepository;
 import com.rahnemacollege.repository.PictureRepository;
 import com.rahnemacollege.repository.UserRepository;
-import com.rahnemacollege.util.exceptions.InvalidInputException;
+import com.rahnemacollege.util.exceptions.MessageException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.quartz.*;
 import org.slf4j.Logger;
@@ -71,32 +71,32 @@ public class AuctionService {
 
     private void validation(AddAuctionDomain auctionDomain) {
         if (auctionDomain.getTitle() == null || auctionDomain.getTitle().length() < 1)
-            throw new InvalidInputException(Message.TITLE_NULL);
+            throw new MessageException(Message.TITLE_NULL);
         if (auctionDomain.getTitle().length() > 50)
-            throw new InvalidInputException(Message.TITLE_TOO_LONG);
+            throw new MessageException(Message.TITLE_TOO_LONG);
         if (auctionDomain.getDescription() != null && auctionDomain.getDescription().length() > 1000)
-            throw new InvalidInputException(Message.DESCRIPTION_TOO_LONG);
+            throw new MessageException(Message.DESCRIPTION_TOO_LONG);
         if (auctionDomain.getDate() < 1)
-            throw new InvalidInputException(Message.DATE_NULL);
+            throw new MessageException(Message.DATE_NULL);
         if (auctionDomain.getDate() - new Date().getTime() < 1800000L)
-            throw new InvalidInputException(Message.DATE_INVALID);
+            throw new MessageException(Message.DATE_INVALID);
         if (auctionDomain.getBasePrice() < 0)
-            throw new InvalidInputException(Message.BASE_PRICE_NULL);
+            throw new MessageException(Message.BASE_PRICE_NULL);
         if (auctionDomain.getMaxNumber() < 2)
-            throw new InvalidInputException(Message.MAX_NUMBER_TOO_LOW);
+            throw new MessageException(Message.MAX_NUMBER_TOO_LOW);
         if (auctionDomain.getMaxNumber() > 15)
-            throw new InvalidInputException(Message.MAX_NUMBER_TOO_HIGH);
+            throw new MessageException(Message.MAX_NUMBER_TOO_HIGH);
     }
 
     private Auction toAuction(AddAuctionDomain auctionDomain, User user) {
         Date date = new Date(auctionDomain.getDate());
-        Category category = categoryRepository.findById(auctionDomain.getCategoryId()).orElseThrow(() -> new InvalidInputException(Message.CATEGORY_INVALID));
+        Category category = categoryRepository.findById(auctionDomain.getCategoryId()).orElseThrow(() -> new MessageException(Message.CATEGORY_INVALID));
         Auction auction = new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(), auctionDomain.getBasePrice(), category, date, user, auctionDomain.getMaxNumber());
         return auction;
     }
 
     public Auction findAuctionById(int id) {
-        return auctionRepository.findById(id).orElseThrow(() -> new InvalidInputException(Message.AUCTION_NOT_FOUND));
+        return auctionRepository.findById(id).orElseThrow(() -> new MessageException(Message.AUCTION_NOT_FOUND));
     }
 
     public AuctionDomain toAuctionDomain(Auction auction, User user, int current) {
@@ -137,7 +137,7 @@ public class AuctionService {
     }
 
     public Auction findById(int id) {
-        Auction auction = auctionRepository.findById(id).orElseThrow(() -> new InvalidInputException(Message.AUCTION_NOT_FOUND));
+        Auction auction = auctionRepository.findById(id).orElseThrow(() -> new MessageException(Message.AUCTION_NOT_FOUND));
         return auction;
     }
 
@@ -192,7 +192,7 @@ public class AuctionService {
         int auctionId = bidRequest.getAuction().getId();
         if (findAuctionById(auctionId).getState() == 1) {
             logger.error("cannot schedule, auction Id#" + auctionId + " is already finished.");
-            throw new InvalidInputException(Message.BID_ON_FINISHED_AUCTION);
+            throw new MessageException(Message.BID_ON_FINISHED_AUCTION);
         }
         try {
             if (scheduler.checkExists(TriggerKey.triggerKey("FTrigger-" + auctionId, "finalizeAuction-triggers"))
@@ -202,7 +202,7 @@ public class AuctionService {
             }
         } catch (SchedulerException e) {
             logger.error("Error scheduling bid", e);
-            throw new InvalidInputException(Message.SCHEDULER_ERROR);
+            throw new MessageException(Message.SCHEDULER_ERROR);
         }
         try {
             Date finishDate = new Date(System.currentTimeMillis() + auctionActiveSession);
@@ -212,7 +212,7 @@ public class AuctionService {
             logger.info("auction Id#" + auctionId + " will be finished @ " + finishDate);
         } catch (SchedulerException e) {
             logger.error("Error scheduling bid", e);
-            throw new InvalidInputException(Message.SCHEDULER_ERROR);
+            throw new MessageException(Message.SCHEDULER_ERROR);
         }
     }
 
