@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.rahnemacollege.domain.AddAuctionDomain;
 import com.rahnemacollege.domain.AuctionDetail;
 import com.rahnemacollege.domain.AuctionDomain;
+import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.model.User;
@@ -25,7 +26,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/auctions")
-
 public class AuctionController {
 
     private final AuctionService auctionService;
@@ -87,7 +87,12 @@ public class AuctionController {
         Long latestBidTime = bidService.findLatestBidTime(auction);
         int members = bidService.getMembers(auction);
         AuctionDomain auctionDomain = auctionService.toAuctionDomain(auction, user, members);
-        AuctionDetail auctionDetail = new AuctionDetail(auctionDomain, auction.getDescription(), lastPrice, latestBidTime);
+        User winner = auction.getWinner();
+        AuctionDetail auctionDetail = null;
+        if (winner != null)
+            auctionDetail = new AuctionDetail(auctionDomain, auction.getDescription(), lastPrice, new UserDomain(winner), latestBidTime);
+        else
+            auctionDetail = new AuctionDetail(auctionDomain, auction.getDescription(), lastPrice, null, latestBidTime);
         System.out.println(new Gson().toJson(auctionDetail));
         return new ResponseEntity<>(auctionDetail, HttpStatus.OK);
     }

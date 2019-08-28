@@ -2,6 +2,7 @@ package com.rahnemacollege.test;
 
 
 import com.rahnemacollege.domain.AddAuctionDomain;
+import com.rahnemacollege.domain.AuctionDetail;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Category;
 import org.junit.Test;
@@ -9,9 +10,12 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -128,18 +132,34 @@ public class AuctionControllerTest extends InitTest {
                 .isEqualTo(false);
     }
 
-    /*@Test
+    @Test
     public void addPicture() throws Exception{
-        MockMultipartFile profilePicture = new MockMultipartFile("picture", Image_PATH, "text/plain", "some xml".getBytes());
-        mvc.perform(MockMvcRequestBuilders.multipart(ADD_PICTURE + auctionId).file(profilePicture).header("auth",auth)).andExpect(status().is(200));
-        AuctionDomain auctionDomain = getAuction(auctionId);
-        mvc.perform(MockMvcRequestBuilders.get(auctionDomain.getPictures().get(0))).andExpect(status().isOk());
-    }*/
+        FileInputStream fis = new FileInputStream(Image_PATH);
+        MockMultipartFile multipartFile = new MockMultipartFile("file", fis);
+        MockMultipartFile profilePicture = new MockMultipartFile("images", "Beautiful_Fantasy_Worlds_Wallpapers_31.jpg", "multipart/form-data", multipartFile.getBytes());
+        mvc.perform(MockMvcRequestBuilders.multipart(ADD_PICTURE + auctionId)
+                .file(profilePicture)
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                .header("auth", auth))
+                .andExpect(status().isOk());
+    }
 
     @Test
     public void invalidToggleBookmark() throws Exception {
         mvc.perform(MockMvcRequestBuilders.post(ADD_BOOKMARK + "?auctionId=" + -1)
                 .header("auth", auth)).andExpect(status().is(458));
+    }
+
+    @Test
+    public void findAuction() throws Exception{
+        String response = mvc.perform(MockMvcRequestBuilders.get(FIND + auctionId)
+                .header("auth",auth)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        AuctionDetail auctionDetail = gson.fromJson(response, AuctionDetail.class);
+        assertThat(auctionDetail.getId())
+                .isEqualTo(auctionId);
+
     }
 
     private AuctionDomain getAuction(int id) throws Exception {

@@ -1,7 +1,6 @@
 package com.rahnemacollege.controller;
 
 
-import com.google.gson.JsonObject;
 import com.rahnemacollege.domain.BidRequest;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Bid;
@@ -10,6 +9,7 @@ import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.service.BidService;
 import com.rahnemacollege.service.UserDetailsServiceImpl;
 import com.rahnemacollege.service.UserService;
+import com.rahnemacollege.util.MessageHandler;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.MessageException;
 import org.slf4j.Logger;
@@ -29,7 +29,6 @@ import org.springframework.stereotype.Controller;
 public class BidController {
 
 
-    @Autowired
     private SimpMessagingTemplate template;
 
     @Autowired
@@ -48,6 +47,12 @@ public class BidController {
     TokenUtil tokenUtil;
 
     private final Logger logger = LoggerFactory.getLogger(BidController.class);
+    private MessageHandler messageHandler;
+
+    public BidController(SimpMessagingTemplate template){
+        this.template = template;
+        messageHandler = new MessageHandler(template);
+    }
 
     @MessageMapping("/bid")
     public void bid(BidRequest request, Message<?> message) {
@@ -58,7 +63,8 @@ public class BidController {
         Bid bid = bidService.add(request, user);
         auctionService.schedule(bid);
         logger.info("bid accepted");
-        template.convertAndSend("/auction/id/" + request.getAuctionId(), bid.getPrice());
+        messageHandler.newBidMessage(request.getAuctionId(), bid.getPrice());
+        messageHandler.myBidMessage(user.getId(), bid.getPrice());
     }
 
     @SubscribeMapping("/id/{auctionId}")
@@ -69,25 +75,22 @@ public class BidController {
         Auction auction = auctionService.findById(auctionId);
         User user = userService.findUserId(Integer.valueOf(headerAccessor.getUser().getName()));
         bidService.removeFromAllAuction(user);
-        bidService.addSubscriptionId(headerAccessor.getSubscriptionId(), auction, user);
+        bidService.addSubscriptionId(String.valueOf(user.getId()), auction, user);
         int current = bidService.enter(auction, user);
-        JsonObject subAlert = new JsonObject();
-        subAlert.addProperty("type", 1);
-        subAlert.addProperty("auctionId", auctionId);
-        subAlert.addProperty("current", current);
-        template.convertAndSend("/app/all",subAlert.toString());
+        messageHandler.subscribeMessage(auctionId,current);
     }
+
+
     @MessageExceptionHandler
     public void enterDenied(MessageException e, Message<?> message) throws Exception{
         logger.error("the exception is : " + e.getMessage());
         StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        String user = headerAccessor.getUser().getName();
-        JsonObject errAlert = new JsonObject();
-        errAlert.addProperty("type",2);
-        errAlert.addProperty("message",e.getMessage());
-        template.convertAndSendToUser(user,"/app/all",errAlert.toString());
-
+        String userId = headerAccessor.getUser().getName();
+        messageHandler.exceptionMessage(e,userId);
     }
+
+
+
 
 
 }
