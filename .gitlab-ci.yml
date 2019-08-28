@@ -1,40 +1,50 @@
-image: java:8-jdk
+# This file is a template, and might need editing before it works on your project.
+# This is the Gradle build system for JVM applications
+# https://gradle.org/
+# https://github.com/gradle/gradle
+#image: ubuntu:16.04
+# image: gradle.centos
+image: gradle
+# Disable the Gradle daemon for Continuous Integration servers as correctness
+# is usually a priority over speed in CI environments. Using a fresh
+# runtime for each build is more reliable since the runtime is completely
+# isolated from any previous builds.
 
-stages:
-  - build
-  - test
-  - deploy
 
 before_script:
-  #  - echo `pwd` # debug
-  #  - echo "$CI_BUILD_NAME, $CI_BUILD_REF_NAME $CI_BUILD_STAGE" # debug
   - export GRADLE_USER_HOME=`pwd`/.gradle
+  - apt-get update -qq
+  - apt-get install -qq git
+  - 'which ssh-agent || ( apt install -qq openssh-client )'
+  - eval $(ssh-agent -s)
+  - ssh-add <(echo "$SSH_PRIVATE_KEY" | base64 --decode)
+  - mkdir -p ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
 
-cache:
-  paths:
-    - .gradle/wrapper
-    - .gradle/caches
 
 build:
   stage: build
-  script:
-    - ./gradlew assemble
-  artifacts:
+  script: gradle --build-cache assemble
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: push
     paths:
-      - build/libs/*.jar
-    expire_in: 1 week
-  only:
-    - master
+      - build
+      - .gradle
+
 
 test:
   stage: test
-  script:
-    - ./gradlew check
+  script: gradle check
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - build
+      - .gradle
 
 deploy:
   stage: deploy
   script:
-    - ./deploy
-
-after_script:
-  - echo "End CI"
+    - ssh root@192.168.10.150 "systemctl restart Auction_Service"
+    - ssh root@5.253.24.159 "systemctl restart Auction_Service"
