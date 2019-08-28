@@ -47,7 +47,7 @@ public class FinalizeAuctionJob extends QuartzJobBean {
         messageHandler.winMessage(auction.getId(),user.getId(),auction.getTitle());
         messageHandler.finishMessage(auction.getId());
         bidService.removeAuction(auction.getId());
-        int lastPrice = bidService.findLastPrice(auction);
+        long lastPrice = bidService.findLastPrice(auction);
         messageHandler.ownerMessage(auction.getOwner().getId(),auction.getId(),lastPrice,auction.getTitle());
     }
 

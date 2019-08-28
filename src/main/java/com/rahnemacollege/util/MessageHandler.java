@@ -27,7 +27,7 @@ public class MessageHandler {
         template.convertAndSend("/app/all", finishAlert.toString());
     }
 
-    public void ownerMessage(int userId, int auctionId, int lastPrice,String title){
+    public void ownerMessage(int userId, int auctionId, long lastPrice,String title){
         JsonObject alert = new JsonObject();
         alert.addProperty("type",6);
         alert.addProperty("auctionId",auctionId);
@@ -55,13 +55,13 @@ public class MessageHandler {
 
     }
 
-    public void newBidMessage(int auctionId, int bidPrice){
+    public void newBidMessage(int auctionId, long bidPrice){
         JsonObject bidAlert = new JsonObject();
         bidAlert.addProperty("price", bidPrice);
         template.convertAndSend("/auction/id/" + auctionId, bidAlert.toString());
     }
 
-    public void myBidMessage(int userId, int price){
+    public void myBidMessage(int userId, long price){
         JsonObject myBidAlert = new JsonObject();
         myBidAlert.addProperty("type", 5);
         myBidAlert.addProperty("price", price);
