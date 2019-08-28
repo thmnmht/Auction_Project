@@ -58,7 +58,7 @@ public class FinalizeAuctionJob extends QuartzJobBean {
             emailService.notifyAuctionWinner(auction, (long) lastPrice);
             emailService.notifyAuctionOwner(auction,(long) lastPrice);
         } catch (MessagingException e) {
-            e.printStackTrace();
+            logger.error("Error while sending email, " + e);
         }
     }
 
