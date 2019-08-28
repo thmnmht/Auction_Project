@@ -18,7 +18,6 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
     protected void inputInvalid(MessageException ex,
                                 HttpServletResponse response) {
         switch (ex.getMessageStatus()) {
-            //add auction
             case TITLE_NULL:
                 response.setStatus(430);
                 break;
@@ -53,7 +52,6 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
                 response.setStatus(453);
                 break;
 
-            //sign up
             case EMAIL_NULL:
                 response.setStatus(439);
                 break;
@@ -73,12 +71,10 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
                 response.setStatus(454);
                 break;
 
-            //login
             case PASSWORD_INCORRECT:
                 response.setStatus(445);
                 break;
 
-            //validPassword recovery
             case EMAIL_NOT_FOUND:
                 response.setStatus(446);
                 break;
@@ -92,7 +88,6 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
                 response.setStatus(450);
                 break;
 
-            //addBookmark
             case INVALID_ID:
                 response.setStatus(457);
                 break;
@@ -118,7 +113,6 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
                 response.setStatus(603);
                 break;
         }
-
         logger.error(ex.getMessageStatus().toString());
     }
 

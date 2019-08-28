@@ -9,7 +9,7 @@ public class AuctionDetail {
 
     private String title;
     private String description;
-    private int basePrice = -1;
+    private long basePrice = -1;
     private long date = -1;
     private int categoryId;
     private int maxNumber = -1;
@@ -24,7 +24,7 @@ public class AuctionDetail {
 
     public AuctionDetail(AuctionDomain auctionDomain,
                          String description,
-                         int lastPrice,
+                         long lastPrice,
                          UserDomain winner,
                          Long latestBidTime) {
         this.title = auctionDomain.getTitle();

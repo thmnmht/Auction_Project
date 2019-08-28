@@ -117,7 +117,7 @@ header "auth" : "Bearer 'Token'"
 ************************************************************************************************************************
 
 -/home/search/{category} POST : search by title
-        @PathParam("title") String title, @PathVariable int category, @RequestParam("page") int page, @RequestParam("size") int size,
+        @RequestParam("title") String title, @PathVariable int category, @RequestParam("page") int page, @RequestParam("size") int size,
         if category was 0 it search with all categories :)
 
 ************************************************************************************************************************

@@ -1,13 +1,12 @@
 package com.rahnemacollege.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.rahnemacollege.model.User;
 import lombok.Data;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 
 @Data
-public class UserDomain{
+public class UserDomain {
 
     private String name;
     private String email;
@@ -17,7 +16,7 @@ public class UserDomain{
 
     public UserDomain(String name,
                       String email,
-                      String picture){
+                      String picture) {
         this.name = name;
         this.email = email;
         this.picture = picture;

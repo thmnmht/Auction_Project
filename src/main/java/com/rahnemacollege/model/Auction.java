@@ -22,7 +22,7 @@ public class Auction {
     private String title;
     private String description;
     @Column(name = "base_price")
-    private int basePrice;
+    private long basePrice;
     @ManyToOne
     @JoinColumn(name = "category_id")
     @RestResource(exported = false)
@@ -40,18 +40,18 @@ public class Auction {
 
 
     @Override
-    public boolean equals(Object o){
-        if(o instanceof Auction)
+    public boolean equals(Object o) {
+        if (o instanceof Auction)
             if (((Auction) o).id == id)
                 return true;
-            return false;
+        return false;
     }
 
 
     public Auction() {
     }
 
-    public Auction(String title, String description, int base_price, Category category, Date date, User owner,
+    public Auction(String title, String description, long base_price, Category category, Date date, User owner,
                    int max_number) {
         this.title = title;
         this.description = description;
@@ -63,7 +63,6 @@ public class Auction {
         this.owner = owner;
         this.maxNumber = max_number;
     }
-
 
 
 }

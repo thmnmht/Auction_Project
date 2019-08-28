@@ -83,7 +83,7 @@ public class AuctionController {
         User user = userDetailsService.getUser();
         Auction auction = auctionService.findById(id);
         log(" find the auction with title " + auction.getTitle());
-        int lastPrice = bidService.findLastPrice(auction);
+        long lastPrice = bidService.findLastPrice(auction);
         Long latestBidTime = bidService.findLatestBidTime(auction);
         int members = bidService.getMembers(auction);
         AuctionDomain auctionDomain = auctionService.toAuctionDomain(auction, user, members);

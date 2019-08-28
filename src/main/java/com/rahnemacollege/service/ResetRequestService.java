@@ -28,7 +28,7 @@ public class ResetRequestService {
         this.repository.save(request);
     }
 
-    public String registerResetRequest(User user){
+    public String registerResetRequest(User user) {
         String token;
         ResetRequest resetRequest;
         if (findByUser(user).isPresent()) {
@@ -48,7 +48,7 @@ public class ResetRequestService {
         return token;
     }
 
-    public String generateToken(){
+    public String generateToken() {
         return UUID.randomUUID().toString();
     }
 
@@ -59,18 +59,5 @@ public class ResetRequestService {
     public void removeRequest(ResetRequest request) {
         repository.delete(request);
     }
-
-    /*
-    public void printAll() {
-        System.err.println("Printing requests");
-        for (ResetRequest request : repository.findAll()) {
-            System.err.println("ResetRequest{ id# " + request.getId()
-                    + ", user : " + request.getUser().getEmail()
-                    + ", token : " + request.getToken()
-                    + ", date : " + request.getDate() + "}");
-        }
-        System.err.println("End of requests");
-    }
-     */
 
 }

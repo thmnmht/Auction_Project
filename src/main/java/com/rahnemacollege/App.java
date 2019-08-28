@@ -4,14 +4,11 @@
 package com.rahnemacollege;
 
 
-import com.rahnemacollege.util.exceptions.Message;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import java.util.Date;
 
 
 @SpringBootApplication(exclude = {JacksonAutoConfiguration.class}, scanBasePackages = {
@@ -19,7 +16,6 @@ import java.util.Date;
 public class App extends SpringBootServletInitializer{
 
     public static void main(String[] args) {
-        System.out.println(Message.TOKEN_NOT_FOUND.ordinal());
         SpringApplication.run(App.class, args);
     }
 

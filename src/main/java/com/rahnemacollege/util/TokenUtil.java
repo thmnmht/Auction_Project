@@ -14,7 +14,7 @@ public interface    TokenUtil extends Serializable {
      * @param token
      * @return
      */
-    public String getIdFromToken(String token);
+    String getIdFromToken(String token);
 
     /**
      * retrieve expiration date from token
@@ -22,7 +22,7 @@ public interface    TokenUtil extends Serializable {
      * @param token
      * @return
      */
-    public Date getExpirationDateFromToken(String token);
+    Date getExpirationDateFromToken(String token);
 
     /**
      * generate token for user
@@ -30,7 +30,7 @@ public interface    TokenUtil extends Serializable {
      * @param userDetails
      * @return
      */
-    public String generateToken(UserDetails userDetails);
+    String generateToken(UserDetails userDetails);
 
     /**
      * validate token
@@ -39,5 +39,5 @@ public interface    TokenUtil extends Serializable {
      * @param userDetails
      * @return
      */
-    public Boolean validateToken(String token, UserDetails userDetails);
+    Boolean validateToken(String token, UserDetails userDetails);
 }

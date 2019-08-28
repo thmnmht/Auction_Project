@@ -2,6 +2,7 @@ package com.rahnemacollege.model;
 
 
 import lombok.Data;
+
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import java.util.Date;
@@ -21,15 +22,15 @@ public class Bid {
     @JoinColumn(name = "user_id")
     private User user;
     @Min(value = 0, message = "Price could not be negative value.")
-    private int price;
+    private long price;
     private Date date;
 
 
-    public Bid(){
+    public Bid() {
 
     }
 
-    public Bid(Auction auction,User user,int price,Date date){
+    public Bid(Auction auction, User user, long price, Date date) {
         this.auction = auction;
         this.user = user;
         this.price = price;

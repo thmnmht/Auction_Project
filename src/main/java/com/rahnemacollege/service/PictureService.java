@@ -20,7 +20,6 @@ import java.util.Date;
 import java.util.List;
 
 
-
 @Service
 public class PictureService {
 
@@ -30,7 +29,6 @@ public class PictureService {
     private UserRepository userRepository;
     private final Logger logger = LoggerFactory.getLogger(PictureService.class);
     private final String IMAGE_PATH = "./usr/local/share";
-
 
 
     public List<Picture> getAll() {
@@ -48,16 +46,16 @@ public class PictureService {
     }
 
 
-    public void setAuctionPictures(Auction auction,MultipartFile[] images) {
+    public void setAuctionPictures(Auction auction, MultipartFile[] images) {
         String path = IMAGE_PATH + "/images/auction_images/" + auction.getId() + "/";
         new File(path).mkdirs();
         logger.info("directory created");
         for (MultipartFile image :
                 images) {
-            String fileName = "/images/auction_images/" + auction.getId() + "/" +  new Date().getTime() + ".jpg";
+            String fileName = "/images/auction_images/" + auction.getId() + "/" + new Date().getTime() + ".jpg";
             String pathName = IMAGE_PATH + fileName;
             try {
-                saveAuctionPicture(image, pathName, auction,fileName);
+                saveAuctionPicture(image, pathName, auction, fileName);
             } catch (IOException e) {
                 logger.error(e.getMessage());
             }
@@ -65,19 +63,19 @@ public class PictureService {
     }
 
 
-    public void saveAuctionPicture(MultipartFile pic, String path, Auction auction,String file_name) throws IOException {
+    public void saveAuctionPicture(MultipartFile pic, String path, Auction auction, String file_name) throws IOException {
         Picture picture = new Picture(file_name, auction);
         pictureRepository.save(picture);
         logger.info("added picture to repository");
         save(pic, path);
     }
 
-    public SimpleUserDomain setProfilePicture(User user,MultipartFile picture){
+    public SimpleUserDomain setProfilePicture(User user, MultipartFile picture) {
         int userId = user.getId();
         String path = IMAGE_PATH + "/images/profile_images/" + userId + "/";
         new File(path).mkdirs();
         String fileName = "/images/profile_images/" + userId + "/" + new Date().getTime() + ".jpg";
-        String pathName = IMAGE_PATH +  fileName;
+        String pathName = IMAGE_PATH + fileName;
         try {
             save(picture, pathName);
             user.setPicture(fileName);
@@ -85,7 +83,7 @@ public class PictureService {
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
-        return new SimpleUserDomain(user.getName(),user.getEmail());
+        return new SimpleUserDomain(user.getName(), user.getEmail());
 
     }
 }

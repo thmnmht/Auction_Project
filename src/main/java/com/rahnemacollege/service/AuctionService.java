@@ -3,9 +3,7 @@ package com.rahnemacollege.service;
 
 import com.google.common.collect.Lists;
 import com.rahnemacollege.domain.AddAuctionDomain;
-import com.rahnemacollege.domain.AuctionDetail;
 import com.rahnemacollege.domain.AuctionDomain;
-import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.job.FinalizeAuctionJob;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Bid;
@@ -129,12 +127,6 @@ public class AuctionService {
 
     }
 
-//    public Page<AuctionDomain> filter(int categoryId, int page, int size) {
-//        List<Auction> auctions = getAllAliveAuctions().stream().filter(c -> c.getCategory().getId() == categoryId).collect(Collectors.toList());
-//        return toPage(auctions, page, size);
-//    }
-
-
     public List<Auction> getAll() {
         return new ArrayList<>(Lists.newArrayList(auctionRepository.findAll()));
     }
@@ -144,13 +136,11 @@ public class AuctionService {
         return auction;
     }
 
-
     public List<Auction> findByTitle(String title, int categoryId) {
-        List<Auction> auctions = new ArrayList<>();
+        List<Auction> auctions;
         if (categoryId == 0) {
             auctions = auctionRepository.findByStateOrderByIdDesc(0);
         } else {
-
             auctions = auctionRepository.findByStateAndCategory_idOrderByIdDesc(0, categoryId);
         }
         if (title != null && title.length() > 0) {
@@ -177,8 +167,9 @@ public class AuctionService {
         return pages;
     }
 
-    public Page<Auction> getHottest(PageRequest request) {
-        return auctionRepository.findHottest(request);
+    public List<Auction> getHottest() {
+
+        return auctionRepository.findHottest();
     }
 
     @Transactional
@@ -214,7 +205,7 @@ public class AuctionService {
             scheduler.scheduleJob(jobDetail, trigger);
             logger.info("auction Id#" + auctionId + " will be finished @ " + finishDate);
         } catch (SchedulerException e) {
-            logger.error("Error scheduling bid", e);
+            logger.error("Error scheduling bid", e.toString());
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
     }

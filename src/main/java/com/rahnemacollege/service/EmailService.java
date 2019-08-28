@@ -17,12 +17,10 @@ import javax.mail.internet.MimeMessage;
 public class EmailService {
     private final JavaMailSender mailSender;
 
-
     @Autowired
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
-
 
     @Async
     public void sendPassRecoveryMail(User user, String appUrl, String token) throws MessagingException {
