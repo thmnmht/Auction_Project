@@ -37,6 +37,7 @@ public class InitTest {
     protected final String FORGOT = "/users/forgot";
     protected final String GET_BOOKMARKS = "/users/bookmarks";
     protected final String RESET = "/users/reset";
+    protected final String AUCTIONS = "/users/auctions";
     protected final String CATEGORY = "/auctions/category";
     protected final String ADD = "/auctions/add";
     protected final String ADD_PICTURE = "/auctions/add/picture/";
@@ -45,7 +46,7 @@ public class InitTest {
     protected final String ALL = "/auctions/all";
     protected final String SEARCH = "/home/search/";
 
-    protected final String Image_PATH = "Beautiful_Fantasy_Worlds_Wallpapers_31.jpg";
+    protected final String Image_PATH = "usr/local/share/Beautiful_Fantasy_Worlds_Wallpapers_31.jpg";
 
     //length : 1676
     protected final String LONG_STRING = "MySQL is an open source relational database management system (RDBMS) with a wide-range of applications in business infrastructure. The huge amounts transactions processed by any MySQL server on a day to day basis and the importance of maintaining smooth continuity of these transactions for uninterrupted business service delivery makes it essential for business organizations to have a proper MySQL Management system in place. Also, while most MySQL monitor tools generate notifications in case of performance issues, an ideal MySQL monitoring tool will not only alert you but also provides comprehensive insight into the root cause of the issues and helps you troubleshoot them quickly. \n" +

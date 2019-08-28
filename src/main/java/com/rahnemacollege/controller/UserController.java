@@ -7,8 +7,8 @@ import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.*;
 import com.rahnemacollege.util.ResourceAssembler;
 import com.rahnemacollege.util.TokenUtil;
-import com.rahnemacollege.util.exceptions.MessageException;
 import com.rahnemacollege.util.exceptions.Message;
+import com.rahnemacollege.util.exceptions.MessageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -146,9 +146,9 @@ public class UserController {
     }
 
     @GetMapping("/auctions")
-    public PagedResources<Resource<AuctionDomain>> allUserAuctions(@RequestParam("page") int page,
-                                                                             @RequestParam("size") int size,
-                                                                             PagedResourcesAssembler<AuctionDomain> assembler) {
+    public PagedResources<Resource<AuctionDomain>> allUserAuctions(@RequestParam(value = "page") int page,
+                                                                   @RequestParam(value = "size") int size,
+                                                                   PagedResourcesAssembler<AuctionDomain> assembler) {
         //TODO : change it
         User user = detailsService.getUser();
         List<Auction> auctions = auctionService.findByOwner(user);

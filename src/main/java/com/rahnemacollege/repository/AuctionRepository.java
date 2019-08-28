@@ -1,6 +1,7 @@
 package com.rahnemacollege.repository;
 
 import com.rahnemacollege.model.Auction;
+import com.rahnemacollege.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -30,4 +31,5 @@ public interface AuctionRepository extends CrudRepository<Auction, Integer> {
     List<Auction> findByStateAndCategory_idOrderByIdDesc(int state, int CategoryId);
 
 
+    Page<Auction> findByOwner(User user, Pageable pageable);
 }

@@ -238,4 +238,7 @@ public class AuctionService {
                 .build();
     }
 
+    public Page<Auction> findByOwner(User user, Pageable pageable) {
+        return auctionRepository.findByOwner(user,pageable);
+    }
 }
