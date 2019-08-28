@@ -191,7 +191,7 @@ public class UserController {
             String appUrl = request.getScheme() + "://" + ip;
 //            String appUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
             try {
-                emailService.sendPassRecoveryMail(userEmail, appUrl, requestService.registerResetRequest(user));
+                emailService.sendPassRecoveryMail(user, appUrl, requestService.registerResetRequest(user));
                 log.info("A password reset link has been sent to " + userEmail + " @" +
                         new Date());
             } catch (Exception e) {

@@ -4,6 +4,7 @@ import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.AuctionRepository;
 import com.rahnemacollege.service.BidService;
+import com.rahnemacollege.service.EmailService;
 import com.rahnemacollege.util.MessageHandler;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -14,6 +15,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
+import javax.mail.MessagingException;
+
 @Component
 public class FinalizeAuctionJob extends QuartzJobBean {
     private static final Logger logger = LoggerFactory.getLogger(FinalizeAuctionJob.class);
@@ -22,6 +25,8 @@ public class FinalizeAuctionJob extends QuartzJobBean {
 
     @Autowired
     private BidService bidService;
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     SimpMessagingTemplate template;
@@ -49,6 +54,12 @@ public class FinalizeAuctionJob extends QuartzJobBean {
         bidService.removeAuction(auction.getId());
         int lastPrice = bidService.findLastPrice(auction);
         messageHandler.ownerMessage(auction.getOwner().getId(),auction.getId(),lastPrice,auction.getTitle());
+        try {
+            emailService.notifyAuctionWinner(auction, (long) lastPrice);
+            emailService.notifyAuctionOwner(auction,(long) lastPrice);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
     }
 
 
