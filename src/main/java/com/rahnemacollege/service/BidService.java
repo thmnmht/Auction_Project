@@ -33,7 +33,6 @@ public class BidService {
 
     private OnlinePeopleRepository peopleRepository;
 
-
     private Logger logger;
 
 
@@ -94,14 +93,12 @@ public class BidService {
         return peopleRepository.getMembers(auction.getId()).size();
     }
 
-
     public int getMembers(Auction auction) {
         List<User> users = peopleRepository.getMembers(auction.getId());
         if (users == null)
             return 0;
         return users.size();
     }
-
 
     public void removeFromAllAuction(User user) {
         peopleRepository.ExitUser(user);
