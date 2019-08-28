@@ -6,19 +6,13 @@ import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.service.BidService;
 import com.rahnemacollege.service.UserDetailsServiceImpl;
-import com.rahnemacollege.util.ResourceAssembler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.*;
 
-import javax.websocket.server.PathParam;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,16 +21,13 @@ import java.util.stream.Collectors;
 public class HomePageController {
 
     private final AuctionService auctionService;
-    private final ResourceAssembler assembler;
     private final Logger log;
     private final UserDetailsServiceImpl userDetailsService;
     private final BidService bidService;
 
 
-
-    public HomePageController(AuctionService auctionService, ResourceAssembler assembler, UserDetailsServiceImpl userDetailsService, BidService bidService) {
+    public HomePageController(AuctionService auctionService, UserDetailsServiceImpl userDetailsService, BidService bidService) {
         this.auctionService = auctionService;
-        this.assembler = assembler;
         this.userDetailsService = userDetailsService;
         this.bidService = bidService;
         log = LoggerFactory.getLogger(AuctionController.class);
@@ -48,16 +39,15 @@ public class HomePageController {
                                                   PagedResourcesAssembler<AuctionDomain> assembler) {
         log.info("get hottest");
         User user = userDetailsService.getUser();
-        Page<Auction> hotAuctions = auctionService.getHottest(PageRequest.of(page, size));
+        List<Auction> hotAuctions = auctionService.getHottest();
         List<AuctionDomain> auctionDomainList = hotAuctions.stream().map(a ->
-            auctionService.toAuctionDomain(a,user,bidService.getMembers(a))).collect(Collectors.toList());
-        Page<AuctionDomain> tmp =  new PageImpl<>(auctionDomainList);
-        return assembler.toResource(tmp);
+                auctionService.toAuctionDomain(a, user, bidService.getMembers(a))).collect(Collectors.toList());
+        return assembler.toResource(auctionService.toPage(auctionDomainList, page, size));
     }
 
 
     @PostMapping("/search/{category}")
-    public PagedResources<Resource<AuctionDomain>> search(@PathParam("title") String title,
+    public PagedResources<Resource<AuctionDomain>> search(@RequestParam("title") String title,
                                                           @PathVariable int category,
                                                           @RequestParam("page") int page,
                                                           @RequestParam("size") int size,
@@ -66,7 +56,7 @@ public class HomePageController {
         List<Auction> auctions = auctionService.findByTitle(title, category);
         User user = userDetailsService.getUser();
         List<AuctionDomain> auctionDomains = auctions.stream().map(a ->
-                auctionService.toAuctionDomain(a,user,bidService.getMembers(a))).collect(Collectors.toList());
+                auctionService.toAuctionDomain(a, user, bidService.getMembers(a))).collect(Collectors.toList());
         return assembler.toResource(auctionService.toPage(auctionDomains, page, size));
     }
 

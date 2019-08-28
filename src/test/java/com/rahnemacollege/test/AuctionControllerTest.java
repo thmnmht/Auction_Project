@@ -150,7 +150,7 @@ public class AuctionControllerTest extends InitTest {
         return gson.fromJson(response, AuctionDomain.class);
     }
 
-    private String createAddAuctionRequest(String title, String description, int base_price, int max_number, int category_id, long date) throws Exception {
+    private String createAddAuctionRequest(String title, String description, long base_price, int max_number, int category_id, long date) throws Exception {
         AddAuctionDomain addAuctionDomain = new AddAuctionDomain();
         addAuctionDomain.setTitle(title);
         addAuctionDomain.setBasePrice(base_price);

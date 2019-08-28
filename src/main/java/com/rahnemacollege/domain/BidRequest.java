@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class BidRequest {
 
-    private int price;
+    private long price;
     private int auctionId;
 
 }

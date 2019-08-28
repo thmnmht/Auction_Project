@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -57,11 +56,11 @@ public class BidService {
         if (!peopleRepository.isInAuction(auction, user))
             throw new MessageException(Message.THE_USER_IS_NOT_IN_AUCTION);
         if (bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).isPresent()
-                && bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).get().getUser().getId().equals(user.getId())){
+                && bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).get().getUser().getId().equals(user.getId())) {
             throw new MessageException(Message.ALREADY_BID);
         }
-        int lastPrice = findLastPrice(auction);
-        int bidPrice = request.getPrice();
+        long lastPrice = findLastPrice(auction);
+        long bidPrice = request.getPrice();
         if (bidPrice <= lastPrice)
             throw new MessageException(Message.PRICE_TOO_LOW);
         Bid bid = new Bid(auction, user, bidPrice, new Date());
@@ -69,7 +68,7 @@ public class BidService {
         return bid;
     }
 
-    public int findLastPrice(Auction auction) {
+    public long findLastPrice(Auction auction) {
         return bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).map(Bid::getPrice).orElseGet(auction::getBasePrice);
     }
 

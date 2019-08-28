@@ -174,8 +174,9 @@ public class AuctionService {
         return pages;
     }
 
-    public Page<Auction> getHottest(PageRequest request) {
-        return auctionRepository.findHottest(request);
+    public List<Auction> getHottest() {
+
+        return auctionRepository.findHottest();
     }
 
     @Transactional

@@ -44,6 +44,8 @@ public class InitTest {
     protected final String ADD_BOOKMARK = "/auctions/bookmark";
     protected final String ALL = "/auctions/all";
     protected final String SEARCH = "/home/search/";
+    protected final String HOTTEST = "/home/hottest";
+
 
     protected final String Image_PATH = "Beautiful_Fantasy_Worlds_Wallpapers_31.jpg";
 
