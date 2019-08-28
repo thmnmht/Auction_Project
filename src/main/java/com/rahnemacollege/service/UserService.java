@@ -117,9 +117,9 @@ public class UserService {
     public UserDomain toUserDomain(User user) {
         UserDomain userDomain;
         if (user.getPicture() != null && user.getPicture().length() > 1)
-            userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), "http://" + ip + user.getPicture());
+            userDomain = new UserDomain(user.getName(), user.getEmail(), "http://" + ip + user.getPicture());
         else
-            userDomain = new UserDomain(user.getName(), user.getEmail(), user.getId(), user.getPicture());
+            userDomain = new UserDomain(user.getName(), user.getEmail(), user.getPicture());
         return userDomain;
     }
 

@@ -26,7 +26,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/auctions")
-
 public class AuctionController {
 
     private final AuctionService auctionService;

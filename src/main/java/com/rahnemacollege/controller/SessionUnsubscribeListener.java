@@ -6,6 +6,7 @@ import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.service.BidService;
 import com.rahnemacollege.service.UserService;
+import com.rahnemacollege.util.MessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,6 @@ import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 public class SessionUnsubscribeListener implements ApplicationListener<SessionUnsubscribeEvent> {
 
 
-    @Autowired
     private SimpMessagingTemplate template;
 
     @Autowired
@@ -36,6 +36,14 @@ public class SessionUnsubscribeListener implements ApplicationListener<SessionUn
     private AuctionService auctionService;
 
     private Logger logger = LoggerFactory.getLogger(SessionUnsubscribeListener.class);
+    private MessageHandler messageHandler;
+
+
+    public SessionUnsubscribeListener(SimpMessagingTemplate template){
+        this.template = template;
+        messageHandler = new MessageHandler(template);
+
+    }
 
     @Override
     public void onApplicationEvent(SessionUnsubscribeEvent event) {
@@ -47,10 +55,6 @@ public class SessionUnsubscribeListener implements ApplicationListener<SessionUn
         Subscription subscription = bidService.getSubscription(subscriptionId);
         bidService.removeFromAllAuction(user);
         int current = bidService.getMembers(subscription.getAuction());
-        JsonObject subAlert = new JsonObject();
-        subAlert.addProperty("type", 1);
-        subAlert.addProperty("auctionId", subscription.getAuction().getId());
-        subAlert.addProperty("current", current);
-        template.convertAndSend("/app/all",subAlert.toString());
+        messageHandler.subscribeMessage(subscription.getAuction().getId(), current);
     }
 }

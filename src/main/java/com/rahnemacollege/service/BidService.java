@@ -52,7 +52,7 @@ public class BidService {
             throw new MessageException(Message.FINISHED_AUCTION);
         if (user.equals(auction.getOwner()))
             throw new MessageException(Message.THE_USER_IS_THE_OWNER_OF_THE_AUCTION);
-        if (auction.getDate().getTime() >= new Date().getTime())
+        if (auction.getDate().getTime() > new Date().getTime())
             throw new MessageException(Message.THE_AUCTION_DIDNT_START_YET);
         if (!peopleRepository.isInAuction(auction, user))
             throw new MessageException(Message.THE_USER_IS_NOT_IN_AUCTION);

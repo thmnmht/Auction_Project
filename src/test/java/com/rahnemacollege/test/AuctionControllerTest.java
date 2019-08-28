@@ -132,16 +132,17 @@ public class AuctionControllerTest extends InitTest {
                 .isEqualTo(false);
     }
 
-   /* @Test
+    @Test
     public void addPicture() throws Exception{
         FileInputStream fis = new FileInputStream(Image_PATH);
         MockMultipartFile multipartFile = new MockMultipartFile("file", fis);
-        MockMultipartFile profilePicture = new MockMultipartFile("picture", "Beautiful_Fantasy_Worlds_Wallpapers_31.jpg", "multipart/form-data", multipartFile.getBytes());
-//        mvc.perform(MockMvcRequestBuilders.multipart(ADD_PICTURE + auctionId).file(profilePicture).header("auth", auth)).andExpect(status().is(200));
-        MockMultipartFile[] array = new MockMultipartFile[1];
-        array[0] = profilePicture;
-        mvc.perform(MockMvcRequestBuilders.post(ADD_PICTURE + auctionId).contentType(MediaType.MULTIPART_FORM_DATA_VALUE).requestAttr("images", array).header("auth", auth)).andExpect(status().isOk());
-    }*/
+        MockMultipartFile profilePicture = new MockMultipartFile("images", "Beautiful_Fantasy_Worlds_Wallpapers_31.jpg", "multipart/form-data", multipartFile.getBytes());
+        mvc.perform(MockMvcRequestBuilders.multipart(ADD_PICTURE + auctionId)
+                .file(profilePicture)
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                .header("auth", auth))
+                .andExpect(status().isOk());
+    }
 
     @Test
     public void invalidToggleBookmark() throws Exception {
