@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.rahnemacollege.domain.AddAuctionDomain;
 import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.job.FinalizeAuctionJob;
+import com.rahnemacollege.job.NotifyBookmarkedAuction;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Bid;
 import com.rahnemacollege.model.Category;
@@ -13,8 +14,8 @@ import com.rahnemacollege.repository.AuctionRepository;
 import com.rahnemacollege.repository.CategoryRepository;
 import com.rahnemacollege.repository.PictureRepository;
 import com.rahnemacollege.repository.UserRepository;
-import com.rahnemacollege.util.exceptions.MessageException;
 import com.rahnemacollege.util.exceptions.Message;
+import com.rahnemacollege.util.exceptions.MessageException;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,20 @@ public class AuctionService {
     @Autowired
     private Scheduler scheduler;
 
-    private final long auctionActiveSession = 30000L;
+    private final long auctionActiveSessionTime = 30000L;
+    private final String finalizeAuctionTriggerName = "FTrigger-";
+    private final String finalizeAuctionTriggerGroup = "FinalizeAuction-triggers";
+    private final String finalizeAuctionJobGroup = "FinalizeAuction-jobs";
+
+    private final long remainingTimeToNotify = 600000L;
+    private final String notifyBookmarkedAuctionTriggerName = "NTrigger-";
+    private final String notifyBookmarkedAuctionTriggerGroup = "NotifyAuction-triggers";
+    private final String notifyBookmarkedAuctionJobGroup = "NotifyAuction-jobs";
+
+    private final String fakeBidTriggerName = "FakeBidTrigger-";
+    private final String fakeBidTriggerGroup = "FakeBid-triggers";
+    private final String fakeBidJobGroup = "FakeBid-jobs";
+
 
     @Autowired
     public AuctionService(UserRepository userRepository, AuctionRepository auctionRepository, CategoryRepository categoryRepository,
@@ -66,7 +80,12 @@ public class AuctionService {
         validation(auctionDomain);
         Auction auction = toAuction(auctionDomain, user);
         auction = auctionRepository.save(auction);
+        schedulrFakeBidOn(auction);
         return auction;
+    }
+
+    private void schedulrFakeBidOn(Auction addedAuction) {
+        
     }
 
     private void validation(AddAuctionDomain auctionDomain) {
@@ -78,8 +97,8 @@ public class AuctionService {
             throw new MessageException(Message.DESCRIPTION_TOO_LONG);
         if (auctionDomain.getDate() < 1)
             throw new MessageException(Message.DATE_NULL);
-        if (auctionDomain.getDate() - new Date().getTime() < 1800000L)
-            throw new MessageException(Message.DATE_INVALID);
+//        if (auctionDomain.getDate() - new Date().getTime() < 1800000L)
+//            throw new MessageException(Message.DATE_INVALID);
         if (auctionDomain.getBasePrice() < 0)
             throw new MessageException(Message.BASE_PRICE_NULL);
         if (auctionDomain.getMaxNumber() < 2)
@@ -124,7 +143,6 @@ public class AuctionService {
 
     public List<Category> getCategory() {
         return Lists.newArrayList(categoryRepository.findAll());
-
     }
 
     public List<Auction> getAll() {
@@ -175,33 +193,91 @@ public class AuctionService {
     @Transactional
     public void addBookmark(User user, Auction auction) {
         Set<Auction> bookmarks = user.getBookmarks();
-        if (bookmarks.contains(auction))
+        if (bookmarks.contains(auction)) {
             bookmarks.remove(auction);
-        else
+            unscheduleNotifying(user, auction);
+        } else {
             bookmarks.add(auction);
+            scheduleNotifying(user, auction);
+        }
+
         userRepository.save(user);
     }
 
-    public void schedule(Bid bidRequest) {
+    private void unscheduleNotifying(User user, Auction bookmarkedAuction) {
+        try {
+            if (scheduler.checkExists(TriggerKey.triggerKey(notifyBookmarkedAuctionTriggerName + bookmarkedAuction.getId(), notifyBookmarkedAuctionTriggerGroup))
+                    && scheduler.checkExists(JobKey.jobKey(String.valueOf(user.getId()), notifyBookmarkedAuctionJobGroup))) {
+                scheduler.unscheduleJob(TriggerKey.triggerKey(notifyBookmarkedAuctionTriggerName + bookmarkedAuction.getId(), notifyBookmarkedAuctionTriggerGroup));
+            }
+            else
+                throw new MessageException(Message.REALLY_BAD_SITUATION);
+        } catch (SchedulerException e) {
+            logger.error("Error unscheduling notification", e);
+            throw new MessageException(Message.SCHEDULER_ERROR);
+        }
+    }
+
+    private void scheduleNotifying(User user, Auction bookmarkedAuction) {
+        int auctionId = bookmarkedAuction.getId();
+        int userId = user.getId();
+        try {
+            Date finishDate = new Date(bookmarkedAuction.getDate().getTime() - remainingTimeToNotify);
+            if (finishDate.after(new Date())) {
+                JobDetail jobDetail = buildNotifyJobDetail(user, bookmarkedAuction);
+                Trigger trigger = buildNotifyJobTrigger(jobDetail, finishDate, userId);
+                scheduler.scheduleJob(jobDetail, trigger);
+                logger.info("auction Id#" + auctionId + " will be notified to user Id#" + userId + " @ " + finishDate);
+            }
+        } catch (SchedulerException e) {
+            logger.error("Error scheduling notification", e.toString());
+            throw new MessageException(Message.SCHEDULER_ERROR);
+        }
+
+    }
+
+    private Trigger buildNotifyJobTrigger(JobDetail jobDetail, Date finishDate, int userId) {
+        return TriggerBuilder.newTrigger()
+                .forJob(jobDetail)
+                .withIdentity(TriggerKey.triggerKey(notifyBookmarkedAuctionTriggerName + userId, notifyBookmarkedAuctionTriggerGroup))
+                .withDescription("Notify Auction Trigger")
+                .startAt(finishDate)
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
+                .build();
+    }
+
+    private JobDetail buildNotifyJobDetail(User user, Auction bookmarkedAuction) {
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("auction", bookmarkedAuction);
+        jobDataMap.put("user", user);
+        return JobBuilder.newJob(NotifyBookmarkedAuction.class)
+                .withIdentity(JobKey.jobKey(String.valueOf(bookmarkedAuction.getId()), notifyBookmarkedAuctionJobGroup))
+                .withDescription("Notify Auction Job")
+                .usingJobData(jobDataMap)
+                .storeDurably()
+                .build();
+    }
+
+    public void scheduleFinalizing(Bid bidRequest) {
         int auctionId = bidRequest.getAuction().getId();
         if (findAuctionById(auctionId).getState() == 1) {
-            logger.error("cannot schedule, auction Id#" + auctionId + " is already finished.");
+            logger.error("cannot scheduleFinalizing, auction Id#" + auctionId + " is already finished.");
             throw new MessageException(Message.FINISHED_AUCTION);
         }
         try {
-            if (scheduler.checkExists(TriggerKey.triggerKey("FTrigger-" + auctionId, "finalizeAuction-triggers"))
-                    || scheduler.checkExists(JobKey.jobKey(String.valueOf(bidRequest.getId()), "finalizeAuction-jobs"))) {
-                scheduler.unscheduleJob(TriggerKey.triggerKey("FTrigger-" + auctionId, "finalizeAuction-triggers"));
-                scheduler.deleteJob(JobKey.jobKey(String.valueOf(bidRequest.getId()), "finalizeAuction-jobs"));
+            if (scheduler.checkExists(TriggerKey.triggerKey(finalizeAuctionTriggerName + auctionId, finalizeAuctionTriggerGroup))
+                    || scheduler.checkExists(JobKey.jobKey(String.valueOf(bidRequest.getId()), finalizeAuctionJobGroup))) {
+                scheduler.unscheduleJob(TriggerKey.triggerKey(finalizeAuctionTriggerName + auctionId, finalizeAuctionTriggerGroup));
+                scheduler.deleteJob(JobKey.jobKey(String.valueOf(bidRequest.getId()), finalizeAuctionJobGroup));
             }
         } catch (SchedulerException e) {
             logger.error("Error scheduling bid", e);
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
         try {
-            Date finishDate = new Date(System.currentTimeMillis() + auctionActiveSession);
-            JobDetail jobDetail = buildJobDetail(bidRequest);
-            Trigger trigger = buildJobTrigger(jobDetail, finishDate, auctionId);
+            Date finishDate = new Date(System.currentTimeMillis() + auctionActiveSessionTime);
+            JobDetail jobDetail = buildFinalizeJobDetail(bidRequest);
+            Trigger trigger = buildFinalizeJobTrigger(jobDetail, finishDate, auctionId);
             scheduler.scheduleJob(jobDetail, trigger);
             logger.info("auction Id#" + auctionId + " will be finished @ " + finishDate);
         } catch (SchedulerException e) {
@@ -210,22 +286,22 @@ public class AuctionService {
         }
     }
 
-    private JobDetail buildJobDetail(Bid bid) {
+    private JobDetail buildFinalizeJobDetail(Bid bid) {
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put("auction", bid.getAuction());
         jobDataMap.put("bidder", bid.getUser());
         return JobBuilder.newJob(FinalizeAuctionJob.class)
-                .withIdentity(JobKey.jobKey(String.valueOf(bid.getId()), "finalizeAuction-jobs"))
+                .withIdentity(JobKey.jobKey(String.valueOf(bid.getId()), finalizeAuctionJobGroup))
                 .withDescription("Finalize Auction Job")
                 .usingJobData(jobDataMap)
                 .storeDurably()
                 .build();
     }
 
-    private Trigger buildJobTrigger(JobDetail jobDetail, Date startAt, Integer auctionId) {
+    private Trigger buildFinalizeJobTrigger(JobDetail jobDetail, Date startAt, Integer auctionId) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
-                .withIdentity(TriggerKey.triggerKey("FTrigger-" + auctionId, "finalizeAuction-triggers"))
+                .withIdentity(TriggerKey.triggerKey(finalizeAuctionTriggerName + auctionId, finalizeAuctionTriggerGroup))
                 .withDescription("Finalize Auction Trigger")
                 .startAt(startAt)
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())

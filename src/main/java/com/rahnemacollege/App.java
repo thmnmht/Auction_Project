@@ -10,12 +10,15 @@ import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
+import java.util.Date;
+
 
 @SpringBootApplication(exclude = {JacksonAutoConfiguration.class}, scanBasePackages = {
         "com.rahnemacollege"})
 public class App extends SpringBootServletInitializer{
 
     public static void main(String[] args) {
+        System.err.println(new Date().getTime());
         SpringApplication.run(App.class, args);
     }
 
