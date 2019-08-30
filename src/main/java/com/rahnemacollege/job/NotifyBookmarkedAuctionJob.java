@@ -10,8 +10,8 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NotifyBookmarkedAuction extends QuartzJobBean {
-    private static final Logger logger = LoggerFactory.getLogger(FinalizeAuctionJob.class);
+public class NotifyBookmarkedAuctionJob extends QuartzJobBean {
+    private static final Logger logger = LoggerFactory.getLogger(NotifyBookmarkedAuctionJob.class);
 
     @Override
     protected void executeInternal(JobExecutionContext context) {
@@ -20,5 +20,6 @@ public class NotifyBookmarkedAuction extends QuartzJobBean {
         Auction auction = (Auction) jobDataMap.get("auction");
         User user = (User) jobDataMap.get("user");
         //Todo : notify user that auction is getting started
+        logger.info("user " + user.getEmail() + " got notification for auction Id#" + auction.getId());
     }
 }

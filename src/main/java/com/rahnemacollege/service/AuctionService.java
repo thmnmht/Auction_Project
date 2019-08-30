@@ -4,8 +4,9 @@ package com.rahnemacollege.service;
 import com.google.common.collect.Lists;
 import com.rahnemacollege.domain.AddAuctionDomain;
 import com.rahnemacollege.domain.AuctionDomain;
+import com.rahnemacollege.job.FakeBidJob;
 import com.rahnemacollege.job.FinalizeAuctionJob;
-import com.rahnemacollege.job.NotifyBookmarkedAuction;
+import com.rahnemacollege.job.NotifyBookmarkedAuctionJob;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Bid;
 import com.rahnemacollege.model.Category;
@@ -80,12 +81,30 @@ public class AuctionService {
         validation(auctionDomain);
         Auction auction = toAuction(auctionDomain, user);
         auction = auctionRepository.save(auction);
-        schedulrFakeBidOn(auction);
+        scheduleFakeBidOn(auction);
         return auction;
     }
 
-    private void schedulrFakeBidOn(Auction addedAuction) {
-        
+
+    private Trigger buildFakeBidJobTrigger(JobDetail jobDetail, Date finishDate, int auctionId) {
+        return TriggerBuilder.newTrigger()
+                .forJob(jobDetail)
+                .withIdentity(TriggerKey.triggerKey(fakeBidTriggerName + auctionId, fakeBidTriggerGroup))
+                .withDescription("Fake Bid Trigger")
+                .startAt(finishDate)
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
+                .build();
+    }
+
+    private JobDetail buildFakeBidJobDetail(Auction auction) {
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("auction", auction);
+        return JobBuilder.newJob(FakeBidJob.class)
+                .withIdentity(JobKey.jobKey(String.valueOf(auction.getId()), fakeBidJobGroup))
+                .withDescription("Fake bid Job")
+                .usingJobData(jobDataMap)
+                .storeDurably()
+                .build();
     }
 
     private void validation(AddAuctionDomain auctionDomain) {
@@ -200,18 +219,17 @@ public class AuctionService {
             bookmarks.add(auction);
             scheduleNotifying(user, auction);
         }
-
         userRepository.save(user);
     }
 
     private void unscheduleNotifying(User user, Auction bookmarkedAuction) {
         try {
-            if (scheduler.checkExists(TriggerKey.triggerKey(notifyBookmarkedAuctionTriggerName + bookmarkedAuction.getId(), notifyBookmarkedAuctionTriggerGroup))
-                    && scheduler.checkExists(JobKey.jobKey(String.valueOf(user.getId()), notifyBookmarkedAuctionJobGroup))) {
-                scheduler.unscheduleJob(TriggerKey.triggerKey(notifyBookmarkedAuctionTriggerName + bookmarkedAuction.getId(), notifyBookmarkedAuctionTriggerGroup));
+            if (scheduler.checkExists(TriggerKey.triggerKey(notifyBookmarkedAuctionTriggerName + user.getId(), notifyBookmarkedAuctionTriggerGroup))
+                    && scheduler.checkExists(JobKey.jobKey((bookmarkedAuction.getId() + "/" + user.getId()), notifyBookmarkedAuctionJobGroup))) {
+                scheduler.unscheduleJob(TriggerKey.triggerKey(notifyBookmarkedAuctionTriggerName + user.getId(), notifyBookmarkedAuctionTriggerGroup));
+                scheduler.deleteJob(JobKey.jobKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionJobGroup));
+                logger.info("auction Id#" + bookmarkedAuction.getId() + " won't be notified to user Id#" + user.getId() + " anymore. " );
             }
-            else
-                throw new MessageException(Message.REALLY_BAD_SITUATION);
         } catch (SchedulerException e) {
             logger.error("Error unscheduling notification", e);
             throw new MessageException(Message.SCHEDULER_ERROR);
@@ -236,6 +254,23 @@ public class AuctionService {
 
     }
 
+    private void scheduleFakeBidOn(Auction addedAuction) {
+        int auctionId = addedAuction.getId();
+        try {
+            Date finishDate = addedAuction.getDate();
+            if (addedAuction.getState() == 0 && finishDate.after(new Date())) {
+                JobDetail jobDetail = buildFakeBidJobDetail(addedAuction);
+                Trigger trigger = buildFakeBidJobTrigger(jobDetail, finishDate, auctionId);
+                scheduler.scheduleJob(jobDetail, trigger);
+                logger.info("It will bid on auction Id#" + auctionId + " @ " + finishDate);
+            }
+        } catch (SchedulerException e) {
+            logger.error("Error scheduling fake biding", e.toString());
+            throw new MessageException(Message.SCHEDULER_ERROR);
+        }
+    }
+
+
     private Trigger buildNotifyJobTrigger(JobDetail jobDetail, Date finishDate, int userId) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
@@ -250,8 +285,8 @@ public class AuctionService {
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put("auction", bookmarkedAuction);
         jobDataMap.put("user", user);
-        return JobBuilder.newJob(NotifyBookmarkedAuction.class)
-                .withIdentity(JobKey.jobKey(String.valueOf(bookmarkedAuction.getId()), notifyBookmarkedAuctionJobGroup))
+        return JobBuilder.newJob(NotifyBookmarkedAuctionJob.class)
+                .withIdentity(JobKey.jobKey((bookmarkedAuction.getId() + "/" + user.getId()), notifyBookmarkedAuctionJobGroup))
                 .withDescription("Notify Auction Job")
                 .usingJobData(jobDataMap)
                 .storeDurably()

@@ -45,21 +45,27 @@ public class FinalizeAuctionJob extends QuartzJobBean {
 
     private void finalizeAuction(Auction auction, User user) {
         messageHandler = new MessageHandler(template);
-        auction.setWinner(user);
+        if (!auction.getOwner().getId().equals(user.getId())) {
+            auction.setWinner(user);
+            logger.info("User : " + user.getEmail() + " just won auction with id : " + auction.getId());
+            messageHandler.winMessage(auction.getId(),user.getId(),auction.getTitle());
+            messageHandler.finishMessage(auction.getId());
+            bidService.removeAuction(auction.getId());
+            long lastPrice = bidService.findLastPrice(auction);
+            messageHandler.ownerMessage(auction.getOwner().getId(),auction.getId(),lastPrice,auction.getTitle());
+            try {
+                emailService.notifyAuctionWinner(auction, lastPrice);
+                emailService.notifyAuctionOwner(auction, lastPrice);
+            } catch (MessagingException e) {
+                logger.error("Error while sending email, " + e);
+            }
+        }
+        else {
+            //Todo
+        }
         auction.setState(1);
         repository.save(auction);
-        logger.info("User : " + user.getEmail() + " just won auction with id : " + auction.getId());
-        messageHandler.winMessage(auction.getId(),user.getId(),auction.getTitle());
-        messageHandler.finishMessage(auction.getId());
-        bidService.removeAuction(auction.getId());
-        long lastPrice = bidService.findLastPrice(auction);
-        messageHandler.ownerMessage(auction.getOwner().getId(),auction.getId(),lastPrice,auction.getTitle());
-        try {
-            emailService.notifyAuctionWinner(auction, lastPrice);
-            emailService.notifyAuctionOwner(auction, lastPrice);
-        } catch (MessagingException e) {
-            logger.error("Error while sending email, " + e);
-        }
+
     }
 
 
