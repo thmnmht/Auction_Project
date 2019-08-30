@@ -1,6 +1,5 @@
 package com.rahnemacollege.controller;
 
-import com.google.gson.JsonObject;
 import com.rahnemacollege.domain.Subscription;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.AuctionService;
@@ -11,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.GenericMessage;
@@ -32,14 +30,11 @@ public class SessionUnsubscribeListener implements ApplicationListener<SessionUn
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private AuctionService auctionService;
-
     private Logger logger = LoggerFactory.getLogger(SessionUnsubscribeListener.class);
     private MessageHandler messageHandler;
 
 
-    public SessionUnsubscribeListener(SimpMessagingTemplate template){
+    public SessionUnsubscribeListener(SimpMessagingTemplate template) {
         this.template = template;
         messageHandler = new MessageHandler(template);
 
@@ -54,6 +49,7 @@ public class SessionUnsubscribeListener implements ApplicationListener<SessionUn
         String subscriptionId = String.valueOf(user.getId());
         Subscription subscription = bidService.getSubscription(subscriptionId);
         bidService.removeFromAllAuction(user);
+        logger.info("user with id " + user.getId() + " exit from auction with id" + subscription.getAuction().getId());
         int current = bidService.getMembers(subscription.getAuction());
         messageHandler.subscribeMessage(subscription.getAuction().getId(), current);
     }

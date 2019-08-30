@@ -52,28 +52,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                // We don't need CSRF for this example
+                // We don't need CSRF
                 .csrf().disable()
-
                 .authorizeRequests()
-                //don't authenticate this particular request
                 .antMatchers("/users/login", "/users/signup","/users/forgot","/users/reset","/static/*","/favicon.ico"
                         ,"/static/css/*","/static/js/*","/static/media/*","/manifest.json","/logo192.png","/testSocket/bid.html"
                         ,"/testSocket/bid.js","/webjars/**","/socket/**"
                         ).permitAll()
-                // all other requests need to be authenticated
                 .anyRequest().authenticated()
                 .and()
-
-                /* make sure we use stateless session; session won't be used to store user's state.
-                .exceptionHandling()
-                    .authenticationEntryPoint(authenticationEntryPoint)
-                    .and()
-                */
-
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
-        // Add a filter to validate the tokens with every request
         httpSecurity.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
     }
 }

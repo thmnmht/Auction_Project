@@ -29,30 +29,24 @@ import org.springframework.stereotype.Controller;
 public class BidController {
 
 
-    private SimpMessagingTemplate template;
-
     @Autowired
     private BidService bidService;
-
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
-
     @Autowired
     private UserService userService;
-
     @Autowired
     private AuctionService auctionService;
-
     @Autowired
     TokenUtil tokenUtil;
-
     private final Logger logger = LoggerFactory.getLogger(BidController.class);
+    private SimpMessagingTemplate template;
     private MessageHandler messageHandler;
-
-    public BidController(SimpMessagingTemplate template){
+    public BidController(SimpMessagingTemplate template) {
         this.template = template;
         messageHandler = new MessageHandler(template);
     }
+
 
     @MessageMapping("/bid")
     public void bid(BidRequest request, Message<?> message) {
@@ -69,7 +63,7 @@ public class BidController {
 
     @SubscribeMapping("/id/{auctionId}")
     public void enterAuction(@DestinationVariable("auctionId") int auctionId,
-                              Message<?> message) throws Exception {
+                             Message<?> message) throws Exception {
         logger.info("someone try to enter auction " + auctionId);
         StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         Auction auction = auctionService.findById(auctionId);
@@ -77,20 +71,15 @@ public class BidController {
         bidService.removeFromAllAuction(user);
         bidService.addSubscriptionId(String.valueOf(user.getId()), auction, user);
         int current = bidService.enter(auction, user);
-        messageHandler.subscribeMessage(auctionId,current);
+        messageHandler.subscribeMessage(auctionId, current);
     }
-
-
     @MessageExceptionHandler
-    public void enterDenied(MessageException e, Message<?> message) throws Exception{
+    public void enterDenied(MessageException e, Message<?> message) throws Exception {
         logger.error("the exception is : " + e.getMessage());
         StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         String userId = headerAccessor.getUser().getName();
-        messageHandler.exceptionMessage(e,userId);
+        messageHandler.exceptionMessage(e, userId);
     }
-
-
-
 
 
 }

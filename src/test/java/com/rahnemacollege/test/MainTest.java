@@ -28,6 +28,7 @@ public final class MainTest {
         mySuite.addTest(new RepeatedTest(new JUnit4TestAdapter(AuctionControllerTest.class), 1));
         mySuite.addTest(new RepeatedTest(new JUnit4TestAdapter(UserControllerTest.class), 1));
         mySuite.addTest(new RepeatedTest(new JUnit4TestAdapter(HomeControllerTest.class), 1));
+        mySuite.addTest(new RepeatedTest(new JUnit4TestAdapter(PasswordFeaturesTest.class), 1));
 
         junit.run(mySuite);
     }

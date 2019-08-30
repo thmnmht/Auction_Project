@@ -58,14 +58,8 @@ public class HomePageController {
         User user = userDetailsService.getUser();
         List<AuctionDomain> auctionDomains = auctions.stream().map(a ->
                 auctionService.toAuctionDomain(a, user, bidService.getMembers(a))).collect(Collectors.toList());
+        log.info("user with email " + user.getEmail() + " search for title " + title);
         return assembler.toResource(auctionService.toPage(auctionDomains, page, size));
     }
-
-//    @GetMapping("/all")
-//    public PagedResources<Resource<AuctionDomain>> getPage(@RequestParam("page") int page, @RequestParam("size") int size, PagedResourcesAssembler<AuctionDomain> assembler) {
-//        log.info("get all auctions");
-//        Page<AuctionDomain> personPage = auctionService.getAllAuctions(page, size);
-//        return assembler.toResource(personPage);
-//    }
 
 }

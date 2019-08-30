@@ -127,12 +127,6 @@ public class AuctionService {
 
     }
 
-//    public Page<AuctionDomain> filter(int categoryId, int page, int size) {
-//        List<Auction> auctions = getAllAliveAuctions().stream().filter(c -> c.getCategory().getId() == categoryId).collect(Collectors.toList());
-//        return toPage(auctions, page, size);
-//    }
-
-
     public List<Auction> getAll() {
         return new ArrayList<>(Lists.newArrayList(auctionRepository.findAll()));
     }
@@ -144,7 +138,7 @@ public class AuctionService {
 
 
     public List<Auction> findByTitle(String title, int categoryId, boolean hottest) {
-        List<Auction> auctions = new ArrayList<>();
+        List<Auction> auctions;
         if (hottest) {
             auctions = auctionRepository.findHottest();
             if (categoryId != 0) {
@@ -220,7 +214,7 @@ public class AuctionService {
             scheduler.scheduleJob(jobDetail, trigger);
             logger.info("auction Id#" + auctionId + " will be finished @ " + finishDate);
         } catch (SchedulerException e) {
-            logger.error("Error scheduling bid", e);
+            logger.error("Error scheduling bid", e.toString());
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
     }

@@ -10,12 +10,10 @@ import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.*;
-import com.rahnemacollege.util.ResourceAssembler;
-import com.rahnemacollege.util.exceptions.MessageException;
 import com.rahnemacollege.util.exceptions.Message;
+import com.rahnemacollege.util.exceptions.MessageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +27,6 @@ import java.util.List;
 public class AuctionController {
 
     private final AuctionService auctionService;
-    private final ResourceAssembler assembler;
     private final UserService userService;
     private final PictureService pictureService;
     private final BidService bidService;
@@ -37,9 +34,8 @@ public class AuctionController {
     private UserDetailsServiceImpl userDetailsService;
 
 
-    public AuctionController(AuctionService auctionService, ResourceAssembler assembler, UserDetailsServiceImpl userDetailsService, UserService userService, PictureService pictureService, BidService bidService) {
+    public AuctionController(AuctionService auctionService, UserDetailsServiceImpl userDetailsService, UserService userService, PictureService pictureService, BidService bidService) {
         this.auctionService = auctionService;
-        this.assembler = assembler;
         this.userDetailsService = userDetailsService;
         this.userService = userService;
         this.pictureService = pictureService;
@@ -66,7 +62,7 @@ public class AuctionController {
     }
 
     @PostMapping(value = "/add/picture/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Resource<AddAuctionDomain> addPicture(@PathVariable int id, @RequestBody MultipartFile[] images) {
+    public ResponseEntity<AddAuctionDomain> addPicture(@PathVariable int id, @RequestBody MultipartFile[] images) {
         log(" try to add pictures for her/his auction.");
         Auction auction = auctionService.findById(id);
         if (images == null || images.length < 1)
@@ -74,7 +70,7 @@ public class AuctionController {
         pictureService.setAuctionPictures(auction, images);
         log(" added picture for auction " + auction.getId());
         AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);
-        return assembler.toResource(addAuctionDomain);
+        return new ResponseEntity<>(addAuctionDomain, HttpStatus.OK);
     }
 
     @GetMapping("/find/{id}")
@@ -99,7 +95,7 @@ public class AuctionController {
 
 
     @RequestMapping(value = "/bookmark", method = RequestMethod.POST)
-    public Resource<AddAuctionDomain> addBookmark(@RequestParam("auctionId") Integer id) {
+    public ResponseEntity<AddAuctionDomain> addBookmark(@RequestParam("auctionId") Integer id) {
         User user = userService.findUserId(userDetailsService.getUser().getId());
         log.info(user.getEmail() + " tried to add bookmark");
         if (id != null) {
@@ -108,7 +104,7 @@ public class AuctionController {
                 auctionService.addBookmark(user, auction);
                 AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);
                 log.info("Auction Id#" + auction.getId() + " just added to " + user.getEmail() + "'s bookmarks");
-                return assembler.toResource(addAuctionDomain);
+                return new ResponseEntity<>(addAuctionDomain, HttpStatus.OK);
             }
             throw new MessageException(Message.REALLY_BAD_SITUATION);
         }

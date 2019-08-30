@@ -5,7 +5,6 @@ import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.ResetRequest;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.*;
-import com.rahnemacollege.util.ResourceAssembler;
 import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.Message;
 import com.rahnemacollege.util.exceptions.MessageException;
@@ -35,7 +34,6 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UserService userService;
-    private final ResourceAssembler assembler;
     private final PasswordService passwordService;
     private UserDetailsServiceImpl detailsService;
     private final ResetRequestService requestService;
@@ -50,13 +48,17 @@ public class UserController {
     private String ip;
 
 
-    public UserController(UserService userService, ResourceAssembler assembler, PasswordService passwordService,
+    public UserController(UserService userService,
+                          PasswordService passwordService,
                           UserDetailsServiceImpl userDetailService,
                           UserDetailsServiceImpl detailsService,
                           ResetRequestService requestService,
-                          EmailService emailService, PictureService pictureService, TokenUtil tokenUtil, AuctionService auctionService, BidService bidService) {
+                          EmailService emailService,
+                          PictureService pictureService,
+                          TokenUtil tokenUtil,
+                          AuctionService auctionService,
+                          BidService bidService) {
         this.userService = userService;
-        this.assembler = assembler;
         this.passwordService = passwordService;
         this.detailsService = userDetailService;
         this.detailsService = detailsService;
@@ -74,13 +76,13 @@ public class UserController {
     public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws MessageException {
         log.info(authenticationRequest.getEmail() + " wants to login *_*");
         String password = authenticationRequest.getPassword();
-        int id  = userService.findUserByEmail(authenticationRequest.getEmail())
-                .orElseThrow(() -> new MessageException(Message.EMAIL_NOT_FOUND))
-                .getId();
-        userService.authenticate(id, password);
-        final UserDetails userDetails = detailsService.loadUserByUsername(String.valueOf(id));
+        User user = userService.findUserByEmail(authenticationRequest.getEmail())
+                .orElseThrow(() -> new MessageException(Message.EMAIL_NOT_FOUND));
+        userService.authenticate(user.getId(), password);
+        final UserDetails userDetails = detailsService.loadUserByUsername(String.valueOf(user.getId()));
         final String token = tokenUtil.generateToken(userDetails);
         log.info("the token will expired : " + tokenUtil.getExpirationDateFromToken(token));
+        userService.addLoginInfo(user);
         return new AuthenticationResponse(token);
     }
 
@@ -93,17 +95,17 @@ public class UserController {
             email = email.toLowerCase();
         User user = userService.edit(detailsService.getUser(), name, email);
         log.info(user.getName() + " changed his/her infos :)");
-        SimpleUserDomain simpleUserDomain = new SimpleUserDomain(user.getName(),user.getEmail());
-        return new ResponseEntity<>(simpleUserDomain,HttpStatus.OK);
+        SimpleUserDomain simpleUserDomain = new SimpleUserDomain(user.getName(), user.getEmail());
+        return new ResponseEntity<>(simpleUserDomain, HttpStatus.OK);
     }
 
     @PostMapping("/edit/picture")
-    public ResponseEntity<SimpleUserDomain> setUserPicture(@RequestPart MultipartFile picture){
+    public ResponseEntity<SimpleUserDomain> setUserPicture(@RequestPart MultipartFile picture) {
         log.info(detailsService.getUser().getName() + " with id " + detailsService.getUser().getId() + " try to set a profile picture");
-        if(picture == null)
+        if (picture == null)
             throw new MessageException(Message.PICTURE_NULL);
         User user = detailsService.getUser();
-        return new ResponseEntity<>(pictureService.setProfilePicture(user,picture),HttpStatus.OK);
+        return new ResponseEntity<>(pictureService.setProfilePicture(user, picture), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/edit/password", method = RequestMethod.POST)
@@ -121,7 +123,6 @@ public class UserController {
         log.info("Password changed for : " + detailsService.getUser().getEmail());
         return new ResponseEntity<>(userService.changePassword(user, nPassword), HttpStatus.OK);
     }
-
 
     @PostMapping(value = "/signup", consumes = "application/json")
     public ResponseEntity<SimpleUserDomain> add(@RequestBody AddUserDomain userDomain) {
@@ -149,34 +150,20 @@ public class UserController {
     public PagedResources<Resource<AuctionDomain>> allUserAuctions(@RequestParam(value = "page") int page,
                                                                    @RequestParam(value = "size") int size,
                                                                    PagedResourcesAssembler<AuctionDomain> assembler) {
-        //TODO : change it
         User user = detailsService.getUser();
         List<Auction> auctions = auctionService.findByOwner(user);
-        List<AuctionDomain> auctionDomains = auctions.stream().map(a ->
-                auctionService.toAuctionDomain(a,user,bidService.getMembers(a))).collect(Collectors.toList());
-        return assembler.toResource(auctionService.toPage(auctionDomains, page, size));
+        return toAuctionDomainPage(auctions, user, page, size, assembler);
     }
-
 
     @GetMapping("/bookmarks")
     public PagedResources<Resource<AuctionDomain>> userBookmarks(@RequestParam("page") int page,
-                                                            @RequestParam("size") int size,
-                                                            PagedResourcesAssembler<AuctionDomain> assembler) {
+                                                                 @RequestParam("size") int size,
+                                                                 PagedResourcesAssembler<AuctionDomain> assembler) {
         User user = detailsService.getUser();
         List<Auction> auctions = userService.getUserBookmarks(user);
-        List<AuctionDomain> auctionDomains = auctions.stream().map(a ->
-                auctionService.toAuctionDomain(a,user,bidService.getMembers(a))).collect(Collectors.toList());
-        return assembler.toResource(auctionService.toPage(auctionDomains, page, size));
+        return toAuctionDomainPage(auctions, user, page, size, assembler);
+
     }
-
-
-    /*@GetMapping("/filter")
-    public Resources<Resource<AuctionDomain>> filter(@PathParam("category") int[] categories_id,
-                                                     @RequestParam("page") int page, @RequestParam("size") int size,
-                                                     PagedResourcesAssembler<AuctionDomain> assembler) {
-        return assembler.toResource(auctionService.filter(categories_id, page, size));
-    }*/
-
 
     @RequestMapping(value = "/forgot", method = RequestMethod.POST)
     public ResponseEntity<SimpleUserDomain> processForgotPasswordForm(@RequestParam("email") String userEmail, HttpServletRequest request) {
@@ -189,9 +176,8 @@ public class UserController {
         } else {
             User user = optional.get();
             String appUrl = request.getScheme() + "://" + ip;
-//            String appUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
             try {
-                emailService.sendPassRecoveryMail(userEmail, appUrl, requestService.registerResetRequest(user));
+                emailService.sendPassRecoveryMail(user, appUrl, requestService.registerResetRequest(user));
                 log.info("A password reset link has been sent to " + userEmail + " @" +
                         new Date());
             } catch (Exception e) {
@@ -211,18 +197,28 @@ public class UserController {
             throw new MessageException(Message.TOKEN_NOT_FOUND);
         });
         User resetUser = request.getUser();
-        if (resetUser != null ) {
+        if (resetUser != null) {
             if (password == null || password.length() < 6)
                 throw new MessageException(Message.PASSWORD_TOO_LOW);
             if (password.length() > 100)
                 throw new MessageException(Message.PASSWORD_TOO_HIGH);
             requestService.removeRequest(request);
-            log.info(resetUser.getEmail()+ " successfully reset his/her password");
+            log.info(resetUser.getEmail() + " successfully reset his/her password");
             return new ResponseEntity<>(userService.changePassword(resetUser, password), HttpStatus.OK);
         } else {
             log.error("Invalid password reset link.");
             throw new MessageException(Message.NOT_RECORDED_REQUEST);
         }
+    }
+
+    private PagedResources<Resource<AuctionDomain>> toAuctionDomainPage(List<Auction> auctions,
+                                                                        User user,
+                                                                        int page,
+                                                                        int size,
+                                                                        PagedResourcesAssembler<AuctionDomain> assembler) {
+        List<AuctionDomain> auctionDomains = auctions.stream().map(a ->
+                auctionService.toAuctionDomain(a, user, bidService.getMembers(a))).collect(Collectors.toList());
+        return assembler.toResource(auctionService.toPage(auctionDomains, page, size));
     }
 
 }

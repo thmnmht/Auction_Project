@@ -4,7 +4,9 @@ import com.google.common.collect.Lists;
 import com.rahnemacollege.domain.SimpleUserDomain;
 import com.rahnemacollege.domain.UserDomain;
 import com.rahnemacollege.model.Auction;
+import com.rahnemacollege.model.LoginInfo;
 import com.rahnemacollege.model.User;
+import com.rahnemacollege.repository.LoginInfoRepository;
 import com.rahnemacollege.repository.UserRepository;
 import com.rahnemacollege.util.exceptions.MessageException;
 import com.rahnemacollege.util.exceptions.Message;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,6 +38,8 @@ public class UserService {
     private PasswordEncoder encoder;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private LoginInfoRepository loginInfoRepository;
 
 
     private final Logger logger;
@@ -82,18 +87,13 @@ public class UserService {
         }
     }
 
-//    public User addUser(User user) {
-//        repository.save(user);
-//        return user;
-//    }
-
     public Optional<User> findUserByEmail(String email) {
         Optional<User> user = repository.findByEmail(email);
         return user;
     }
 
     public User findUserId(int id) {
-        return  repository.findById(id).orElseThrow(() -> new MessageException(Message.INVALID_ID));
+        return repository.findById(id).orElseThrow(() -> new MessageException(Message.INVALID_ID));
     }
 
     public SimpleUserDomain changePassword(User user, String newPassword) {
@@ -114,6 +114,13 @@ public class UserService {
         return user;
     }
 
+    public void addLoginInfo(User user) {
+        LoginInfo loginInfo = new LoginInfo();
+        loginInfo.setUser(user);
+        loginInfo.setDate(new Date());
+        loginInfoRepository.save(loginInfo);
+    }
+
     public UserDomain toUserDomain(User user) {
         UserDomain userDomain;
         if (user.getPicture() != null && user.getPicture().length() > 1)
@@ -129,6 +136,5 @@ public class UserService {
         return new ArrayList<>(user.getBookmarks()).stream().filter(a -> a.getState() == 0)
                 .sorted((a, b) -> b.getId() - a.getId()).collect(Collectors.toList());
     }
-
 
 }
