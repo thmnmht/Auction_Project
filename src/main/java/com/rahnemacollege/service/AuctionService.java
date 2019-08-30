@@ -9,10 +9,7 @@ import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Bid;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.model.User;
-import com.rahnemacollege.repository.AuctionRepository;
-import com.rahnemacollege.repository.CategoryRepository;
-import com.rahnemacollege.repository.PictureRepository;
-import com.rahnemacollege.repository.UserRepository;
+import com.rahnemacollege.repository.*;
 import com.rahnemacollege.util.exceptions.MessageException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.quartz.*;
@@ -43,6 +40,7 @@ public class AuctionService {
     private final CategoryRepository categoryRepository;
     private final PictureRepository pictureRepository;
     private final Logger logger;
+    private final BidRepository bidRepository;
 
     @Value("${server_ip}")
     private String ip;
@@ -54,11 +52,12 @@ public class AuctionService {
 
     @Autowired
     public AuctionService(UserRepository userRepository, AuctionRepository auctionRepository, CategoryRepository categoryRepository,
-                          PictureRepository pictureRepository) {
+                          PictureRepository pictureRepository, BidRepository bidRepository) {
         this.userRepository = userRepository;
         this.auctionRepository = auctionRepository;
         this.categoryRepository = categoryRepository;
         this.pictureRepository = pictureRepository;
+        this.bidRepository = bidRepository;
         this.logger = LoggerFactory.getLogger(AuctionService.class);
     }
 
@@ -66,6 +65,10 @@ public class AuctionService {
         validation(auctionDomain);
         Auction auction = toAuction(auctionDomain, user);
         auction = auctionRepository.save(auction);
+        //owner bid
+        Bid firstBid = new Bid(auction,auction.getOwner(),auction.getBasePrice(),auction.getDate());
+        bidRepository.save(firstBid);
+        // TODO: 8/29/19 :start a job to when auction started call: auctionService.schedule(bid);
         return auction;
     }
 

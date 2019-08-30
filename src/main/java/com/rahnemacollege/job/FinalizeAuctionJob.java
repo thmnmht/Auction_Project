@@ -45,21 +45,33 @@ public class FinalizeAuctionJob extends QuartzJobBean {
 
     private void finalizeAuction(Auction auction, User user) {
         messageHandler = new MessageHandler(template);
-        auction.setWinner(user);
+        if(!user.equals(auction.getOwner())){
+            auction.setWinner(user);
+            logger.info("User : " + user.getEmail() + " just won auction with id : " + auction.getId());
+            finishAuction(auction);
+            long lastPrice = bidService.findLastPrice(auction);
+            messageHandler.winMessage(auction.getId(),user.getId(),auction.getTitle());
+            messageHandler.ownerMessageWithWinner(auction.getOwner().getId(),auction.getId(),lastPrice,auction.getTitle());
+            try {
+                emailService.notifyAuctionWinner(auction, lastPrice);
+                emailService.notifyAuctionOwner(auction, lastPrice);
+            } catch (MessagingException e) {
+                logger.error("Error while sending email, " + e.getMessage());
+            }
+        }
+        else{
+            logger.info("no one participate in auction with id " + auction.getId());
+            finishAuction(auction);
+            messageHandler.ownerMessage(user.getId(),auction.getId(),auction.getTitle());
+        }
+
+    }
+
+    private void finishAuction(Auction auction){
         auction.setState(1);
         repository.save(auction);
-        logger.info("User : " + user.getEmail() + " just won auction with id : " + auction.getId());
-        messageHandler.winMessage(auction.getId(),user.getId(),auction.getTitle());
         messageHandler.finishMessage(auction.getId());
         bidService.removeAuction(auction.getId());
-        long lastPrice = bidService.findLastPrice(auction);
-        messageHandler.ownerMessage(auction.getOwner().getId(),auction.getId(),lastPrice,auction.getTitle());
-        try {
-            emailService.notifyAuctionWinner(auction, (long) lastPrice);
-            emailService.notifyAuctionOwner(auction,(long) lastPrice);
-        } catch (MessagingException e) {
-            logger.error("Error while sending email, " + e);
-        }
     }
 
 

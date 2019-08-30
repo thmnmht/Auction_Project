@@ -123,4 +123,13 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
             response.setStatus(455);
         logger.error(ex.getMessage());
     }
+
+    @ExceptionHandler(value = {IllegalArgumentException.class})
+    private void tryToGetMorePage(IllegalArgumentException ex,
+                                  HttpServletResponse response){
+        if(ex.getMessage().contains("> toIndex")){
+            logger.error(ex.getMessage());
+            response.setStatus(604);
+        }
+    }
 }
