@@ -18,7 +18,7 @@ public interface AuctionRepository extends CrudRepository<Auction, Integer> {
             "on (Auctions.id = users_bookmarks.bookmarks_id AND Auctions.state=0)\n" +
             "group by\n" +
             "Auctions.id\n " +
-            "ORDER BY number_of_bookmarks DESC", nativeQuery = true)
+            "ORDER BY number_of_bookmarks DESC, Auctions.id DESC", nativeQuery = true)
     List<Auction> findHottest();
 
     List<Auction> findByOwner_idOrderByIdDesc(int user_id);

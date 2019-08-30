@@ -139,12 +139,21 @@ public class AuctionService {
         return auction;
     }
 
-    public List<Auction> findByTitle(String title, int categoryId) {
+
+    public List<Auction> findByTitle(String title, int categoryId, boolean hottest) {
         List<Auction> auctions;
-        if (categoryId == 0) {
-            auctions = auctionRepository.findByStateOrderByIdDesc(0);
+        if (hottest) {
+            auctions = auctionRepository.findHottest();
+            if (categoryId != 0) {
+                auctions = auctions.stream().filter(a -> a.getCategory().getId() == categoryId)
+                        .collect(Collectors.toList());
+            }
         } else {
-            auctions = auctionRepository.findByStateAndCategory_idOrderByIdDesc(0, categoryId);
+            if (categoryId == 0) {
+                auctions = auctionRepository.findByStateOrderByIdDesc(0);
+            } else {
+                auctions = auctionRepository.findByStateAndCategory_idOrderByIdDesc(0, categoryId);
+            }
         }
         if (title != null && title.length() > 0) {
             Pattern pattern = Pattern.compile(title, Pattern.CASE_INSENSITIVE);
@@ -170,10 +179,10 @@ public class AuctionService {
         return pages;
     }
 
-    public List<Auction> getHottest() {
-
-        return auctionRepository.findHottest();
-    }
+//    public List<Auction> getHottest() {
+//
+//        return auctionRepository.findHottest();
+//    }
 
     @Transactional
     public void addBookmark(User user, Auction auction) {
