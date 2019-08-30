@@ -33,27 +33,28 @@ public class HomePageController {
         log = LoggerFactory.getLogger(AuctionController.class);
     }
 
-    @GetMapping("/hottest")
-    PagedResources<Resource<AuctionDomain>> paged(@RequestParam("page") int page,
-                                                  @RequestParam(value = "size") int size,
-                                                  PagedResourcesAssembler<AuctionDomain> assembler) {
-        log.info("get hottest");
-        User user = userDetailsService.getUser();
-        List<Auction> hotAuctions = auctionService.getHottest();
-        List<AuctionDomain> auctionDomainList = hotAuctions.stream().map(a ->
-                auctionService.toAuctionDomain(a, user, bidService.getMembers(a))).collect(Collectors.toList());
-        return assembler.toResource(auctionService.toPage(auctionDomainList, page, size));
-    }
+//    @GetMapping("/hottest")
+//    PagedResources<Resource<AuctionDomain>> paged(@RequestParam("page") int page,
+//                                                  @RequestParam(value = "size") int size,
+//                                                  PagedResourcesAssembler<AuctionDomain> assembler) {
+//        log.info("get hottest");
+//        User user = userDetailsService.getUser();
+//        List<Auction> hotAuctions = auctionService.getHottest();
+//        List<AuctionDomain> auctionDomainList = hotAuctions.stream().map(a ->
+//                auctionService.toAuctionDomain(a, user, bidService.getMembers(a))).collect(Collectors.toList());
+//        return assembler.toResource(auctionService.toPage(auctionDomainList, page, size));
+//    }
 
 
     @PostMapping("/search/{category}")
     public PagedResources<Resource<AuctionDomain>> search(@RequestParam("title") String title,
                                                           @PathVariable int category,
+                                                          @RequestParam(value = "hottest", defaultValue = "false") boolean hottest,
                                                           @RequestParam("page") int page,
                                                           @RequestParam("size") int size,
                                                           PagedResourcesAssembler<AuctionDomain> assembler) {
         log.info("search");
-        List<Auction> auctions = auctionService.findByTitle(title, category);
+        List<Auction> auctions = auctionService.findByTitle(title, category, hottest);
         User user = userDetailsService.getUser();
         List<AuctionDomain> auctionDomains = auctions.stream().map(a ->
                 auctionService.toAuctionDomain(a, user, bidService.getMembers(a))).collect(Collectors.toList());
