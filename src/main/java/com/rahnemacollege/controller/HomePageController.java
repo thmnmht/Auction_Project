@@ -25,26 +25,12 @@ public class HomePageController {
     private final UserDetailsServiceImpl userDetailsService;
     private final BidService bidService;
 
-
     public HomePageController(AuctionService auctionService, UserDetailsServiceImpl userDetailsService, BidService bidService) {
         this.auctionService = auctionService;
         this.userDetailsService = userDetailsService;
         this.bidService = bidService;
         log = LoggerFactory.getLogger(AuctionController.class);
     }
-
-//    @GetMapping("/hottest")
-//    PagedResources<Resource<AuctionDomain>> paged(@RequestParam("page") int page,
-//                                                  @RequestParam(value = "size") int size,
-//                                                  PagedResourcesAssembler<AuctionDomain> assembler) {
-//        log.info("get hottest");
-//        User user = userDetailsService.getUser();
-//        List<Auction> hotAuctions = auctionService.getHottest();
-//        List<AuctionDomain> auctionDomainList = hotAuctions.stream().map(a ->
-//                auctionService.toAuctionDomain(a, user, bidService.getMembers(a))).collect(Collectors.toList());
-//        return assembler.toResource(auctionService.toPage(auctionDomainList, page, size));
-//    }
-
 
     @PostMapping("/search/{category}")
     public PagedResources<Resource<AuctionDomain>> search(@RequestParam("title") String title,

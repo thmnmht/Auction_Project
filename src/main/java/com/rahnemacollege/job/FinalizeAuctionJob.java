@@ -45,33 +45,34 @@ public class FinalizeAuctionJob extends QuartzJobBean {
 
     private void finalizeAuction(Auction auction, User user) {
         messageHandler = new MessageHandler(template);
-        if(!user.equals(auction.getOwner())){
+        if (!auction.getOwner().getId().equals(user.getId())) {
             auction.setWinner(user);
             logger.info("User : " + user.getEmail() + " just won auction with id : " + auction.getId());
-            finishAuction(auction);
-            long lastPrice = bidService.findLastPrice(auction);
             messageHandler.winMessage(auction.getId(),user.getId(),auction.getTitle());
+            messageHandler.finishMessage(auction.getId());
+            bidService.removeAuction(auction.getId());
+            long lastPrice = bidService.findLastPrice(auction);
             messageHandler.ownerMessageWithWinner(auction.getOwner().getId(),auction.getId(),lastPrice,auction.getTitle());
             try {
                 emailService.notifyAuctionWinner(auction, lastPrice);
                 emailService.notifyAuctionOwner(auction, lastPrice);
             } catch (MessagingException e) {
-                logger.error("Error while sending email, " + e.getMessage());
+                logger.error("Error while sending email, " + e);
             }
         }
-        else{
-            logger.info("no one participate in auction with id " + auction.getId());
-            finishAuction(auction);
-            messageHandler.ownerMessage(user.getId(),auction.getId(),auction.getTitle());
+        else {
+            bidService.removeAuction(auction.getId());
+            messageHandler.ownerMessage(user.getId(), auction.getId(), auction.getTitle());
+            try {
+                emailService.notifyExpiredAuction(auction);
+            } catch (MessagingException e) {
+                logger.error("Error while sending email, " + e);
+            }
+            logger.info("User : " + user.getEmail() + "'s auction #Id : " + auction.getId() +" expired.");
         }
-
-    }
-
-    private void finishAuction(Auction auction){
         auction.setState(1);
         repository.save(auction);
-        messageHandler.finishMessage(auction.getId());
-        bidService.removeAuction(auction.getId());
+
     }
 
 

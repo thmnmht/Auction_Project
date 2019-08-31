@@ -55,9 +55,9 @@ public class BidController {
         User user = userService.findUserId(Integer.valueOf(headerAccessor.getUser().getName()));
         logger.info(user.getEmail() + " with id " + user.getId() + " wants to bid auction " + request.getAuctionId());
         Bid bid = bidService.add(request, user);
-        auctionService.schedule(bid);
+        auctionService.scheduleFinalizing(bid);
         logger.info("bid accepted");
-        messageHandler.newBidMessage(request.getAuctionId(), bid.getPrice());
+        messageHandler.newBidMessage(request.getAuctionId(), bid.getPrice(), false);
         messageHandler.myBidMessage(user.getId(), bid.getPrice());
     }
 

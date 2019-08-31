@@ -101,11 +101,11 @@ public class AuctionController {
         User user = userService.findUserId(userDetailsService.getUser().getId());
         log.info(user.getEmail() + " tried to add bookmark");
         if (id != null) {
-            Auction auction = auctionService.findAuctionById(id);
+            Auction auction = auctionService.findById(id);
             if (auction != null) {
                 auctionService.addBookmark(user, auction);
                 AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);
-                log.info("Auction Id#" + auction.getId() + " just added to " + user.getEmail() + "'s bookmarks");
+                log.info("Auction Id#" + auction.getId() + " just added/removed to " + user.getEmail() + "'s bookmarks");
                 return new ResponseEntity<>(addAuctionDomain, HttpStatus.OK);
             }
             throw new MessageException(Message.REALLY_BAD_SITUATION);

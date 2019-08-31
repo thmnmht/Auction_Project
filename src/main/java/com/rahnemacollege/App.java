@@ -18,7 +18,7 @@ import java.util.Date;
 public class App extends SpringBootServletInitializer{
 
     public static void main(String[] args) {
-        System.out.println(new Date().getTime());
+        System.err.println(new Date().getTime());
         SpringApplication.run(App.class, args);
     }
 

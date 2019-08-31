@@ -74,7 +74,7 @@ public class EmailService {
                 "    <div>\n" +
                 "            <h1>\n" +
                 winnerUser.getName() +
-                "               عزیز! سلام.\n" +
+                "               عزیز، سلام!\n" +
                 "\n" +
                 "            </h1>\n" +
                 "            <h3>\n" +
@@ -113,7 +113,7 @@ public class EmailService {
                 "    <div>\n" +
                 "        <h1>\n" +
                 ownerUser.getName() +
-                "            عزیز! سلام.\n" +
+                "            عزیز، سلام!\n" +
                 "\n" +
                 "        </h1>\n" +
                 "        <h3>\n" +
@@ -139,6 +139,43 @@ public class EmailService {
 
         helper.setText(text, true);
         helper.setSubject("مزایدۀ آگهی شما به پایان رسید!");
+        mailSender.send(message);
+    }
+
+    @Async
+    public void notifyExpiredAuction(Auction expiredAuction) throws MessagingException {
+        User owner = expiredAuction.getOwner();
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+        helper.setFrom("fivegears.rahnema@gmail.com");
+        helper.setTo(owner.getEmail());
+        String text = "<html>\n" +
+                "\n" +
+                "<body dir=\"rtl\">\n" +
+                "    <div>\n" +
+                "            <h1>\n" +
+                owner.getName() +
+                "               عزیز، سلام!\n" +
+                "\n" +
+                "            </h1>\n" +
+                "            <h3>\n" +
+                "متأسفانه مزایدۀ شما با عنوان \n" +
+                "                «\n" +
+                expiredAuction.getTitle() +
+                "                »\n" +
+                " منقضی شده است.\n" +
+                "                <br>\n" +
+                "                یاعلی. در پناه حق!\n" +
+                "            </h3>\n" +
+                "    </div>\n" +
+                "\n" +
+                "\n" +
+                "</body>\n" +
+                "\n" +
+                "</html>";
+
+        helper.setText(text, true);
+        helper.setSubject("یک آگهی شما منقضی شده است.");
         mailSender.send(message);
     }
 }
