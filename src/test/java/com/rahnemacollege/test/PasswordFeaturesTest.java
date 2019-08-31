@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Transactional
@@ -53,6 +54,7 @@ public class PasswordFeaturesTest extends InitTest {
             //read Email
             Thread.sleep(10000);
             String token = readEmail();
+            assertThat(token).isNotNull();
             System.err.println(token);
             simpleUserDomain = resetPass(token);
             AssertionsForClassTypes.assertThat(simpleUserDomain.getName())
@@ -159,7 +161,6 @@ public class PasswordFeaturesTest extends InitTest {
     @After
     public void deleteUser(){
         if (userDomain!= null){
-            System.err.println("here to delete user");
             userRepository.deleteByEmail(userDomain.getEmail());
         }
     }

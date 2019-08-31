@@ -164,30 +164,27 @@ public class EmailReceiver {
 
                 String contentType = msg.getContentType();
                 String messageContent = "";
-
-                if (from.contains(userName) && subject.contains("AucApp validPassword recovery")
-                        && (contentType.contains("TEXT/PLAIN"))) {
+                if (from.contains(userName) && subject.contains("بازنشانی رمزعبور")
+                        && (contentType.contains("TEXT/PLAIN") || contentType.contains("TEXT/HTML"))) {
                     try {
                         Object content = msg.getContent();
                         if (content != null) {
                             messageContent = content.toString();
-                            int a = messageContent.split("/").length;
-                            token = messageContent.split("/")[a - 1].substring("reset?token=".length(),"reset?token=".length()+36);
+                            int a = messageContent.split("=").length;
+                            token = messageContent.split("=")[a - 1].substring(0, 36);
                         }
                     } catch (Exception ex) {
                         messageContent = "[Error downloading content]";
                         ex.printStackTrace();
                     }
                 }
-                /* print out details of each message
+                /*
                 System.out.println("Message #" + (i + 1) + ":");
                 System.out.println("\t From: " + from);
-                System.out.println("\t To: " + toList);
-                System.out.println("\t CC: " + ccList);
                 System.out.println("\t Subject: " + subject);
-                System.out.println("\t Sent Date: " + sentDate);
                 System.out.println("\t Message: " + messageContent);
                  */
+
             }
             // disconnect
             folderInbox.close(false);

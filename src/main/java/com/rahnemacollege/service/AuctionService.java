@@ -56,7 +56,6 @@ public class AuctionService {
     private final String finalizeAuctionJobGroup = "FinalizeAuction-jobs";
 
     private final long remainingTimeToNotify = 600000L;
-    private final String notifyBookmarkedAuctionTriggerName = "NTrigger-";
     private final String notifyBookmarkedAuctionTriggerGroup = "NotifyAuction-triggers";
     private final String notifyBookmarkedAuctionJobGroup = "NotifyAuction-jobs";
 
@@ -232,14 +231,14 @@ public class AuctionService {
 
     private void unscheduleNotifying(User user, Auction bookmarkedAuction) {
         try {
-            if (scheduler.checkExists(TriggerKey.triggerKey(notifyBookmarkedAuctionTriggerName + user.getId(), notifyBookmarkedAuctionTriggerGroup))
+            if (scheduler.checkExists(TriggerKey.triggerKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionTriggerGroup))
                     && scheduler.checkExists(JobKey.jobKey((bookmarkedAuction.getId() + "/" + user.getId()), notifyBookmarkedAuctionJobGroup))) {
-                scheduler.unscheduleJob(TriggerKey.triggerKey(notifyBookmarkedAuctionTriggerName + user.getId(), notifyBookmarkedAuctionTriggerGroup));
+                scheduler.unscheduleJob(TriggerKey.triggerKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionTriggerGroup));
                 scheduler.deleteJob(JobKey.jobKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionJobGroup));
                 logger.info("auction Id#" + bookmarkedAuction.getId() + " won't be notified to user Id#" + user.getId() + " anymore. " );
             }
         } catch (SchedulerException e) {
-            logger.error("Error unscheduling notification", e.getMessage());
+            logger.error("Error unscheduling notification : " + e.getMessage());
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
     }
@@ -252,12 +251,12 @@ public class AuctionService {
             Date finishDate = new Date(System.currentTimeMillis() + 60000);
             if (finishDate.after(new Date())) {
                 JobDetail jobDetail = buildNotifyJobDetail(user, bookmarkedAuction);
-                Trigger trigger = buildNotifyJobTrigger(jobDetail, finishDate, userId);
+                Trigger trigger = buildNotifyJobTrigger(jobDetail, finishDate, userId, auctionId);
                 scheduler.scheduleJob(jobDetail, trigger);
                 logger.info("auction Id#" + auctionId + " will be notified to user Id#" + userId + " @ " + finishDate);
             }
         } catch (SchedulerException e) {
-            logger.error("Error scheduling notification", e.getMessage());
+            logger.error("Error scheduling notification : " + e.getMessage());
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
 
@@ -274,7 +273,7 @@ public class AuctionService {
                 logger.info("It will bid on auction Id#" + auctionId + " @ " + finishDate);
             }
         } catch (SchedulerException e) {
-            logger.error("Error scheduling fake biding", e.toString());
+            logger.error("Error scheduling fake biding : " + e.getMessage());
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
     }
@@ -293,10 +292,10 @@ public class AuctionService {
     }
 
 
-    private Trigger buildNotifyJobTrigger(JobDetail jobDetail, Date finishDate, int userId) {
+    private Trigger buildNotifyJobTrigger(JobDetail jobDetail, Date finishDate, int userId, int auctionId) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
-                .withIdentity(TriggerKey.triggerKey(notifyBookmarkedAuctionTriggerName + userId, notifyBookmarkedAuctionTriggerGroup))
+                .withIdentity(TriggerKey.triggerKey(auctionId + "/" + userId, notifyBookmarkedAuctionTriggerGroup))
                 .withDescription("Notify Auction Trigger")
                 .startAt(finishDate)
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
@@ -328,7 +327,7 @@ public class AuctionService {
                 scheduler.deleteJob(JobKey.jobKey(String.valueOf(bidRequest.getId()), finalizeAuctionJobGroup));
             }
         } catch (SchedulerException e) {
-            logger.error("Error scheduling bid", e);
+            logger.error("Error scheduling bid : " + e.getMessage());
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
         try {
@@ -338,7 +337,7 @@ public class AuctionService {
             scheduler.scheduleJob(jobDetail, trigger);
             logger.info("auction Id#" + auctionId + " will be finished @ " + finishDate);
         } catch (SchedulerException e) {
-            logger.error("Error scheduling bid", e.toString());
+            logger.error("Error scheduling bid : " + e.getMessage());
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
     }
