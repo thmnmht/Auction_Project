@@ -48,7 +48,7 @@ public class AuctionService {
     @Autowired
     private Scheduler scheduler;
 
-    private final long auctionActiveSession = 30000L;
+    private final long AUCTION_ACTIVE_SESSION = 30000L;
 
     @Autowired
     public AuctionService(UserRepository userRepository, AuctionRepository auctionRepository, CategoryRepository categoryRepository,
@@ -66,7 +66,7 @@ public class AuctionService {
         Auction auction = toAuction(auctionDomain, user);
         auction = auctionRepository.save(auction);
         //owner bid
-        Bid firstBid = new Bid(auction,auction.getOwner(),auction.getBasePrice(),auction.getDate());
+        Bid firstBid = new Bid(auction, auction.getOwner(), auction.getBasePrice(), auction.getDate());
         bidRepository.save(firstBid);
         // TODO: 8/29/19 :start a job to when auction started call: auctionService.schedule(bid);
         return auction;
@@ -141,6 +141,7 @@ public class AuctionService {
 
 
     public List<Auction> findByTitle(String title, int categoryId, boolean hottest) {
+
         List<Auction> auctions;
         if (hottest) {
             auctions = auctionRepository.findHottest();
@@ -150,9 +151,9 @@ public class AuctionService {
             }
         } else {
             if (categoryId == 0) {
-                auctions = auctionRepository.findByStateOrderByIdDesc(0);
+                auctions = auctionRepository.findByStateNotOrderByIdDesc(1);
             } else {
-                auctions = auctionRepository.findByStateAndCategory_idOrderByIdDesc(0, categoryId);
+                auctions = auctionRepository.findByStateNotAndCategory_idOrderByIdDesc(1, categoryId);
             }
         }
         if (title != null && title.length() > 0) {
@@ -179,10 +180,6 @@ public class AuctionService {
         return pages;
     }
 
-//    public List<Auction> getHottest() {
-//
-//        return auctionRepository.findHottest();
-//    }
 
     @Transactional
     public void addBookmark(User user, Auction auction) {
@@ -207,11 +204,11 @@ public class AuctionService {
                 scheduler.deleteJob(JobKey.jobKey(String.valueOf(bidRequest.getId()), "finalizeAuction-jobs"));
             }
         } catch (SchedulerException e) {
-            logger.error("Error scheduling bid", e);
+            logger.error("Error scheduling bid", e.getMessage());
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
         try {
-            Date finishDate = new Date(System.currentTimeMillis() + auctionActiveSession);
+            Date finishDate = new Date(System.currentTimeMillis() + AUCTION_ACTIVE_SESSION);
             JobDetail jobDetail = buildJobDetail(bidRequest);
             Trigger trigger = buildJobTrigger(jobDetail, finishDate, auctionId);
             scheduler.scheduleJob(jobDetail, trigger);
@@ -221,6 +218,7 @@ public class AuctionService {
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
     }
+
 
     private JobDetail buildJobDetail(Bid bid) {
         JobDataMap jobDataMap = new JobDataMap();

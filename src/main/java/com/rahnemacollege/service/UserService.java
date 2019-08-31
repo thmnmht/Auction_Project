@@ -133,7 +133,7 @@ public class UserService {
     @Transactional
     public List<Auction> getUserBookmarks(User user) {
         user = repository.findByEmail(user.getEmail()).orElseThrow(() -> new MessageException(Message.EMAIL_INVALID));
-        return new ArrayList<>(user.getBookmarks()).stream().filter(a -> a.getState() == 0)
+        return new ArrayList<>(user.getBookmarks()).stream().filter(a -> a.getState() == 0 || a.getState() == 2)
                 .sorted((a, b) -> b.getId() - a.getId()).collect(Collectors.toList());
     }
 

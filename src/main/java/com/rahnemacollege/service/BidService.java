@@ -64,6 +64,10 @@ public class BidService {
             throw new MessageException(Message.PRICE_TOO_LOW);
         Bid bid = new Bid(auction, user, bidPrice, new Date());
         bid = bidRepository.save(bid);
+        if (auction.getState() == 0) {
+            auction.setState(2);
+            auctionRepository.save(auction);
+        }
         return bid;
     }
 
