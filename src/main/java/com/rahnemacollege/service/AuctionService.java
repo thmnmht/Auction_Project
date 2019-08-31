@@ -114,9 +114,9 @@ public class AuctionService {
         if (auctionDomain.getDescription() != null && auctionDomain.getDescription().length() > 1000)
             throw new MessageException(Message.DESCRIPTION_TOO_LONG);
         if (auctionDomain.getDate() < 1)
-            throw new MessageException(Message.DATE_NULL);
-//        if (auctionDomain.getDate() - new Date().getTime() < 1800000L)
-//            throw new MessageException(Message.DATE_INVALID);
+            throw new MessageException(Message.DATE_NULL);/*
+        if (auctionDomain.getDate() - new Date().getTime() < 1800000L)
+            throw new MessageException(Message.DATE_INVALID);*/
         if (auctionDomain.getBasePrice() < 0)
             throw new MessageException(Message.BASE_PRICE_NULL);
         if (auctionDomain.getMaxNumber() < 2)
@@ -130,10 +130,6 @@ public class AuctionService {
         Category category = categoryRepository.findById(auctionDomain.getCategoryId()).orElseThrow(() -> new MessageException(Message.CATEGORY_INVALID));
         Auction auction = new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(), auctionDomain.getBasePrice(), category, date, user, auctionDomain.getMaxNumber());
         return auction;
-    }
-
-    public Auction findAuctionById(int id) {
-        return auctionRepository.findById(id).orElseThrow(() -> new MessageException(Message.AUCTION_NOT_FOUND));
     }
 
     public AuctionDomain toAuctionDomain(Auction auction, User user, int current) {
@@ -317,8 +313,8 @@ public class AuctionService {
 
     public void scheduleFinalizing(Bid bidRequest) {
         int auctionId = bidRequest.getAuction().getId();
-        if (findAuctionById(auctionId).getState() == 1) {
-            logger.error("cannot scheduleFinalizing, auction Id#" + auctionId + " is already finished.");
+        if (findById(auctionId).getState() == 1) {
+            logger.error("cannot schedule, auction Id#" + auctionId + " is already finished.");
             throw new MessageException(Message.FINISHED_AUCTION);
         }
         try {

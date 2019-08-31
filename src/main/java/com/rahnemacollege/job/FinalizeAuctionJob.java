@@ -52,7 +52,7 @@ public class FinalizeAuctionJob extends QuartzJobBean {
             messageHandler.finishMessage(auction.getId());
             bidService.removeAuction(auction.getId());
             long lastPrice = bidService.findLastPrice(auction);
-            messageHandler.ownerMessage(auction.getOwner().getId(),auction.getId(),lastPrice,auction.getTitle());
+            messageHandler.ownerMessageWithWinner(auction.getOwner().getId(),auction.getId(),lastPrice,auction.getTitle());
             try {
                 emailService.notifyAuctionWinner(auction, lastPrice);
                 emailService.notifyAuctionOwner(auction, lastPrice);
@@ -62,12 +62,12 @@ public class FinalizeAuctionJob extends QuartzJobBean {
         }
         else {
             bidService.removeAuction(auction.getId());
+            messageHandler.ownerMessage(user.getId(), auction.getId(), auction.getTitle());
             try {
                 emailService.notifyExpiredAuction(auction);
             } catch (MessagingException e) {
                 logger.error("Error while sending email, " + e);
             }
-            //Todo : alert auction's owner via websocket
             logger.info("User : " + user.getEmail() + "'s auction #Id : " + auction.getId() +" expired.");
         }
         auction.setState(1);

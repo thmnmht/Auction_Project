@@ -57,7 +57,7 @@ public class BidController {
         Bid bid = bidService.add(request, user);
         auctionService.scheduleFinalizing(bid);
         logger.info("bid accepted");
-        messageHandler.newBidMessage(request.getAuctionId(), bid.getPrice());
+        messageHandler.newBidMessage(request.getAuctionId(), bid.getPrice(), false);
         messageHandler.myBidMessage(user.getId(), bid.getPrice());
     }
 
