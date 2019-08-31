@@ -56,7 +56,6 @@ public class AuctionService {
     private final String finalizeAuctionJobGroup = "FinalizeAuction-jobs";
 
     private final long remainingTimeToNotify = 600000L;
-    private final String notifyBookmarkedAuctionTriggerName = "NTrigger-";
     private final String notifyBookmarkedAuctionTriggerGroup = "NotifyAuction-triggers";
     private final String notifyBookmarkedAuctionJobGroup = "NotifyAuction-jobs";
 
@@ -95,6 +94,7 @@ public class AuctionService {
                 .build();
     }
 
+
     private JobDetail buildFakeBidJobDetail(Auction auction) {
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put("auction", auction);
@@ -114,9 +114,9 @@ public class AuctionService {
         if (auctionDomain.getDescription() != null && auctionDomain.getDescription().length() > 1000)
             throw new MessageException(Message.DESCRIPTION_TOO_LONG);
         if (auctionDomain.getDate() < 1)
-            throw new MessageException(Message.DATE_NULL);/*
-        if (auctionDomain.getDate() - new Date().getTime() < 1800000L)
-            throw new MessageException(Message.DATE_INVALID);*/
+            throw new MessageException(Message.DATE_NULL);
+//        if (auctionDomain.getDate() - new Date().getTime() < 1800000L)
+//            throw new MessageException(Message.DATE_INVALID);
         if (auctionDomain.getBasePrice() < 0)
             throw new MessageException(Message.BASE_PRICE_NULL);
         if (auctionDomain.getMaxNumber() < 2)
@@ -130,6 +130,10 @@ public class AuctionService {
         Category category = categoryRepository.findById(auctionDomain.getCategoryId()).orElseThrow(() -> new MessageException(Message.CATEGORY_INVALID));
         Auction auction = new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(), auctionDomain.getBasePrice(), category, date, user, auctionDomain.getMaxNumber());
         return auction;
+    }
+
+    public Auction findAuctionById(int id) {
+        return auctionRepository.findById(id).orElseThrow(() -> new MessageException(Message.AUCTION_NOT_FOUND));
     }
 
     public AuctionDomain toAuctionDomain(Auction auction, User user, int current) {
@@ -227,33 +231,38 @@ public class AuctionService {
     }
 
     private void unscheduleNotifying(User user, Auction bookmarkedAuction) {
+        logger.warn(user.getEmail() + " is here to remove auction");
         try {
-            if (scheduler.checkExists(TriggerKey.triggerKey(notifyBookmarkedAuctionTriggerName + user.getId(), notifyBookmarkedAuctionTriggerGroup))
-                    && scheduler.checkExists(JobKey.jobKey((bookmarkedAuction.getId() + "/" + user.getId()), notifyBookmarkedAuctionJobGroup))) {
-                scheduler.unscheduleJob(TriggerKey.triggerKey(notifyBookmarkedAuctionTriggerName + user.getId(), notifyBookmarkedAuctionTriggerGroup));
+            System.err.println("trigger exists : " + scheduler.checkExists(TriggerKey.triggerKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionTriggerGroup)));
+            System.err.println("Job exists : " + scheduler.checkExists(JobKey.jobKey((bookmarkedAuction.getId() + "/" + user.getId()), notifyBookmarkedAuctionJobGroup)));
+            if (scheduler.checkExists(JobKey.jobKey((bookmarkedAuction.getId() + "/" + user.getId()), notifyBookmarkedAuctionJobGroup))) {
+                logger.warn("I'm in if");
+                if (scheduler.checkExists(TriggerKey.triggerKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionTriggerGroup)))
+                    scheduler.unscheduleJob(TriggerKey.triggerKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionTriggerGroup));
                 scheduler.deleteJob(JobKey.jobKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionJobGroup));
-                logger.info("auction Id#" + bookmarkedAuction.getId() + " won't be notified to user Id#" + user.getId() + " anymore. " );
+                logger.info("auction Id#" + bookmarkedAuction.getId() + " won't be notified to user Id#" + user.getId() + " anymore. ");
             }
         } catch (SchedulerException e) {
-            logger.error("Error unscheduling notification", e.getMessage());
+            logger.error("Error unscheduling notification : " + e.getMessage());
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
     }
+
 
     private void scheduleNotifying(User user, Auction bookmarkedAuction) {
         int auctionId = bookmarkedAuction.getId();
         int userId = user.getId();
         try {
 //            Date finishDate = new Date(bookmarkedAuction.getDate().getTime() - remainingTimeToNotify);
-            Date finishDate = new Date(System.currentTimeMillis() + 60000);
+            Date finishDate = new Date(System.currentTimeMillis() + 10000);
             if (finishDate.after(new Date())) {
                 JobDetail jobDetail = buildNotifyJobDetail(user, bookmarkedAuction);
-                Trigger trigger = buildNotifyJobTrigger(jobDetail, finishDate, userId);
+                Trigger trigger = buildNotifyJobTrigger(jobDetail, finishDate, userId, auctionId);
                 scheduler.scheduleJob(jobDetail, trigger);
                 logger.info("auction Id#" + auctionId + " will be notified to user Id#" + userId + " @ " + finishDate);
             }
         } catch (SchedulerException e) {
-            logger.error("Error scheduling notification", e.getMessage());
+            logger.error("Error scheduling notification : " + e.getMessage());
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
 
@@ -270,7 +279,7 @@ public class AuctionService {
                 logger.info("It will bid on auction Id#" + auctionId + " @ " + finishDate);
             }
         } catch (SchedulerException e) {
-            logger.error("Error scheduling fake biding", e.toString());
+            logger.error("Error scheduling fake biding : " + e.getMessage());
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
     }
@@ -289,10 +298,10 @@ public class AuctionService {
     }
 
 
-    private Trigger buildNotifyJobTrigger(JobDetail jobDetail, Date finishDate, int userId) {
+    private Trigger buildNotifyJobTrigger(JobDetail jobDetail, Date finishDate, int userId, int auctionId) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
-                .withIdentity(TriggerKey.triggerKey(notifyBookmarkedAuctionTriggerName + userId, notifyBookmarkedAuctionTriggerGroup))
+                .withIdentity(TriggerKey.triggerKey(auctionId + "/" + userId, notifyBookmarkedAuctionTriggerGroup))
                 .withDescription("Notify Auction Trigger")
                 .startAt(finishDate)
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
@@ -311,10 +320,11 @@ public class AuctionService {
                 .build();
     }
 
+
     public void scheduleFinalizing(Bid bidRequest) {
         int auctionId = bidRequest.getAuction().getId();
-        if (findById(auctionId).getState() == 1) {
-            logger.error("cannot schedule, auction Id#" + auctionId + " is already finished.");
+        if (findAuctionById(auctionId).getState() == 1) {
+            logger.error("cannot scheduleFinalizing, auction Id#" + auctionId + " is already finished.");
             throw new MessageException(Message.FINISHED_AUCTION);
         }
         try {
@@ -324,7 +334,7 @@ public class AuctionService {
                 scheduler.deleteJob(JobKey.jobKey(String.valueOf(bidRequest.getId()), finalizeAuctionJobGroup));
             }
         } catch (SchedulerException e) {
-            logger.error("Error scheduling bid", e);
+            logger.error("Error scheduling bid : " + e.getMessage());
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
         try {
@@ -334,7 +344,7 @@ public class AuctionService {
             scheduler.scheduleJob(jobDetail, trigger);
             logger.info("auction Id#" + auctionId + " will be finished @ " + finishDate);
         } catch (SchedulerException e) {
-            logger.error("Error scheduling bid", e.toString());
+            logger.error("Error scheduling bid : " + e.getMessage());
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
     }
