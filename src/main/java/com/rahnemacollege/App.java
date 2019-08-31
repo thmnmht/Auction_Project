@@ -4,8 +4,6 @@
 package com.rahnemacollege;
 
 
-import com.rahnemacollege.service.AuctionService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -19,15 +17,9 @@ import java.util.Date;
         "com.rahnemacollege"})
 public class App extends SpringBootServletInitializer{
 
-    @Autowired
-    private static AuctionService auctionService;
-
-
     public static void main(String[] args) {
         System.err.println(new Date().getTime());
         SpringApplication.run(App.class, args);
-//        auctionService.initialReschedule();
-        //Todo
     }
 
     @Override

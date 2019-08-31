@@ -28,11 +28,19 @@ public class MessageHandler {
         template.convertAndSend("/app/all", finishAlert.toString());
     }
 
-    public void ownerMessage(int userId, int auctionId, long lastPrice, String title) {
+    public void ownerMessageWithWinner(int userId, int auctionId, long lastPrice, String title) {
         JsonObject alert = new JsonObject();
         alert.addProperty("type", 6);
         alert.addProperty("auctionId", auctionId);
         alert.addProperty("price", lastPrice);
+        alert.addProperty("title", title);
+        template.convertAndSendToUser(String.valueOf(userId), "/app/all", alert.toString());
+    }
+
+    public void ownerMessage(int userId,int auctionId,String title){
+        JsonObject alert = new JsonObject();
+        alert.addProperty("type", 8);
+        alert.addProperty("auctionId", auctionId);
         alert.addProperty("title", title);
         template.convertAndSendToUser(String.valueOf(userId), "/app/all", alert.toString());
     }

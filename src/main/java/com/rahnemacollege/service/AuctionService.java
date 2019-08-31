@@ -11,10 +11,7 @@ import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Bid;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.model.User;
-import com.rahnemacollege.repository.AuctionRepository;
-import com.rahnemacollege.repository.CategoryRepository;
-import com.rahnemacollege.repository.PictureRepository;
-import com.rahnemacollege.repository.UserRepository;
+import com.rahnemacollege.repository.*;
 import com.rahnemacollege.util.exceptions.Message;
 import com.rahnemacollege.util.exceptions.MessageException;
 import org.quartz.*;
@@ -45,6 +42,7 @@ public class AuctionService {
     private final CategoryRepository categoryRepository;
     private final PictureRepository pictureRepository;
     private final Logger logger;
+    private final BidRepository bidRepository;
 
     @Value("${server_ip}")
     private String ip;
@@ -69,11 +67,12 @@ public class AuctionService {
 
     @Autowired
     public AuctionService(UserRepository userRepository, AuctionRepository auctionRepository, CategoryRepository categoryRepository,
-                          PictureRepository pictureRepository) {
+                          PictureRepository pictureRepository, BidRepository bidRepository) {
         this.userRepository = userRepository;
         this.auctionRepository = auctionRepository;
         this.categoryRepository = categoryRepository;
         this.pictureRepository = pictureRepository;
+        this.bidRepository = bidRepository;
         this.logger = LoggerFactory.getLogger(AuctionService.class);
     }
 
@@ -173,12 +172,21 @@ public class AuctionService {
         return auction;
     }
 
-    public List<Auction> findByTitle(String title, int categoryId) {
+
+    public List<Auction> findByTitle(String title, int categoryId, boolean hottest) {
         List<Auction> auctions;
-        if (categoryId == 0) {
-            auctions = auctionRepository.findByStateOrderByIdDesc(0);
+        if (hottest) {
+            auctions = auctionRepository.findHottest();
+            if (categoryId != 0) {
+                auctions = auctions.stream().filter(a -> a.getCategory().getId() == categoryId)
+                        .collect(Collectors.toList());
+            }
         } else {
-            auctions = auctionRepository.findByStateAndCategory_idOrderByIdDesc(0, categoryId);
+            if (categoryId == 0) {
+                auctions = auctionRepository.findByStateOrderByIdDesc(0);
+            } else {
+                auctions = auctionRepository.findByStateAndCategory_idOrderByIdDesc(0, categoryId);
+            }
         }
         if (title != null && title.length() > 0) {
             Pattern pattern = Pattern.compile(title, Pattern.CASE_INSENSITIVE);
@@ -204,10 +212,10 @@ public class AuctionService {
         return pages;
     }
 
-    public List<Auction> getHottest() {
-
-        return auctionRepository.findHottest();
-    }
+//    public List<Auction> getHottest() {
+//
+//        return auctionRepository.findHottest();
+//    }
 
     @Transactional
     public void addBookmark(User user, Auction auction) {
