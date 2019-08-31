@@ -101,7 +101,7 @@ public class AuctionController {
         User user = userService.findUserId(userDetailsService.getUser().getId());
         log.info(user.getEmail() + " tried to add bookmark");
         if (id != null) {
-            Auction auction = auctionService.findAuctionById(id);
+            Auction auction = auctionService.findById(id);
             if (auction != null) {
                 auctionService.addBookmark(user, auction);
                 AddAuctionDomain addAuctionDomain = new AddAuctionDomain(auction);

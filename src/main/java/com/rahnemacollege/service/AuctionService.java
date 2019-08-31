@@ -50,12 +50,12 @@ public class AuctionService {
     @Autowired
     private Scheduler scheduler;
 
-    private final long auctionActiveSessionTime = 30000L;
+    private final long AUCTION_ACTIVE_SESSION_TIME = 30000L;
     private final String finalizeAuctionTriggerName = "FTrigger-";
     private final String finalizeAuctionTriggerGroup = "FinalizeAuction-triggers";
     private final String finalizeAuctionJobGroup = "FinalizeAuction-jobs";
 
-    private final long remainingTimeToNotify = 600000L;
+    private final long REMAINING_TIME_TO_NOTIFY = 600000L;
     private final String notifyBookmarkedAuctionTriggerGroup = "NotifyAuction-triggers";
     private final String notifyBookmarkedAuctionJobGroup = "NotifyAuction-jobs";
 
@@ -93,6 +93,7 @@ public class AuctionService {
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
                 .build();
     }
+
 
     private JobDetail buildFakeBidJobDetail(Auction auction) {
         JobDataMap jobDataMap = new JobDataMap();
@@ -182,9 +183,9 @@ public class AuctionService {
             }
         } else {
             if (categoryId == 0) {
-                auctions = auctionRepository.findByStateOrderByIdDesc(0);
+                auctions = auctionRepository.findByStateNotOrderByIdDesc(1);
             } else {
-                auctions = auctionRepository.findByStateAndCategory_idOrderByIdDesc(0, categoryId);
+                auctions = auctionRepository.findByStateNotAndCategory_idOrderByIdDesc(1, categoryId);
             }
         }
         if (title != null && title.length() > 0) {
@@ -211,10 +212,6 @@ public class AuctionService {
         return pages;
     }
 
-//    public List<Auction> getHottest() {
-//
-//        return auctionRepository.findHottest();
-//    }
 
     @Transactional
     public void addBookmark(User user, Auction auction) {
@@ -230,12 +227,16 @@ public class AuctionService {
     }
 
     private void unscheduleNotifying(User user, Auction bookmarkedAuction) {
+        logger.warn(user.getEmail() + " is here to remove auction");
         try {
-            if (scheduler.checkExists(TriggerKey.triggerKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionTriggerGroup))
-                    && scheduler.checkExists(JobKey.jobKey((bookmarkedAuction.getId() + "/" + user.getId()), notifyBookmarkedAuctionJobGroup))) {
-                scheduler.unscheduleJob(TriggerKey.triggerKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionTriggerGroup));
+            System.err.println("trigger exists : " + scheduler.checkExists(TriggerKey.triggerKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionTriggerGroup)));
+            System.err.println("Job exists : " + scheduler.checkExists(JobKey.jobKey((bookmarkedAuction.getId() + "/" + user.getId()), notifyBookmarkedAuctionJobGroup)));
+            if (scheduler.checkExists(JobKey.jobKey((bookmarkedAuction.getId() + "/" + user.getId()), notifyBookmarkedAuctionJobGroup))) {
+                logger.warn("I'm in if");
+                if (scheduler.checkExists(TriggerKey.triggerKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionTriggerGroup)))
+                    scheduler.unscheduleJob(TriggerKey.triggerKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionTriggerGroup));
                 scheduler.deleteJob(JobKey.jobKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionJobGroup));
-                logger.info("auction Id#" + bookmarkedAuction.getId() + " won't be notified to user Id#" + user.getId() + " anymore. " );
+                logger.info("auction Id#" + bookmarkedAuction.getId() + " won't be notified to user Id#" + user.getId() + " anymore. ");
             }
         } catch (SchedulerException e) {
             logger.error("Error unscheduling notification : " + e.getMessage());
@@ -243,12 +244,13 @@ public class AuctionService {
         }
     }
 
+
     private void scheduleNotifying(User user, Auction bookmarkedAuction) {
         int auctionId = bookmarkedAuction.getId();
         int userId = user.getId();
         try {
-//            Date finishDate = new Date(bookmarkedAuction.getDate().getTime() - remainingTimeToNotify);
-            Date finishDate = new Date(System.currentTimeMillis() + 60000);
+//            Date finishDate = new Date(bookmarkedAuction.getDate().getTime() - REMAINING_TIME_TO_NOTIFY);
+            Date finishDate = new Date(System.currentTimeMillis() + 10000);
             if (finishDate.after(new Date())) {
                 JobDetail jobDetail = buildNotifyJobDetail(user, bookmarkedAuction);
                 Trigger trigger = buildNotifyJobTrigger(jobDetail, finishDate, userId, auctionId);
@@ -314,6 +316,7 @@ public class AuctionService {
                 .build();
     }
 
+
     public void scheduleFinalizing(Bid bidRequest) {
         int auctionId = bidRequest.getAuction().getId();
         if (findAuctionById(auctionId).getState() == 1) {
@@ -331,7 +334,7 @@ public class AuctionService {
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
         try {
-            Date finishDate = new Date(System.currentTimeMillis() + auctionActiveSessionTime);
+            Date finishDate = new Date(System.currentTimeMillis() + AUCTION_ACTIVE_SESSION_TIME);
             JobDetail jobDetail = buildFinalizeJobDetail(bidRequest);
             Trigger trigger = buildFinalizeJobTrigger(jobDetail, finishDate, auctionId);
             scheduler.scheduleJob(jobDetail, trigger);

@@ -68,19 +68,10 @@ public class FinalizeAuctionJob extends QuartzJobBean {
             } catch (MessagingException e) {
                 logger.error("Error while sending email, " + e);
             }
-            //Todo : alert auction's owner via websocket
             logger.info("User : " + user.getEmail() + "'s auction #Id : " + auction.getId() +" expired.");
         }
         auction.setState(1);
         repository.save(auction);
 
     }
-
-
-
-
-
-
-
-
 }

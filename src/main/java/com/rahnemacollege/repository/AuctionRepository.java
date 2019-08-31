@@ -11,21 +11,23 @@ import java.util.List;
 @Repository
 public interface AuctionRepository extends CrudRepository<Auction, Integer> {
 
-    //todo: consider limit for the hottest cards
-    @Query(value = "SELECT * ,COUNT(bookmarks_id) AS number_of_bookmarks \n" +
-            "FROM Auctions\n" +
-            "left join users_bookmarks\n" +
-            "on (Auctions.id = users_bookmarks.bookmarks_id AND Auctions.state=0)\n" +
-            "group by\n" +
-            "Auctions.id\n " +
-            "ORDER BY number_of_bookmarks DESC, Auctions.id DESC", nativeQuery = true)
+    @Query(value = " SELECT * ,COUNT(bookmarks_id) AS number_of_bookmarks " +
+            "FROM Auctions left join users_bookmarks " +
+            "on (Auctions.id = users_bookmarks.bookmarks_id ) " +
+            "WHERE Auctions.state!=1 " +
+            "group by Auctions.id " +
+            "ORDER BY number_of_bookmarks DESC, Auctions.id DESC\n", nativeQuery = true)
     List<Auction> findHottest();
+
+//    List<Auction> findByStateNotOrderByCountBy
 
     List<Auction> findByOwner_idOrderByIdDesc(int user_id);
 
-    List<Auction> findByStateOrderByIdDesc(int state);
+    List<Auction> findByStateNotOrderByIdDesc(int states);
 
-    List<Auction> findByStateAndCategory_idOrderByIdDesc(int state, int CategoryId);
+    List<Auction> findByStateNotAndCategory_idOrderByIdDesc(int states, int CategoryId);
 
 
 }
+
+

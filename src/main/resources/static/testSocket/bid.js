@@ -68,6 +68,11 @@ function join() {
     console.log(lastSubId);
 }
 
+function notif() {
+
+
+}
+
 function disjoin() {
     auctionId = $("#auctionId").val();
     $("#chatHeader").append(' Exit from' + auctionId + "! ");
@@ -102,6 +107,9 @@ $(function () {
     });
     $("#disjoin").click(function () {
         disjoin();
+    });
+    $("#notif").click(function () {
+        notif();
     });
     $("#init").click(function () {
         initSubscribe();
