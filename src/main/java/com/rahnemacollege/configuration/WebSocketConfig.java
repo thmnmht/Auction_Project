@@ -62,24 +62,24 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.setInterceptors(new ChannelInterceptor() {
+        registration.interceptors(new ChannelInterceptor() {
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
                 if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
                     logger.info("try to connect");
                     String jwtToken = Objects.requireNonNull(headerAccessor.getFirstNativeHeader("auth")).substring(7);
                     String id = tokenUtil.getIdFromToken(jwtToken);
-                    if(tokenUtil.isTokenExpired(jwtToken))
+                    if (tokenUtil.isTokenExpired(jwtToken))
                         throw new MessageException(com.rahnemacollege.util.exceptions.Message.TOKEN_NOT_FOUND);
                     User user = userService.findUserId(Integer.valueOf(id));
                     Authentication u = new UsernamePasswordAuthenticationToken(user.getId().toString(), user.getPassword(), new ArrayList<>());
                     headerAccessor.setUser(u);
                     logger.info("the user with session id " + headerAccessor.getSessionId() + " connected");
                 }
-                if(StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())){
+                if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
                     System.err.println(headerAccessor.getDestination().toString());
                 }
-                if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())){
+                if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())) {
                     User user = userService.findUserId(Integer.valueOf(headerAccessor.getUser().getName()));
                     bidService.removeFromAllAuction(user);
                 }

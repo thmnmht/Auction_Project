@@ -1,6 +1,7 @@
 package com.rahnemacollege.util;
 
 import com.google.gson.JsonObject;
+import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.util.exceptions.MessageException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
@@ -44,6 +45,14 @@ public class MessageHandler {
         errAlert.addProperty("code", exception.getMessageStatus().ordinal());
         template.convertAndSendToUser(userId, "/app/all", errAlert.toString());
 
+    }
+
+    public void notify(String userId, Auction auction) {
+        JsonObject alert = new JsonObject();
+        alert.addProperty("type", 9);
+        alert.addProperty("auctionId", auction.getId());
+        alert.addProperty("title", auction.getTitle());
+        template.convertAndSendToUser(String.valueOf(userId), "/app/all", alert.toString());
     }
 
     public void subscribeMessage(int auctionId, int current) {

@@ -81,7 +81,7 @@ public class AuctionService {
         validation(auctionDomain);
         Auction auction = toAuction(auctionDomain, user);
         auction = auctionRepository.save(auction);
-//        scheduleFakeBidOn(auction);
+        scheduleFakeBidOn(auction);
         return auction;
     }
 
@@ -231,7 +231,7 @@ public class AuctionService {
                 logger.info("auction Id#" + bookmarkedAuction.getId() + " won't be notified to user Id#" + user.getId() + " anymore. " );
             }
         } catch (SchedulerException e) {
-            logger.error("Error unscheduling notification", e);
+            logger.error("Error unscheduling notification", e.getMessage());
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
     }
@@ -240,7 +240,8 @@ public class AuctionService {
         int auctionId = bookmarkedAuction.getId();
         int userId = user.getId();
         try {
-            Date finishDate = new Date(bookmarkedAuction.getDate().getTime() - remainingTimeToNotify);
+//            Date finishDate = new Date(bookmarkedAuction.getDate().getTime() - remainingTimeToNotify);
+            Date finishDate = new Date(System.currentTimeMillis() + 60000);
             if (finishDate.after(new Date())) {
                 JobDetail jobDetail = buildNotifyJobDetail(user, bookmarkedAuction);
                 Trigger trigger = buildNotifyJobTrigger(jobDetail, finishDate, userId);
@@ -248,7 +249,7 @@ public class AuctionService {
                 logger.info("auction Id#" + auctionId + " will be notified to user Id#" + userId + " @ " + finishDate);
             }
         } catch (SchedulerException e) {
-            logger.error("Error scheduling notification", e.toString());
+            logger.error("Error scheduling notification", e.getMessage());
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
 
@@ -267,6 +268,19 @@ public class AuctionService {
         } catch (SchedulerException e) {
             logger.error("Error scheduling fake biding", e.toString());
             throw new MessageException(Message.SCHEDULER_ERROR);
+        }
+    }
+
+    public void initialReschedule() {
+        Iterable<User> users = userRepository.findAll();
+        Iterable<Auction> auctions = auctionRepository.findAll();
+        for (User user : users) {
+            for (Auction auction : user.getBookmarks()) {
+                scheduleNotifying(user, auction);
+            }
+        }
+        for (Auction auction : auctions) {
+            scheduleFakeBidOn(auction);
         }
     }
 
