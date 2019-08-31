@@ -50,12 +50,12 @@ public class AuctionService {
     @Autowired
     private Scheduler scheduler;
 
-    private final long AUCTION_ACTIVE_SESSION = 30000L;
+    private final long AUCTION_ACTIVE_SESSION_TIME = 30000L;
     private final String finalizeAuctionTriggerName = "FTrigger-";
     private final String finalizeAuctionTriggerGroup = "FinalizeAuction-triggers";
     private final String finalizeAuctionJobGroup = "FinalizeAuction-jobs";
 
-    private final long remainingTimeToNotify = 600000L;
+    private final long REMAINING_TIME_TO_NOTIFY = 600000L;
     private final String notifyBookmarkedAuctionTriggerGroup = "NotifyAuction-triggers";
     private final String notifyBookmarkedAuctionJobGroup = "NotifyAuction-jobs";
 
@@ -249,7 +249,7 @@ public class AuctionService {
         int auctionId = bookmarkedAuction.getId();
         int userId = user.getId();
         try {
-//            Date finishDate = new Date(bookmarkedAuction.getDate().getTime() - remainingTimeToNotify);
+//            Date finishDate = new Date(bookmarkedAuction.getDate().getTime() - REMAINING_TIME_TO_NOTIFY);
             Date finishDate = new Date(System.currentTimeMillis() + 10000);
             if (finishDate.after(new Date())) {
                 JobDetail jobDetail = buildNotifyJobDetail(user, bookmarkedAuction);
@@ -334,7 +334,7 @@ public class AuctionService {
             throw new MessageException(Message.SCHEDULER_ERROR);
         }
         try {
-            Date finishDate = new Date(System.currentTimeMillis() + auctionActiveSessionTime);
+            Date finishDate = new Date(System.currentTimeMillis() + AUCTION_ACTIVE_SESSION_TIME);
             JobDetail jobDetail = buildFinalizeJobDetail(bidRequest);
             Trigger trigger = buildFinalizeJobTrigger(jobDetail, finishDate, auctionId);
             scheduler.scheduleJob(jobDetail, trigger);
