@@ -81,7 +81,7 @@ public class AuctionService {
         validation(auctionDomain);
         Auction auction = toAuction(auctionDomain, user);
         auction = auctionRepository.save(auction);
-        scheduleFakeBidOn(auction);
+//        scheduleFakeBidOn(auction);
         return auction;
     }
 
