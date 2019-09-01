@@ -8,13 +8,12 @@ import com.rahnemacollege.service.BidService;
 import com.rahnemacollege.service.UserDetailsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/home")
@@ -40,12 +39,12 @@ public class HomePageController {
                                                           @RequestParam("size") int size,
                                                           PagedResourcesAssembler<AuctionDomain> assembler) {
         log.info("search");
-        List<Auction> auctions = auctionService.findByTitle(title, category, hottest);
+        Page<Auction> auctions = auctionService.findByTitle(title, category, hottest, page, size);
         User user = userDetailsService.getUser();
-        List<AuctionDomain> auctionDomains = auctions.stream().map(a ->
-                auctionService.toAuctionDomain(a, user, bidService.getMembers(a))).collect(Collectors.toList());
+        Page<AuctionDomain> auctionDomains = auctions.map(a ->
+                auctionService.toAuctionDomain(a, user, bidService.getMembers(a)));
         log.info("user with email " + user.getEmail() + " search for title " + title);
-        return assembler.toResource(auctionService.toPage(auctionDomains, page, size));
+        return assembler.toResource(auctionDomains);
     }
 
 }

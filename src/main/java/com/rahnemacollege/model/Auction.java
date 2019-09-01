@@ -38,9 +38,6 @@ public class Auction {
     @Column(name = "max_number")
     private int maxNumber;
 
-//    @ManyToMany(mappedBy = "bookmarks")
-//    private Set<User> bookmarkers = new HashSet<>();
-
     @Override
     public boolean equals(Object o) {
         if (o instanceof Auction)

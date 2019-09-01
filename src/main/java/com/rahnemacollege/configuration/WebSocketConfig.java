@@ -46,7 +46,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private static Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketConfig.class);
 
 
-
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes("/auction", "/app") //socket_subscriber
@@ -63,6 +62,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(new ChannelInterceptor() {
+            @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
                 if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
