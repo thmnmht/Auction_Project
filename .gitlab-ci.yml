@@ -11,7 +11,7 @@ image: gradle
 # isolated from any previous builds.
 
 services:
-  - mysql:latest
+  - mariadb
 
 variables:
   # Configure mysql environment variables (https://hub.docker.com/_/mysql/)
