@@ -50,7 +50,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes("/auction", "/app") //socket_subscriber
-                .enableSimpleBroker("/app", "/auction"); //socket_publisher
+                .enableSimpleBroker("/app"); //socket_publisher
     }
 
     @Override

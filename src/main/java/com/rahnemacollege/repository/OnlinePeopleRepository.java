@@ -29,7 +29,7 @@ public class OnlinePeopleRepository {
 
         void removeUser(User user){
             users.remove(user);
-            if(owner != null && user != null && user.equals(owner))
+            if(user != null && user.equals(owner))
                 owner = null;
         }
     }

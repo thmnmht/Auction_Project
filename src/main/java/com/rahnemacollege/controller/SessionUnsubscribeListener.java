@@ -21,7 +21,6 @@ import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 @Controller
 public class SessionUnsubscribeListener implements ApplicationListener<SessionUnsubscribeEvent> {
 
-
     private SimpMessagingTemplate template;
 
     @Autowired

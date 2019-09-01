@@ -18,6 +18,12 @@ variables:
   MYSQL_DATABASE: "TestDB"
   MYSQL_ROOT_PASSWORD: "1q2w3e4r"
 
+  connect:
+    image: mysql
+    script:
+      - echo "SELECT 'OK';" | mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mysql "$MYSQL_DATABASE"
+
+
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
   - apt-get update -qq
