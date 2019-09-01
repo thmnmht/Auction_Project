@@ -10,6 +10,13 @@ image: gradle
 # runtime for each build is more reliable since the runtime is completely
 # isolated from any previous builds.
 
+services:
+  - mysql:latest
+
+variables:
+  # Configure mysql environment variables (https://hub.docker.com/_/mysql/)
+  MYSQL_DATABASE: "TestDB"
+  MYSQL_ROOT_PASSWORD: "1q2w3e4r"
 
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
@@ -17,7 +24,7 @@ before_script:
   - apt-get install -qq git
   - 'which ssh-agent || ( apt install -qq openssh-client )'
   - eval $(ssh-agent -s)
-  - ssh-add <(echo "$SSH_PRIVATE_KEY" | base64 --decode)
+  - ssh-add <(echo "$SSH_PRIVATE_KEY" | base64 -d)
   - mkdir -p ~/.ssh
   - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
 
