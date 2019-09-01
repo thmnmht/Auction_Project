@@ -17,6 +17,7 @@ public class ResetRequest {
     private User user;
     private Date date;
     private String token;
+    private int i;
 
     public ResetRequest() {
     }

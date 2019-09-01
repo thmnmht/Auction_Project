@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -229,10 +230,7 @@ public class AuctionService {
     private void unscheduleNotifying(User user, Auction bookmarkedAuction) {
         logger.warn(user.getEmail() + " is here to remove auction");
         try {
-            System.err.println("trigger exists : " + scheduler.checkExists(TriggerKey.triggerKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionTriggerGroup)));
-            System.err.println("Job exists : " + scheduler.checkExists(JobKey.jobKey((bookmarkedAuction.getId() + "/" + user.getId()), notifyBookmarkedAuctionJobGroup)));
             if (scheduler.checkExists(JobKey.jobKey((bookmarkedAuction.getId() + "/" + user.getId()), notifyBookmarkedAuctionJobGroup))) {
-                logger.warn("I'm in if");
                 if (scheduler.checkExists(TriggerKey.triggerKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionTriggerGroup)))
                     scheduler.unscheduleJob(TriggerKey.triggerKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionTriggerGroup));
                 scheduler.deleteJob(JobKey.jobKey(bookmarkedAuction.getId() + "/" + user.getId(), notifyBookmarkedAuctionJobGroup));
@@ -249,8 +247,7 @@ public class AuctionService {
         int auctionId = bookmarkedAuction.getId();
         int userId = user.getId();
         try {
-//            Date finishDate = new Date(bookmarkedAuction.getDate().getTime() - REMAINING_TIME_TO_NOTIFY);
-            Date finishDate = new Date(System.currentTimeMillis() + 10000);
+            Date finishDate = new Date(bookmarkedAuction.getDate().getTime() - REMAINING_TIME_TO_NOTIFY);
             if (finishDate.after(new Date())) {
                 JobDetail jobDetail = buildNotifyJobDetail(user, bookmarkedAuction);
                 Trigger trigger = buildNotifyJobTrigger(jobDetail, finishDate, userId, auctionId);
@@ -268,7 +265,7 @@ public class AuctionService {
         int auctionId = addedAuction.getId();
         try {
             Date finishDate = addedAuction.getDate();
-            if (addedAuction.getState() == 0 && finishDate.after(new Date())) {
+            if (addedAuction.getState() != 1) {
                 JobDetail jobDetail = buildFakeBidJobDetail(addedAuction);
                 Trigger trigger = buildFakeBidJobTrigger(jobDetail, finishDate, auctionId);
                 scheduler.scheduleJob(jobDetail, trigger);
@@ -280,6 +277,7 @@ public class AuctionService {
         }
     }
 
+    @PostConstruct
     public void initialReschedule() {
         Iterable<User> users = userRepository.findAll();
         Iterable<Auction> auctions = auctionRepository.findAll();
@@ -291,6 +289,7 @@ public class AuctionService {
         for (Auction auction : auctions) {
             scheduleFakeBidOn(auction);
         }
+        logger.info("Rescheduled jobs successfully.");
     }
 
 

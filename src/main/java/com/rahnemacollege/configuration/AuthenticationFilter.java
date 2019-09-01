@@ -23,9 +23,7 @@ import com.rahnemacollege.util.TokenUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 
 @Component
-public class
-
-AuthenticationFilter extends OncePerRequestFilter {
+public class AuthenticationFilter extends OncePerRequestFilter {
 
     private UserDetailsService userDetailsService;
     private TokenUtil tokenUtil;
