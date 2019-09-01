@@ -12,6 +12,7 @@ import com.rahnemacollege.model.Bid;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.*;
+import com.rahnemacollege.util.NumberHandler;
 import com.rahnemacollege.util.exceptions.Message;
 import com.rahnemacollege.util.exceptions.MessageException;
 import org.quartz.*;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.*;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,6 +46,7 @@ public class AuctionService {
     private final PictureRepository pictureRepository;
     private final Logger logger;
     private final BidRepository bidRepository;
+    private final NumberHandler numberHandler = new NumberHandler();
 
     @Value("${server_ip}")
     private String ip;
@@ -118,7 +121,7 @@ public class AuctionService {
             throw new MessageException(Message.DATE_NULL);
 //        if (auctionDomain.getDate() - new Date().getTime() < 1800000L)
 //            throw new MessageException(Message.DATE_INVALID);
-        if (auctionDomain.getBasePrice() < 0)
+        if (numberHandler.createNumberLong(auctionDomain.getBasePrice()) < 0)
             throw new MessageException(Message.BASE_PRICE_NULL);
         if (auctionDomain.getMaxNumber() < 2)
             throw new MessageException(Message.MAX_NUMBER_TOO_LOW);
@@ -129,7 +132,8 @@ public class AuctionService {
     private Auction toAuction(AddAuctionDomain auctionDomain, User user) {
         Date date = new Date(auctionDomain.getDate());
         Category category = categoryRepository.findById(auctionDomain.getCategoryId()).orElseThrow(() -> new MessageException(Message.CATEGORY_INVALID));
-        Auction auction = new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(), auctionDomain.getBasePrice(), category, date, user, auctionDomain.getMaxNumber());
+        long basePrice = numberHandler.createNumberLong(auctionDomain.getBasePrice());
+        Auction auction = new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(), basePrice, category, date, user, auctionDomain.getMaxNumber());
         return auction;
     }
 

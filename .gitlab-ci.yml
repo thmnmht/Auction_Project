@@ -46,9 +46,10 @@ build:
       - build
       - .gradle
 
+
 gitab_mysql_service:
   stage: run_jobs
-  image: alpine:latest
+  image: nginx:alpine
   services:
     - mariadb:latest
   script:
