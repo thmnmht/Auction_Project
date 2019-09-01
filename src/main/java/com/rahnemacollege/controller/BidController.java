@@ -7,7 +7,6 @@ import com.rahnemacollege.model.Bid;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.service.BidService;
-import com.rahnemacollege.service.UserDetailsServiceImpl;
 import com.rahnemacollege.service.UserService;
 import com.rahnemacollege.util.MessageHandler;
 import com.rahnemacollege.util.TokenUtil;
@@ -31,8 +30,6 @@ public class BidController {
 
     @Autowired
     private BidService bidService;
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
     @Autowired
     private UserService userService;
     @Autowired

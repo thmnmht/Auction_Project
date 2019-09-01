@@ -75,7 +75,7 @@ public class MessageHandler {
     public void newBidMessage(int auctionId, long bidPrice, boolean fake) {
         JsonObject bidAlert = new JsonObject();
         bidAlert.addProperty("price", bidPrice);
-        bidAlert.addProperty("fake", bidPrice);
+        bidAlert.addProperty("fake", fake);
         template.convertAndSend("/auction/id/" + auctionId, bidAlert.toString());
     }
 
