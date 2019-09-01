@@ -49,7 +49,7 @@ build:
 
 gitab_mysql_service:
   stage: run_jobs
-  image: node:8-alpine:latest
+  image: nginx:alpine
   services:
     - mariadb:latest
   script:
