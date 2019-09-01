@@ -4,9 +4,13 @@ package com.rahnemacollege.test;
 import com.rahnemacollege.domain.AddAuctionDomain;
 import com.rahnemacollege.domain.AuctionDetail;
 import com.rahnemacollege.domain.AuctionDomain;
+import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
+import com.rahnemacollege.repository.AuctionRepository;
+import com.rahnemacollege.repository.PictureRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -29,7 +33,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class AuctionControllerTest extends InitTest {
 
-    private int auctionId = 2;
+
+
+    @Autowired
+    private AuctionRepository auctionRepository;
+
+    @Autowired
+    private PictureRepository pictureRepository;
 
     @Test
     public void getCategory() throws Exception {
@@ -46,18 +56,14 @@ public class AuctionControllerTest extends InitTest {
 
     @Test
     public void addAuction() throws Exception {
-        String request = createAddAuctionRequest("testADDAuction", "", 100, 5, 1, 1608883888000L);
-        System.err.println(request);
-        String response = mvc.perform(MockMvcRequestBuilders.post(ADD)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(request).header("auth", auth)
-        ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        AuctionDomain auctionDomain = gson.fromJson(response, AuctionDomain.class);
-        auctionId = auctionDomain.getId();
+        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", 100, 5, 1, 1608883888000L));
+        int auctionId = auctionDomain.getId();
         assertThat(auctionDomain.getTitle())
                 .isEqualTo("testADDAuction");
         assertThat(auctionDomain.isMine())
                 .isEqualTo(true);
+        auctionRepository.deleteById(auctionId);
+
     }
 
     @Test
@@ -103,23 +109,24 @@ public class AuctionControllerTest extends InitTest {
                 .content(request).header("auth", auth)
         ).andExpect(status().is(436));
 
-        request = createAddAuctionRequest("invalid date", "", 100, 5, 1, 1566025484715L);
+        /*request = createAddAuctionRequest("invalid date", "", 100, 5, 1, 1566025484715L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
-        ).andExpect(status().is(437));
+        ).andExpect(status().is(437));*/
 
-        request = createAddAuctionRequest("invalid date", "", 100, 5, 1, 1566025484715L);
+        /*request = createAddAuctionRequest("invalid date", "", 100, 5, 1, 1566025484715L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
-        ).andExpect(status().is(437));
+        ).andExpect(status().is(437));*/
 
     }
 
     @Test
     public void toggleBookmark() throws Exception {
-        AuctionDomain auctionDomain = getAuction(auctionId);
+        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", 100, 5, 1, 1608883888000L));
+        int auctionId = auctionDomain.getId();
         assertThat(auctionDomain.isBookmark())
                 .isEqualTo(false);
         mvc.perform(MockMvcRequestBuilders.post(ADD_BOOKMARK + "?auctionId=" + auctionDomain.getId()).header("auth", auth)).andExpect(status().isOk());
@@ -130,10 +137,14 @@ public class AuctionControllerTest extends InitTest {
         auctionDomain = getAuction(auctionDomain.getId());
         assertThat(auctionDomain.isBookmark())
                 .isEqualTo(false);
+        auctionRepository.deleteById(auctionId);
     }
 
     @Test
     public void addPicture() throws Exception{
+        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", 100, 5, 1, 1608883888000L));
+        int auctionId = auctionDomain.getId();
+        System.err.println(auctionDomain.getId());
         FileInputStream fis = new FileInputStream(Image_PATH);
         MockMultipartFile multipartFile = new MockMultipartFile("file", fis);
         MockMultipartFile profilePicture = new MockMultipartFile("images", "Beautiful_Fantasy_Worlds_Wallpapers_31.jpg", "multipart/form-data", multipartFile.getBytes());
@@ -142,6 +153,8 @@ public class AuctionControllerTest extends InitTest {
                 .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
                 .header("auth", auth))
                 .andExpect(status().isOk());
+        pictureRepository.deleteByAuction_id(auctionId);
+        auctionRepository.deleteById(auctionId);
     }
 
     @Test
@@ -152,6 +165,8 @@ public class AuctionControllerTest extends InitTest {
 
     @Test
     public void findAuction() throws Exception{
+        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", 100, 5, 1, 1608883888000L));
+        int auctionId = auctionDomain.getId();
         String response = mvc.perform(MockMvcRequestBuilders.get(FIND + auctionId)
                 .header("auth",auth)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -159,6 +174,7 @@ public class AuctionControllerTest extends InitTest {
         AuctionDetail auctionDetail = gson.fromJson(response, AuctionDetail.class);
         assertThat(auctionDetail.getId())
                 .isEqualTo(auctionId);
+        auctionRepository.deleteById(auctionId);
 
     }
 
@@ -180,6 +196,15 @@ public class AuctionControllerTest extends InitTest {
         addAuctionDomain.setDescription(description);
         String request = gson.toJson(addAuctionDomain);
         return request;
+    }
+
+    private AuctionDomain addAuction(String request) throws Exception{
+        String response = mvc.perform(MockMvcRequestBuilders.post(ADD)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request).header("auth", auth)
+        ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        AuctionDomain auctionDomain = gson.fromJson(response, AuctionDomain.class);
+        return auctionDomain;
     }
 
 }
