@@ -62,7 +62,7 @@ public class FinalizeAuctionJob extends QuartzJobBean {
         }
         else {
             bidService.removeAuction(auction.getId());
-            messageHandler.ownerMessage(user.getId(), auction.getId(), auction.getTitle());
+            messageHandler.ownerMessage(auction.getOwner().getId(),auction.getId(),auction.getTitle());
             try {
                 emailService.notifyExpiredAuction(auction);
             } catch (MessagingException e) {
@@ -74,12 +74,4 @@ public class FinalizeAuctionJob extends QuartzJobBean {
         repository.save(auction);
 
     }
-
-
-
-
-
-
-
-
 }

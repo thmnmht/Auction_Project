@@ -29,12 +29,11 @@ public class User {
     private String picture;
 
 
-    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
 //    @RestResource(exported = false)
     @JoinTable(name = "users_bookmarks",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "bookmarks_id", referencedColumnName = "id"))
-
     private Set<Auction> bookmarks = new HashSet<Auction>();
 
     @OneToOne(mappedBy = "user")

@@ -65,10 +65,11 @@ public class AuctionController {
     public ResponseEntity<AuctionDomain> addPicture(@PathVariable int id, @RequestBody MultipartFile[] images) {
         log(" try to add pictures for her/his auction.");
         Auction auction = auctionService.findById(id);
-        if (images == null || images.length < 1)
-            throw new MessageException(Message.PICTURE_NULL);
-        pictureService.setAuctionPictures(auction, images);
-        log(" added picture for auction " + auction.getId());
+        if (images != null && images.length > 0){
+            pictureService.setAuctionPictures(auction, images);
+            log(" added picture for auction " + auction.getId());
+        }
+//            throw new MessageException(Message.PICTURE_NULL);
         User user = userDetailsService.getUser();
         int current = bidService.getMembers(auction);
         AuctionDomain auctionDomain = auctionService.toAuctionDomain(auction, user, current);
