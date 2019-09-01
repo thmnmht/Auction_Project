@@ -9,6 +9,7 @@ import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.AuctionRepository;
 import com.rahnemacollege.repository.BidRepository;
 import com.rahnemacollege.repository.OnlinePeopleRepository;
+import com.rahnemacollege.util.NumberHandler;
 import com.rahnemacollege.util.exceptions.MessageException;
 import com.rahnemacollege.util.exceptions.Message;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ public class BidService {
     private AuctionRepository auctionRepository;
 
     private OnlinePeopleRepository peopleRepository;
+    private final NumberHandler numberHandler = new NumberHandler();
 
     private Logger logger;
 
@@ -59,7 +61,7 @@ public class BidService {
             throw new MessageException(Message.ALREADY_BID);
         }
         long lastPrice = findLastPrice(auction);
-        long bidPrice = request.getPrice();
+        long bidPrice = numberHandler.createNumberLong(request.getPrice());
         if (bidPrice <= lastPrice)
             throw new MessageException(Message.PRICE_TOO_LOW);
         Bid bid = new Bid(auction, user, bidPrice, new Date());
