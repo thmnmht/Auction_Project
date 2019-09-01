@@ -10,18 +10,12 @@ image: gradle
 # runtime for each build is more reliable since the runtime is completely
 # isolated from any previous builds.
 
-services:
-  - mariadb
-
 variables:
   # Configure mysql environment variables (https://hub.docker.com/_/mysql/)
   MYSQL_DATABASE: "TestDB"
   MYSQL_ROOT_PASSWORD: "1q2w3e4r"
 
-  connect:
-    image: mysql
-    script:
-      - echo "SELECT 'OK';" | mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mysql "$MYSQL_DATABASE"
+
 
 
 before_script:
@@ -48,6 +42,15 @@ build:
 
 test:
   stage: test
+  image: alpine:latest
+    services:
+      - mariadb:latest
+    script:
+      - apk --no-cache add mysql-client
+      - mysql --version
+      - sleep 20
+      - echo "SHOW databases;"| mysql -u root -p"$MYSQL_ROOT_PASSWORD" -h 127.0.0.1 "${MYSQL_DATABASE}"
+
   script: gradle check
   cache:
     key: "$CI_COMMIT_REF_NAME"
