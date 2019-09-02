@@ -43,12 +43,12 @@ build:
 prepare:
   stage: prepare
   image: mysql
-    script:
-      - service mysql start
-      - echo "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('password');" | mysql -u root
-      - echo "SELECT 'OK';" | mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -h mysql "$MYSQL_DATABASE"
-      - mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -h localhost < "data/db/scripts/create-db.sql"
-      - mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -h localhost < "data/db/scripts/init-db-tables.sql"
+  script:
+    - service mysql start
+    - echo "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('password');" | mysql -u root
+    - echo "SELECT 'OK';" | mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -h mysql "$MYSQL_DATABASE"
+    - mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -h localhost < "data/db/scripts/create-db.sql"
+    - mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -h localhost < "data/db/scripts/init-db-tables.sql"
 
 
 
