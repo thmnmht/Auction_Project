@@ -17,8 +17,8 @@ variables:
 
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
-  - apk update -qq
-  - apk install -qq git
+  - apt-get update -qq
+  - apt-get install -qq git
   - 'which ssh-agent || ( apt install -qq openssh-client )'
   - eval $(ssh-agent -s)
   - ssh-add <(echo "$SSH_PRIVATE_KEY" | base64 -d)
