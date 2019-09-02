@@ -87,7 +87,7 @@ public class AuctionController {
         int members = bidService.getMembers(auction);
         AuctionDomain auctionDomain = auctionService.toAuctionDomain(auction, user, members);
         User winner = auction.getWinner();
-        AuctionDetail auctionDetail = null;
+        AuctionDetail auctionDetail;
         if (winner != null)
             auctionDetail = new AuctionDetail(auctionDomain, auction.getDescription(), lastPrice, new UserDomain(winner), latestBidTime);
         else
