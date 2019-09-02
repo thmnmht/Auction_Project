@@ -27,7 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,7 +41,6 @@ public class AuctionService {
     private final CategoryRepository categoryRepository;
     private final PictureRepository pictureRepository;
     private final Logger logger;
-    private final BidRepository bidRepository;
     private final NumberHandler numberHandler = new NumberHandler();
 
     @Value("${server_ip}")
@@ -67,12 +65,11 @@ public class AuctionService {
 
     @Autowired
     public AuctionService(UserRepository userRepository, AuctionRepository auctionRepository, CategoryRepository categoryRepository,
-                          PictureRepository pictureRepository, BidRepository bidRepository) {
+                          PictureRepository pictureRepository) {
         this.userRepository = userRepository;
         this.auctionRepository = auctionRepository;
         this.categoryRepository = categoryRepository;
         this.pictureRepository = pictureRepository;
-        this.bidRepository = bidRepository;
         this.logger = LoggerFactory.getLogger(AuctionService.class);
     }
 
@@ -130,8 +127,7 @@ public class AuctionService {
         Date date = new Date(auctionDomain.getDate());
         Category category = categoryRepository.findById(auctionDomain.getCategoryId()).orElseThrow(() -> new MessageException(Message.CATEGORY_INVALID));
         long basePrice = numberHandler.createNumberLong(auctionDomain.getBasePrice());
-        Auction auction = new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(), basePrice, category, date, user, auctionDomain.getMaxNumber());
-        return auction;
+        return new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(), basePrice, category, date, user, auctionDomain.getMaxNumber());
     }
 
     public Auction findAuctionById(int id) {
@@ -146,7 +142,7 @@ public class AuctionService {
                 auction.getId(),
                 current,
                 auction.getState());
-        if (auction.getOwner().getId() == user.getId())
+        if (auction.getOwner().getId().equals(user.getId()))
             auctionDomain.setMine(true);
         String userEmail = user.getEmail();
         user = userRepository.findByEmail(userEmail).get();
@@ -174,8 +170,7 @@ public class AuctionService {
     }
 
     public Auction findById(int id) {
-        Auction auction = auctionRepository.findById(id).orElseThrow(() -> new MessageException(Message.AUCTION_NOT_FOUND));
-        return auction;
+        return auctionRepository.findById(id).orElseThrow(() -> new MessageException(Message.AUCTION_NOT_FOUND));
     }
 
 

@@ -65,7 +65,7 @@ public class AuctionController {
     public ResponseEntity<AuctionDomain> addPicture(@PathVariable int id, @RequestBody MultipartFile[] images) {
         log(" try to add pictures for her/his auction.");
         Auction auction = auctionService.findById(id);
-        if (images != null && images.length > 0){
+        if (images != null && images.length > 0) {
             pictureService.setAuctionPictures(auction, images);
             log(" added picture for auction " + auction.getId());
         }
@@ -87,7 +87,7 @@ public class AuctionController {
         int members = bidService.getMembers(auction);
         AuctionDomain auctionDomain = auctionService.toAuctionDomain(auction, user, members);
         User winner = auction.getWinner();
-        AuctionDetail auctionDetail = null;
+        AuctionDetail auctionDetail;
         if (winner != null)
             auctionDetail = new AuctionDetail(auctionDomain, auction.getDescription(), lastPrice, new UserDomain(winner), latestBidTime);
         else

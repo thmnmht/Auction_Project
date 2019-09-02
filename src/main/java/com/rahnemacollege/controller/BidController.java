@@ -9,7 +9,6 @@ import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.service.BidService;
 import com.rahnemacollege.service.UserService;
 import com.rahnemacollege.util.MessageHandler;
-import com.rahnemacollege.util.TokenUtil;
 import com.rahnemacollege.util.exceptions.MessageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,13 +33,12 @@ public class BidController {
     private UserService userService;
     @Autowired
     private AuctionService auctionService;
-    @Autowired
-    TokenUtil tokenUtil;
+
     private final Logger logger = LoggerFactory.getLogger(BidController.class);
-    private SimpMessagingTemplate template;
+
     private MessageHandler messageHandler;
+
     public BidController(SimpMessagingTemplate template) {
-        this.template = template;
         messageHandler = new MessageHandler(template);
     }
 
@@ -69,6 +67,7 @@ public class BidController {
         int current = bidService.enter(auction, user);
         messageHandler.subscribeMessage(auctionId, current);
     }
+
     @MessageExceptionHandler
     public void enterDenied(MessageException e, Message<?> message) throws Exception {
         logger.error("the exception is : " + e.getMessage());
