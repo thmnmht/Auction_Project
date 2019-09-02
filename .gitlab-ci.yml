@@ -1,4 +1,4 @@
-image: gradle
+
 
 image: ubuntu:16.04
 
@@ -30,6 +30,7 @@ before_script:
 
 build:
   stage: build
+  image: gradle
   script: gradle --build-cache assemble
   cache:
     key: "$CI_COMMIT_REF_NAME"
