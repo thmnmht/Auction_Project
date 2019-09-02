@@ -1,18 +1,8 @@
-# This file is a template, and might need editing before it works on your project.
-# This is the Gradle build system for JVM applications
-# https://gradle.org/
-# https://github.com/gradle/gradle
 image: ubuntu:16.04
-# image: gradle.centos
-image: gradle
-# Disable the Gradle daemon for Continuous Integration servers as correctness
-# is usually a priority over speed in CI environments. Using a fresh
-# runtime for each build is more reliable since the runtime is completely
-# isolated from any previous builds.
 
 stages:
   - build
-  - run_jobs
+  - prepare
   - test
   - deploy
 
@@ -38,6 +28,7 @@ before_script:
 
 build:
   stage: build
+  image: gradle
   script: gradle --build-cache assemble
   cache:
     key: "$CI_COMMIT_REF_NAME"
@@ -47,17 +38,14 @@ build:
       - .gradle
 
 
-gitab_mysql_service:
-  stage: run_jobs
-  image: nginx:alpine
+prepare:
+  stage: prepare
+  image: java:openjdk-8
   services:
-    - mariadb:latest
+    - mariadb
   script:
-    - apk update && apk --no-cache add mysql-client
-    - mysql --version
-    - sleep 20
-    - echo "SHOW databases;"| mysql -u root -p"$MYSQL_ROOT_PASSWORD" -h 127.0.0.1 "${MYSQL_DATABASE}"
-
+    - apt-get update && apt-get --assume-yes install mysql-client
+    - mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mariadb < "data/db/scripts/create-db.sql"
 
 
 test:
