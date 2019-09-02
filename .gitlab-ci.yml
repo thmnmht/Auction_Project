@@ -4,7 +4,7 @@
 # https://github.com/gradle/gradle
 image: ubuntu:16.04
 # image: gradle.centos
-image: gradle
+        #image: gradle
 # Disable the Gradle daemon for Continuous Integration servers as correctness
 # is usually a priority over speed in CI environments. Using a fresh
 # runtime for each build is more reliable since the runtime is completely
