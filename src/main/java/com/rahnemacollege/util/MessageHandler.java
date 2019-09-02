@@ -2,6 +2,7 @@ package com.rahnemacollege.util;
 
 import com.google.gson.JsonObject;
 import com.rahnemacollege.model.Auction;
+import com.rahnemacollege.util.exceptions.Message;
 import com.rahnemacollege.util.exceptions.MessageException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
@@ -94,6 +95,10 @@ public class MessageHandler {
         if (message.equals(com.rahnemacollege.util.exceptions.Message.AUCTION_IS_FULL))
             return 7;
         if (message.equals(com.rahnemacollege.util.exceptions.Message.THE_AUCTION_DIDNT_START_YET))
+            return 7;
+        if(message.equals(Message.THE_USER_IS_IN_ANOTHER_AUCTION))
+            return 7;
+        if(message.equals(Message.THE_USER_WAS_IN_AUCTION))
             return 7;
         return 2;
     }

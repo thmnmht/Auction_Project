@@ -15,21 +15,21 @@ public class OnlinePeopleRepository {
     private Map<Integer, Member> usersInAuction;
     private Map<String, Subscription> subscriptionIds;
 
-    class Member{
+    class Member {
         List<User> users = new ArrayList<>();
         User owner;
 
-        void addUser(User user){
+        void addUser(User user) {
             users.add(user);
         }
 
-        void addOwner(User user){
+        void addOwner(User user) {
             owner = user;
         }
 
-        void removeUser(User user){
+        void removeUser(User user) {
             users.remove(user);
-            if(user != null && user.equals(owner))
+            if (user != null && user.equals(owner))
                 owner = null;
         }
     }
@@ -39,7 +39,7 @@ public class OnlinePeopleRepository {
         subscriptionIds = new HashMap<>();
     }
 
-    public static OnlinePeopleRepository getInstance(){
+    public static OnlinePeopleRepository getInstance() {
         return instance;
     }
 
@@ -48,16 +48,16 @@ public class OnlinePeopleRepository {
     }
 
     public List<User> getMembers(int auctionId) {
-        if(usersInAuction.get(auctionId) == null)
+        if (usersInAuction.get(auctionId) == null)
             return new ArrayList<>();
         return usersInAuction.get(auctionId).users;
     }
 
     public void add(Auction auction, User user) {
         if (usersInAuction.containsKey(auction.getId())) {
-            if(auction.getOwner().equals(user))
+            if (auction.getOwner().equals(user))
                 usersInAuction.get(auction.getId()).addOwner(user);
-            else{
+            else {
                 int maxNumber = auction.getMaxNumber();
                 int onlineNumber = usersInAuction.get(auction.getId()).users.size();
                 if (maxNumber <= onlineNumber) {
@@ -67,7 +67,7 @@ public class OnlinePeopleRepository {
             }
         } else {
             Member members = new Member();
-            if(auction.getOwner().equals(user))
+            if (auction.getOwner().equals(user))
                 members.addOwner(user);
             else
                 members.addUser(user);
@@ -75,15 +75,15 @@ public class OnlinePeopleRepository {
         }
     }
 
-    public boolean isInAuction(Auction auction, User user) {
-        if (usersInAuction.keySet().contains(auction.getId())) {
-            if (usersInAuction.get(auction.getId()).users.contains(user))
+    public boolean isInAuction(int auctionId, User user) {
+        if (usersInAuction.keySet().contains(auctionId)) {
+            if (usersInAuction.get(auctionId).users.contains(user))
                 return true;
         }
         return false;
     }
 
-    public void removeAuction(int auctionId){
+    public void removeAuction(int auctionId) {
         usersInAuction.remove(auctionId);
     }
 
@@ -94,6 +94,16 @@ public class OnlinePeopleRepository {
 
     public void addSubscriptionId(String subscriptionId, Subscription subscription) {
         subscriptionIds.put(subscriptionId, subscription);
+    }
+
+    public boolean isInAuction(User user){
+        Set<Integer> auctions = usersInAuction.keySet();
+        for (int auctionId :
+                auctions) {
+            if (isInAuction(auctionId, user))
+                return true;
+        }
+        return false;
     }
 
     public Subscription getAuctionId(String subscriptionId) {
