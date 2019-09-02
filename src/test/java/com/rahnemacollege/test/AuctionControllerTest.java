@@ -56,7 +56,7 @@ public class AuctionControllerTest extends InitTest {
 
     @Test
     public void addAuction() throws Exception {
-        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", 100, 5, 1, 1608883888000L));
+        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", "100", 5, 1, 1608883888000L));
         int auctionId = auctionDomain.getId();
         assertThat(auctionDomain.getTitle())
                 .isEqualTo("testADDAuction");
@@ -68,42 +68,42 @@ public class AuctionControllerTest extends InitTest {
 
     @Test
     public void invalidAddAuction() throws Exception {
-        String request = createAddAuctionRequest("invalid base price", "", -1, 5, 1, 15660254847150L);
+        String request = createAddAuctionRequest("invalid base price", "", "-1", 5, 1, 15660254847150L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
         ).andExpect(status().is(432));
-        request = createAddAuctionRequest("invalid max number", "", 100, 1, 1, 15660254847150L);
+        request = createAddAuctionRequest("invalid max number", "", "100", 1, 1, 15660254847150L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
         ).andExpect(status().is(434));
 
-        request = createAddAuctionRequest("", "", 100, 5, 1, 15660254847150L);
+        request = createAddAuctionRequest("", "", "100", 5, 1, 15660254847150L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
         ).andExpect(status().is(430));
 
-        request = createAddAuctionRequest("description too long", LONG_STRING, 100, 5, 1, 15660254847150L);
+        request = createAddAuctionRequest("description too long", LONG_STRING, "100", 5, 1, 15660254847150L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
         ).andExpect(status().is(452));
 
-        request = createAddAuctionRequest(LONG_STRING, "", 100, 5, 1, 15660254847150L);
+        request = createAddAuctionRequest(LONG_STRING, "", "100", 5, 1, 15660254847150L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
         ).andExpect(status().is(451));
 
-        request = createAddAuctionRequest("max number too high", "", 100, 16, 1, 15660254847150L);
+        request = createAddAuctionRequest("max number too high", "", "100", 16, 1, 15660254847150L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
         ).andExpect(status().is(435));
 
-        request = createAddAuctionRequest("invalid category id", "", 100, 5, 0, 15660254847150L);
+        request = createAddAuctionRequest("invalid category id", "", "100", 5, 0, 15660254847150L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
@@ -125,7 +125,7 @@ public class AuctionControllerTest extends InitTest {
 
     @Test
     public void toggleBookmark() throws Exception {
-        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", 100, 5, 1, 1608883888000L));
+        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", "100", 5, 1, 1608883888000L));
         int auctionId = auctionDomain.getId();
         assertThat(auctionDomain.isBookmark())
                 .isEqualTo(false);
@@ -142,7 +142,7 @@ public class AuctionControllerTest extends InitTest {
 
     @Test
     public void addPicture() throws Exception{
-        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", 100, 5, 1, 1608883888000L));
+        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", "100", 5, 1, 1608883888000L));
         int auctionId = auctionDomain.getId();
         System.err.println(auctionDomain.getId());
         FileInputStream fis = new FileInputStream(Image_PATH);
@@ -165,7 +165,7 @@ public class AuctionControllerTest extends InitTest {
 
     @Test
     public void findAuction() throws Exception{
-        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", 100, 5, 1, 1608883888000L));
+        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", "100", 5, 1, 1608883888000L));
         int auctionId = auctionDomain.getId();
         String response = mvc.perform(MockMvcRequestBuilders.get(FIND + auctionId)
                 .header("auth",auth)
@@ -186,7 +186,7 @@ public class AuctionControllerTest extends InitTest {
         return gson.fromJson(response, AuctionDomain.class);
     }
 
-    private String createAddAuctionRequest(String title, String description, long base_price, int max_number, int category_id, long date) throws Exception {
+    private String createAddAuctionRequest(String title, String description, String base_price, int max_number, int category_id, long date) throws Exception {
         AddAuctionDomain addAuctionDomain = new AddAuctionDomain();
         addAuctionDomain.setTitle(title);
         addAuctionDomain.setBasePrice(base_price);

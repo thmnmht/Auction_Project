@@ -54,7 +54,7 @@ public class BidService {
             throw new MessageException(Message.THE_USER_IS_THE_OWNER_OF_THE_AUCTION);
         if (auction.getDate().getTime() > new Date().getTime())
             throw new MessageException(Message.THE_AUCTION_DIDNT_START_YET);
-        if (!peopleRepository.isInAuction(auction, user))
+        if (!peopleRepository.isInAuction(auction.getId(), user))
             throw new MessageException(Message.THE_USER_IS_NOT_IN_AUCTION);
         if (bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).isPresent()
                 && bidRepository.findTopByAuction_idOrderByIdDesc(auction.getId()).get().getUser().getId().equals(user.getId())) {
@@ -89,9 +89,12 @@ public class BidService {
     public int enter(Auction auction, User user) {
         if (auction.getDate().getTime() > new Date().getTime())
             throw new MessageException(Message.THE_AUCTION_DIDNT_START_YET);
-        if (peopleRepository.isInAuction(auction, user)) {
+        if (peopleRepository.isInAuction(auction.getId(), user)) {
             logger.warn("the user with id " + user.getId() + "was in auction with id " + auction.getId());
-            return peopleRepository.getMembers(auction.getId()).size();
+            throw new MessageException(Message.THE_USER_WAS_IN_AUCTION);
+        }
+        if(peopleRepository.isInAuction(user)){
+            throw new MessageException(Message.THE_USER_IS_IN_ANOTHER_AUCTION);
         }
         if (auction.getState() == 1)
             throw new MessageException(Message.FINISHED_AUCTION);

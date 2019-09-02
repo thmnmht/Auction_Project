@@ -65,7 +65,6 @@ public class BidController {
         StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         Auction auction = auctionService.findById(auctionId);
         User user = userService.findUserId(Integer.valueOf(headerAccessor.getUser().getName()));
-        bidService.removeFromAllAuction(user);
         bidService.addSubscriptionId(String.valueOf(user.getId()), auction, user);
         int current = bidService.enter(auction, user);
         messageHandler.subscribeMessage(auctionId, current);
