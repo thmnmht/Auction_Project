@@ -75,11 +75,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     Authentication u = new UsernamePasswordAuthenticationToken(user.getId().toString(), user.getPassword(), new ArrayList<>());
                     headerAccessor.setUser(u);
                     logger.info("the user with session id " + headerAccessor.getSessionId() + " connected");
-                }
-                if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
-                    System.err.println(headerAccessor.getDestination().toString());
-                }
-                if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())) {
+                } else if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())) {
                     User user = userService.findUserId(Integer.valueOf(headerAccessor.getUser().getName()));
                     bidService.removeFromAllAuction(user);
                 }

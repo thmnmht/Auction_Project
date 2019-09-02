@@ -40,7 +40,7 @@ public class FakeBidJob extends QuartzJobBean {
         Auction auction = (Auction) jobDataMap.get("auction");
         Bid bid = new Bid();
         bid.setAuction(auction);
-        bid.setPrice(0L);
+        bid.setPrice(auction.getBasePrice());
         bid.setUser(auction.getOwner());
         bid.setDate(auction.getDate());
         bidRepository.save(bid);
