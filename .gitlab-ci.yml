@@ -12,10 +12,12 @@ image: gradle
 
 stages:
   - build
-  - run_jobs
+  - prepare
   - test
   - deploy
 
+services:
+  - mysql
 
 variables:
   # Configure mysql environment variables (https://hub.docker.com/_/mysql/)
@@ -47,16 +49,15 @@ build:
       - .gradle
 
 
-gitab_mysql_service:
-  stage: run_jobs
-  image: nginx:alpine
-  services:
-    - mariadb:latest
-  script:
-    - apk update && apk --no-cache add mysql-client
-    - mysql --version
-    - sleep 20
-    - echo "SHOW databases;"| mysql -u root -p"$MYSQL_ROOT_PASSWORD" -h 127.0.0.1 "${MYSQL_DATABASE}"
+prepare:
+  stage: prepare
+  image: mysql
+    script:
+      - service mysql start
+      - echo "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('password');" | mysql -u root
+      - echo "SELECT 'OK';" | mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -h mysql "$MYSQL_DATABASE"
+      - mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -h localhost < "data/db/scripts/create-db.sql"
+      - mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -h localhost < "data/db/scripts/init-db-tables.sql"
 
 
 

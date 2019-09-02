@@ -22,8 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class InitTest {
-
-
     @Autowired
     protected MockMvc mvc;
     protected String auth, auth2;

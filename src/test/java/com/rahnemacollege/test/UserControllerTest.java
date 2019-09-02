@@ -184,7 +184,7 @@ public class UserControllerTest extends InitTest {
                 .params(params))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-//        System.err.println(response);
+        System.err.println(response);
         assertThat(response.contains("\"size\" : 4,")).isTrue();
         assertThat(response.contains("\"totalElements\" : 9,")).isTrue();
         assertThat(response.contains("\"totalPages\" : 3,")).isTrue();

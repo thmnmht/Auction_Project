@@ -189,7 +189,7 @@ public class AuctionControllerTest extends InitTest {
     private String createAddAuctionRequest(String title, String description, long base_price, int max_number, int category_id, long date) throws Exception {
         AddAuctionDomain addAuctionDomain = new AddAuctionDomain();
         addAuctionDomain.setTitle(title);
-        addAuctionDomain.setBasePrice(base_price);
+        addAuctionDomain.setBasePrice(String.valueOf(base_price));
         addAuctionDomain.setCategoryId(category_id);
         addAuctionDomain.setDate(date);
         addAuctionDomain.setMaxNumber(max_number);
