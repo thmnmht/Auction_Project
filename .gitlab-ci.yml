@@ -1,4 +1,3 @@
-
 image: ubuntu:16.04
 
 stages:
@@ -17,7 +16,6 @@ variables:
 
 
 before_script:
-  - image: ubuntu:16.04
   - export GRADLE_USER_HOME=`pwd`/.gradle
   - apt-get update -qq
   - apt-get install -qq git
