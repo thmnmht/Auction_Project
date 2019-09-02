@@ -43,7 +43,7 @@ prepare:
     - mariadb
   script:
     - apt-get update && apt-get --assume-yes install mysql-client -y -qq
-    - mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mariadb < create database "$MYSQL_DATABASE" ;
+    - mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mariadb < "data/create_db.sql"
 
 
 test:
