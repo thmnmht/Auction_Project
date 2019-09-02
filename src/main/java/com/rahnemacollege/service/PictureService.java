@@ -55,9 +55,8 @@ public class PictureService {
         imageWriter.setOutput(imageOutputStream);
         ImageWriteParam imageWriteParam = imageWriter.getDefaultWriteParam();
         imageWriteParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-        System.err.println(pic.getSize());
-        if(pic.getSize() > 2000000){
-            imageWriteParam.setCompressionQuality(0.2F);
+        if(pic.getSize() > 3000000){
+            imageWriteParam.setCompressionQuality(0.5F);
         }else{
             imageWriteParam.setCompressionQuality(1.0F);
         }
