@@ -164,6 +164,10 @@ public class AuctionService {
         return auctionDomain;
     }
 
+    public Page<AuctionDomain> toAuctionDomainPage(Page<Auction> auctionPage, User user, int current) {
+        return auctionPage.map(a -> toAuctionDomain(a, user, current));
+    }
+
     public List<Category> getCategory() {
         return Lists.newArrayList(categoryRepository.findAll());
     }
@@ -178,35 +182,41 @@ public class AuctionService {
     }
 
 
-    public List<Auction> findByTitle(String title, int categoryId, boolean hottest) {
-        List<Auction> auctions;
+    public Page<Auction> findByTitle(String title, int categoryId, boolean hottest, int page, int size) {
+        Page<Auction> auctions;
+        PageRequest pageRequest = new PageRequest(page, size);
+        List<Auction> auctionList;
+
         if (hottest) {
-            auctions = auctionRepository.findHottest();
+            auctions = auctionRepository.findHottest(pageRequest);
             if (categoryId != 0) {
-                auctions = auctions.stream().filter(a -> a.getCategory().getId() == categoryId)
+                auctionList = auctions.stream().filter(a -> a.getCategory().getId() == categoryId)
                         .collect(Collectors.toList());
+                auctions = new PageImpl<>(auctionList, pageRequest, auctionList.size());
             }
         } else {
             if (categoryId == 0) {
-                auctions = auctionRepository.findByStateNotOrderByIdDesc(1);
+                auctions = auctionRepository.findByStateNotOrderByIdDesc(1, pageRequest);
             } else {
-                auctions = auctionRepository.findByStateNotAndCategory_idOrderByIdDesc(1, categoryId);
+                auctions = auctionRepository.findByStateNotAndCategory_idOrderByIdDesc(1, categoryId, pageRequest);
             }
         }
         if (title != null && title.length() > 0) {
             Pattern pattern = Pattern.compile(title, Pattern.CASE_INSENSITIVE);
-            auctions = auctions.stream()
+
+            auctionList = auctions.stream()
                     .filter(a -> {
                         Matcher m = pattern.matcher(a.getTitle());
                         return m.find();
                     })
                     .collect(Collectors.toList());
+            auctions = new PageImpl<>(auctionList, pageRequest, auctionList.size());
         }
         return auctions;
     }
 
-    public List<Auction> findByOwner(User user) {
-        return auctionRepository.findByOwner_idOrderByIdDesc(user.getId());
+    public Page<Auction> findByOwner(User user, int page, int size) {
+        return auctionRepository.findByOwner_idOrderByIdDesc(user.getId(), new PageRequest(page, size));
     }
 
     public Page<AuctionDomain> toPage(List<AuctionDomain> list, int page, int size) {

@@ -37,7 +37,7 @@ public class MessageHandler {
         template.convertAndSendToUser(String.valueOf(userId), "/app/all", alert.toString());
     }
 
-    public void ownerMessage(int userId,int auctionId,String title){
+    public void ownerMessage(int userId, int auctionId, String title) {
         JsonObject alert = new JsonObject();
         alert.addProperty("type", 8);
         alert.addProperty("auctionId", auctionId);

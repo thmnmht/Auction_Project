@@ -11,6 +11,7 @@ import com.rahnemacollege.util.exceptions.MessageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
@@ -151,8 +152,8 @@ public class UserController {
                                                                    @RequestParam(value = "size") int size,
                                                                    PagedResourcesAssembler<AuctionDomain> assembler) {
         User user = detailsService.getUser();
-        List<Auction> auctions = auctionService.findByOwner(user);
-        return toAuctionDomainPage(auctions, user, page, size, assembler);
+        Page<Auction> auctions = auctionService.findByOwner(user, page, size);
+        return toAuctionDomainPage(auctions, user, assembler);
     }
 
     @GetMapping("/bookmarks")
@@ -160,8 +161,10 @@ public class UserController {
                                                                  @RequestParam("size") int size,
                                                                  PagedResourcesAssembler<AuctionDomain> assembler) {
         User user = detailsService.getUser();
-        List<Auction> auctions = userService.getUserBookmarks(user);
-        return toAuctionDomainPage(auctions, user, page, size, assembler);
+        List<AuctionDomain> auctions = userService.getUserBookmarks(user).stream().map(a ->
+                auctionService.toAuctionDomain(a, user, bidService.getMembers(a))).collect(Collectors.toList());
+        Page<AuctionDomain> auctionDomainPage = auctionService.toPage(auctions, page, size);
+        return assembler.toResource(auctionDomainPage);
 
     }
 
@@ -211,14 +214,12 @@ public class UserController {
         }
     }
 
-    private PagedResources<Resource<AuctionDomain>> toAuctionDomainPage(List<Auction> auctions,
+    private PagedResources<Resource<AuctionDomain>> toAuctionDomainPage(Page<Auction> auctions,
                                                                         User user,
-                                                                        int page,
-                                                                        int size,
                                                                         PagedResourcesAssembler<AuctionDomain> assembler) {
-        List<AuctionDomain> auctionDomains = auctions.stream().map(a ->
-                auctionService.toAuctionDomain(a, user, bidService.getMembers(a))).collect(Collectors.toList());
-        return assembler.toResource(auctionService.toPage(auctionDomains, page, size));
+        Page<AuctionDomain> auctionDomains = auctions.map(a ->
+                auctionService.toAuctionDomain(a, user, bidService.getMembers(a)));
+        return assembler.toResource(auctionDomains);
     }
 
 }
