@@ -14,6 +14,7 @@ variables:
 
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
+  - apt-key adv --recv-keys --keyserver keyserver.ubuntu.com AA8E81B4331F7F50
   - apt-get update -y -qq
   - apt-get install -qq git
   - apt-get install mysql-client -y -qq
