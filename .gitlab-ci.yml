@@ -6,8 +6,6 @@ stages:
   - test
   - deploy
 
-services:
-  - mysql
 
 variables:
   # Configure mysql environment variables (https://hub.docker.com/_/mysql/)
@@ -42,14 +40,12 @@ build:
 
 prepare:
   stage: prepare
-  image: mysql
+  image: java:openjdk-8
+  services:
+    - mariadb
   script:
-    - service mysql start
-    - echo "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('password');" | mysql -u root
-    - echo "SELECT 'OK';" | mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -h mysql "$MYSQL_DATABASE"
-    - mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -h localhost < "data/db/scripts/create-db.sql"
-    - mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -h localhost < "data/db/scripts/init-db-tables.sql"
-
+    - apt-get update && apt-get --assume-yes install mysql-client
+    - mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mariadb < "data/db/scripts/create-db.sql"
 
 
 test:
