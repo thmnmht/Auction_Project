@@ -2,22 +2,20 @@ image: ubuntu:16.04
 
 stages:
   - build
-  - run_jobs
+  - prepare
   - test
   - deploy
 
 
 variables:
-  # Configure mysql environment variables (https://hub.docker.com/_/mysql/)
   MYSQL_DATABASE: "TestDB"
   MYSQL_ROOT_PASSWORD: "1q2w3e4r"
 
 
-
-
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
-  - apt-get update -qq
+  - apt-get update && apt-get install -y gnupg2
+  - apt-key adv --recv-keys --keyserver keyserver.ubuntu.com AA8E81B4331F7F50
   - apt-get install -qq git
   - 'which ssh-agent || ( apt install -qq openssh-client )'
   - eval $(ssh-agent -s)
@@ -38,17 +36,14 @@ build:
       - .gradle
 
 
-gitab_mysql_service:
-  stage: run_jobs
-  image: nginx:alpine
+prepare:
+  stage: prepare
+  image: java:openjdk-8
   services:
-    - mariadb:latest
+    - mariadb
   script:
-    - apk update && apk --no-cache add mysql-client
-    - mysql --version
-    - sleep 20
-    - echo "SHOW databases;"| mysql -u root -p"$MYSQL_ROOT_PASSWORD" -h 127.0.0.1 "${MYSQL_DATABASE}"
-
+    - apt-get update && apt-get --assume-yes install mysql-client -y -qq
+    - mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mariadb < "data/create_db.sql"
 
 
 test:

@@ -27,14 +27,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -181,32 +178,19 @@ public class AuctionService {
     public Page<Auction> findByTitle(String title, int categoryId, boolean hottest, int page, int size) {
         Page<Auction> auctions;
         PageRequest pageRequest = new PageRequest(page, size);
-        List<Auction> auctionList;
 
         if (hottest) {
-            auctions = auctionRepository.findHottest(pageRequest);
-            if (categoryId != 0) {
-                auctionList = auctions.stream().filter(a -> a.getCategory().getId() == categoryId)
-                        .collect(Collectors.toList());
-                auctions = new PageImpl<>(auctionList, pageRequest, auctionList.size());
+            if (categoryId == 0)
+                auctions = auctionRepository.findHottest(title, pageRequest);
+            else {
+                auctions = auctionRepository.findHottestByCategoryId(categoryId, title, pageRequest);
             }
         } else {
             if (categoryId == 0) {
-                auctions = auctionRepository.findByStateNotOrderByIdDesc(1, pageRequest);
+                auctions = auctionRepository.findByStateNotAndTitleContainingOrderByIdDesc(1, title, pageRequest);
             } else {
-                auctions = auctionRepository.findByStateNotAndCategory_idOrderByIdDesc(1, categoryId, pageRequest);
+                auctions = auctionRepository.findByStateNotAndCategory_idAndTitleContainingOrderByIdDesc(1, categoryId, title, pageRequest);
             }
-        }
-        if (title != null && title.length() > 0) {
-            Pattern pattern = Pattern.compile(title, Pattern.CASE_INSENSITIVE);
-
-            auctionList = auctions.stream()
-                    .filter(a -> {
-                        Matcher m = pattern.matcher(a.getTitle());
-                        return m.find();
-                    })
-                    .collect(Collectors.toList());
-            auctions = new PageImpl<>(auctionList, pageRequest, auctionList.size());
         }
         return auctions;
     }
