@@ -113,8 +113,8 @@ public class AuctionService {
             throw new MessageException(Message.DESCRIPTION_TOO_LONG);
         if (auctionDomain.getDate() < 1)
             throw new MessageException(Message.DATE_NULL);
-//        if (auctionDomain.getDate() - new Date().getTime() < 1800000L)
-//            throw new MessageException(Message.DATE_INVALID);
+        if (auctionDomain.getDate() - new Date().getTime() < 1800000L)
+            throw new MessageException(Message.DATE_INVALID);
         if (numberHandler.createNumberLong(auctionDomain.getBasePrice()) < 0)
             throw new MessageException(Message.BASE_PRICE_NULL);
         if (auctionDomain.getMaxNumber() < 2)
@@ -155,10 +155,6 @@ public class AuctionService {
         ).collect(Collectors.toList());
         auctionDomain.setPictures(auctionPictures);
         return auctionDomain;
-    }
-
-    public Page<AuctionDomain> toAuctionDomainPage(Page<Auction> auctionPage, User user, int current) {
-        return auctionPage.map(a -> toAuctionDomain(a, user, current));
     }
 
     public List<Category> getCategory() {
@@ -270,7 +266,7 @@ public class AuctionService {
         }
     }
 
-    /*@PostConstruct
+    @PostConstruct
     public void initialReschedule() {
         Iterable<User> users = userRepository.findAll();
         Iterable<Auction> auctions = auctionRepository.findAll();
@@ -283,7 +279,7 @@ public class AuctionService {
             scheduleFakeBidOn(auction);
         }
         logger.info("Rescheduled jobs successfully.");
-    }*/
+    }
 
 
     private Trigger buildNotifyJobTrigger(JobDetail jobDetail, Date finishDate, int userId, int auctionId) {

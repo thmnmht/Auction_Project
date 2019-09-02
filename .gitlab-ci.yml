@@ -8,16 +8,14 @@ stages:
 
 
 variables:
-  # Configure mysql environment variables (https://hub.docker.com/_/mysql/)
   MYSQL_DATABASE: "TestDB"
   MYSQL_ROOT_PASSWORD: "1q2w3e4r"
 
 
-
-
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
-  - apt-get update -qq
+  - apt-get update && apt-get install -y gnupg2
+  - apt-key adv --recv-keys --keyserver keyserver.ubuntu.com AA8E81B4331F7F50
   - apt-get install -qq git
   - 'which ssh-agent || ( apt install -qq openssh-client )'
   - eval $(ssh-agent -s)
@@ -44,8 +42,8 @@ prepare:
   services:
     - mariadb
   script:
-    - apt-get update && apt-get --assume-yes install mysql-client
-    - mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mariadb < "data/db/scripts/create-db.sql"
+    - apt-get update && apt-get --assume-yes install mysql-client -y -qq
+    - mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mariadb < "data/create_db.sql"
 
 
 test:
