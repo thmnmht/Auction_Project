@@ -8,17 +8,15 @@ stages:
 
 
 variables:
-  # Configure mysql environment variables (https://hub.docker.com/_/mysql/)
   MYSQL_DATABASE: "TestDB"
   MYSQL_ROOT_PASSWORD: "1q2w3e4r"
 
 
-
-
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
-  - apt-get update -qq
+  - apt-get update -y -qq
   - apt-get install -qq git
+  - apt-get install mysql-client -y -qq
   - 'which ssh-agent || ( apt install -qq openssh-client )'
   - eval $(ssh-agent -s)
   - ssh-add <(echo "$SSH_PRIVATE_KEY" | base64 -d)
