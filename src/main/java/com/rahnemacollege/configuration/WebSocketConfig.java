@@ -75,7 +75,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     bidService.addDeviceId(deviceId, user);
                     Authentication u = new UsernamePasswordAuthenticationToken(deviceId, user.getPassword(), new ArrayList<>());
                     headerAccessor.setUser(u);
-                    logger.info("the user with session id " + headerAccessor.getSessionId() + " connected");
+                    logger.info("the user with id " + user.getId() + " connected with deviceId " + deviceId);
                 }
                 if (headerAccessor != null && StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
                     System.err.println(headerAccessor.getDestination());

@@ -111,6 +111,7 @@ public class OnlinePeopleRepository {
     }
 
     public boolean userExist(User user){
+        System.err.println(deviceIds.containsValue(user.getId()));
         return deviceIds.containsValue(user.getId());
     }
 
@@ -129,8 +130,9 @@ public class OnlinePeopleRepository {
     }
 
     public String getDeviceId(User user){
-        if(!userExist(user))
+        if(!userExist(user)){
             throw new MessageException(Message.USER_NOT_FOUND);
+        }
         Set<String> devIds = deviceIds.keySet();
         for (String deviceId :
                 devIds) {
