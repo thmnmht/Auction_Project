@@ -36,9 +36,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private UserService userService;
     private BidService bidService;
 
-    @Autowired
-    private SimpMessagingTemplate template;
-
     public WebSocketConfig(JwtTokenUtil tokenUtil, UserService userService, BidService bidService) {
         this.tokenUtil = tokenUtil;
         this.userService = userService;
@@ -82,10 +79,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 }
                 if (headerAccessor != null && StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
                     System.err.println(headerAccessor.getDestination());
-                }
-                if (headerAccessor != null && StompCommand.DISCONNECT.equals(headerAccessor.getCommand()) && headerAccessor.getUser() != null) {
+                }if (headerAccessor != null && StompCommand.DISCONNECT.equals(headerAccessor.getCommand()) && headerAccessor.getUser() != null) {
                     Integer userId = bidService.getUserId(headerAccessor.getUser().getName());
-                    if (userId == null)
+                    if(userId == null)
                         return message;
                     User user = userService.findUserId(userId);
                     bidService.removeFromAllAuction(user);
