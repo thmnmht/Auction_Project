@@ -45,7 +45,6 @@ prepare:
     - apt-get update && apt-get --assume-yes install mysql-client -y -qq
     - mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mariadb < "data/create_db.sql"
 
-
 test:
   stage: test
   script: gradle check

@@ -7,6 +7,7 @@ import com.rahnemacollege.domain.AuctionDomain;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.repository.AuctionRepository;
+import com.rahnemacollege.repository.LoginInfoRepository;
 import com.rahnemacollege.repository.PictureRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class AuctionControllerTest extends InitTest {
-
 
 
     @Autowired
