@@ -13,6 +13,7 @@ import com.rahnemacollege.repository.LoginInfoRepository;
 import com.rahnemacollege.repository.UserRepository;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -33,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@Ignore
 public class InitTest {
     @Autowired
     protected MockMvc mvc;
