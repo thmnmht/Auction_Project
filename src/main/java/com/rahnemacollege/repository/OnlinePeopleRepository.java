@@ -1,5 +1,7 @@
 package com.rahnemacollege.repository;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.rahnemacollege.domain.Subscription;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.User;
@@ -14,6 +16,7 @@ public class OnlinePeopleRepository {
     private static OnlinePeopleRepository instance = new OnlinePeopleRepository();
     private Map<Integer, Member> usersInAuction;
     private Map<String, Subscription> subscriptionIds;
+    private Map<String,Integer> deviceIds;
 
     class Member {
         List<User> users = new ArrayList<>();
@@ -37,6 +40,7 @@ public class OnlinePeopleRepository {
     private OnlinePeopleRepository() {
         usersInAuction = new HashMap<>();
         subscriptionIds = new HashMap<>();
+        deviceIds = new HashMap<>();
     }
 
     public static OnlinePeopleRepository getInstance() {
@@ -106,7 +110,41 @@ public class OnlinePeopleRepository {
         return false;
     }
 
+    public boolean userExist(User user){
+        return deviceIds.containsValue(user.getId());
+    }
+
+    public void addDeviceId(String deviceId, User user){
+        if(userExist(user)){
+            if(getDeviceId(user).equals(deviceId))
+                return;
+            throw new MessageException(Message.USER_IS_USING_ANOTHER_DEVICE);
+        }
+        deviceIds.put(deviceId,user.getId());
+
+    }
+
+    public Integer getUserId(String deviceId){
+        return deviceIds.get(deviceId);
+    }
+
+    public String getDeviceId(User user){
+        if(!userExist(user))
+            throw new MessageException(Message.USER_NOT_FOUND);
+        Set<String> devIds = deviceIds.keySet();
+        for (String deviceId :
+                devIds) {
+            if (deviceIds.get(deviceId).equals(user.getId()))
+                return deviceId;
+        }
+        return null;
+    }
+
     public Subscription getAuctionId(String subscriptionId) {
         return subscriptionIds.get(subscriptionId);
+    }
+
+    public void removeDeviceId(String deviceId){
+        deviceIds.remove(deviceId);
     }
 }

@@ -1,6 +1,7 @@
 package com.rahnemacollege.controller;
 
 
+import com.google.gson.JsonObject;
 import com.rahnemacollege.domain.BidRequest;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.Bid;
@@ -47,14 +48,21 @@ public class BidController {
     public void bid(BidRequest request, Message<?> message) {
         logger.info("someone try to bid");
         StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        User user = userService.findUserId(Integer.valueOf(headerAccessor.getUser().getName()));
+        Integer userId = bidService.getUserId(headerAccessor.getUser().getName());
+        if (userId == null){
+            logger.error("user is null ");
+            return;
+        }
+        User user = userService.findUserId(userId);
         logger.info(user.getEmail() + " with id " + user.getId() + " wants to bid auction " + request.getAuctionId());
         Bid bid = bidService.add(request, user);
         auctionService.scheduleFinalizing(bid);
         logger.info("bid accepted");
         messageHandler.newBidMessage(request.getAuctionId(), bid.getPrice(), false);
-        messageHandler.myBidMessage(user.getId(), bid.getPrice());
+        messageHandler.myBidMessage(headerAccessor.getUser().getName(), bid.getPrice());
     }
+
+
 
     @SubscribeMapping("/id/{auctionId}")
     public void enterAuction(@DestinationVariable("auctionId") int auctionId,
@@ -62,8 +70,13 @@ public class BidController {
         logger.info("someone try to enter auction " + auctionId);
         StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         Auction auction = auctionService.findById(auctionId);
-        User user = userService.findUserId(Integer.valueOf(headerAccessor.getUser().getName()));
-        bidService.addSubscriptionId(String.valueOf(user.getId()), auction, user);
+        Integer userId = bidService.getUserId(headerAccessor.getUser().getName());
+        if (userId == null){
+            logger.error("user is null");
+            return;
+        }
+        User user = userService.findUserId(userId);
+        bidService.addSubscriptionId(String.valueOf(userId), auction, user);
         int current = bidService.enter(auction, user);
         messageHandler.subscribeMessage(auctionId, current);
     }
@@ -72,8 +85,7 @@ public class BidController {
     public void enterDenied(MessageException e, Message<?> message) throws Exception {
         logger.error("the exception is : " + e.getMessage());
         StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        String userId = headerAccessor.getUser().getName();
-        messageHandler.exceptionMessage(e, userId);
+        messageHandler.exceptionMessage(e, headerAccessor.getUser().getName());
     }
 
 

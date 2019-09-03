@@ -2,6 +2,7 @@ package com.rahnemacollege.util.exceptions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -112,11 +113,16 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
             case ALREADY_BID:
                 response.setStatus(603);
                 break;
+            case USER_IS_USING_ANOTHER_DEVICE:
+                response.setStatus(605);
+            case USER_NOT_FOUND:
+                response.setStatus(606);
         }
         logger.error(ex.getMessageStatus().toString());
     }
 
     @ExceptionHandler(value = {IllegalStateException.class})
+
     protected void fileUpload(IllegalStateException ex,
                               HttpServletResponse response) {
         if (ex.getMessage().contains("SizeLimitExceededException"))
@@ -131,5 +137,12 @@ public class ExcHandler extends ResponseEntityExceptionHandler {
             logger.error(ex.getMessage());
             response.setStatus(604);
         }
+    }
+
+    @ExceptionHandler(value = {MessageDeliveryException.class})
+    private void userWithAnotherDevice(MessageDeliveryException ex,
+                                       HttpServletResponse response){
+        System.err.println("dadash boro biron");
+        response.setStatus(607);
     }
 }

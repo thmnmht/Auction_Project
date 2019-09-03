@@ -267,7 +267,7 @@ public class AuctionService {
         }
     }
 
-    @PostConstruct
+   /* @PostConstruct
     public void initialReschedule() {
         Iterable<User> users = userRepository.findAll();
         Iterable<Auction> auctions = auctionRepository.findAll();
@@ -280,7 +280,7 @@ public class AuctionService {
             scheduleFakeBidOn(auction);
         }
         logger.info("Rescheduled jobs successfully.");
-    }
+    }*/
 
 
     private Trigger buildNotifyJobTrigger(JobDetail jobDetail, Date finishDate, int userId, int auctionId) {
