@@ -2,15 +2,8 @@ image: ubuntu:16.04
 
 stages:
   - build
-  - prepare
   - test
   - deploy
-
-
-variables:
-  MYSQL_DATABASE: "TestDB"
-  MYSQL_ROOT_PASSWORD: "1q2w3e4r"
-
 
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
@@ -34,18 +27,6 @@ build:
     paths:
       - build
       - .gradle
-
-
-prepare:
-  stage: prepare
-  image: java:openjdk-8
-  services:
-    - mariadb
-  script:
-    - apt-get update && apt-get --assume-yes install mysql-client -y -qq
-    - ls
-    - pwd
-    - mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host=mariadb < "data/create_db.sql"
 
 test:
   stage: test
