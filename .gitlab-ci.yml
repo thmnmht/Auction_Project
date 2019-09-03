@@ -4,7 +4,7 @@ image: gradle
 
 stages:
   - build
-  - test
+#  - test
   - deploy
 
 before_script:
@@ -29,15 +29,15 @@ build:
       - build
       - .gradle
 
-test:
-  stage: test
-  script: gradle check --debug
-  cache:
-    key: "$CI_COMMIT_REF_NAME"
-    policy: pull
-    paths:
-      - build
-      - .gradle
+#test:
+#  stage: test
+#  script: gradle check --stacktrace
+#  cache:
+#    key: "$CI_COMMIT_REF_NAME"
+#    policy: pull
+#    paths:
+#      - build
+#      - .gradle
 
 deploy:
   stage: deploy

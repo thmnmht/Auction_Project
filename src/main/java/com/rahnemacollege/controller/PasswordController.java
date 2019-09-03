@@ -2,8 +2,8 @@ package com.rahnemacollege.controller;
 
 import com.rahnemacollege.model.ResetRequest;
 import com.rahnemacollege.service.ResetRequestService;
-import com.rahnemacollege.util.exceptions.MessageException;
 import com.rahnemacollege.util.exceptions.Message;
+import com.rahnemacollege.util.exceptions.MessageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,6 @@ public class PasswordController {
         log.info("Validation check for token :\"" + token + "\" is requested.");
         Optional<ResetRequest> request = requestService.findByToken(token);
         if (request.isPresent()) {
-            System.err.println("redirecting to pass reset screen");
             redirectAttributes.addAttribute("token", token);
             log.info("Redirecting to passwordReset page for token : \"" + token + "\"");
             return "index";

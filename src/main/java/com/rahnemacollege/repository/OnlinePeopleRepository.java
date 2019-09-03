@@ -1,7 +1,5 @@
 package com.rahnemacollege.repository;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.rahnemacollege.domain.Subscription;
 import com.rahnemacollege.model.Auction;
 import com.rahnemacollege.model.User;
