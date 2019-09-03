@@ -42,7 +42,11 @@ public class AuctionControllerTest extends InitTest {
     private PictureRepository pictureRepository;
 
     @Test
-    public void getCategory() throws Exception {
+    public void categories() throws Exception {
+        getCategory();
+    }
+
+    public int getCategory() throws Exception{
         String response = mvc.perform(MockMvcRequestBuilders.get(CATEGORY).header("auth", auth)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         List<Category> categories = new ArrayList<>(Arrays.asList(gson.fromJson(response, Category[].class)));
         System.out.println("Categories : ");
@@ -50,13 +54,14 @@ public class AuctionControllerTest extends InitTest {
                 categories) {
             System.out.println(c.getCategoryName());
         }
-        if (categories.size() < 3)
-            fail("Exception not thrown");
+        return categories.get(0).getId();
     }
 
     @Test
     public void addAuction() throws Exception {
-        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", "100", 5, 1, 1608883888000L));
+        int categoryId = getCategory();
+        System.err.println(categoryId);
+        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", "100", 5, categoryId, 1608883888000L));
         int auctionId = auctionDomain.getId();
         assertThat(auctionDomain.getTitle())
                 .isEqualTo("testADDAuction");
@@ -68,42 +73,43 @@ public class AuctionControllerTest extends InitTest {
 
     @Test
     public void invalidAddAuction() throws Exception {
-        String request = createAddAuctionRequest("invalid base price", "", "-1", 5, 1, 15660254847150L);
+        int categoryId = getCategory();
+        String request = createAddAuctionRequest("invalid base price", "", "-1", 5, categoryId, 15660254847150L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
         ).andExpect(status().is(432));
-        request = createAddAuctionRequest("invalid max number", "", "100", 1, 1, 15660254847150L);
+        request = createAddAuctionRequest("invalid max number", "", "100", 1, categoryId, 15660254847150L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
         ).andExpect(status().is(434));
 
-        request = createAddAuctionRequest("", "", "100", 5, 1, 15660254847150L);
+        request = createAddAuctionRequest("", "", "100", 5, categoryId, 15660254847150L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
         ).andExpect(status().is(430));
 
-        request = createAddAuctionRequest("description too long", LONG_STRING, "100", 5, 1, 15660254847150L);
+        request = createAddAuctionRequest("description too long", LONG_STRING, "100", 5, categoryId, 15660254847150L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
         ).andExpect(status().is(452));
 
-        request = createAddAuctionRequest(LONG_STRING, "", "100", 5, 1, 15660254847150L);
+        request = createAddAuctionRequest(LONG_STRING, "", "100", 5, categoryId, 15660254847150L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
         ).andExpect(status().is(451));
 
-        request = createAddAuctionRequest("max number too high", "", "100", 16, 1, 15660254847150L);
+        request = createAddAuctionRequest("max number too high", "", "100", 16, categoryId, 15660254847150L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
         ).andExpect(status().is(435));
 
-        request = createAddAuctionRequest("invalid category id", "", "100", 5, 0, 15660254847150L);
+        request = createAddAuctionRequest("invalid category id", "", "100", 5, -1, 15660254847150L);
         mvc.perform(MockMvcRequestBuilders.post(ADD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request).header("auth", auth)
@@ -125,7 +131,8 @@ public class AuctionControllerTest extends InitTest {
 
     @Test
     public void toggleBookmark() throws Exception {
-        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", "100", 5, 1, 1608883888000L));
+        int categoryId = getCategory();
+        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", "100", 5, categoryId, 1608883888000L));
         int auctionId = auctionDomain.getId();
         assertThat(auctionDomain.isBookmark())
                 .isEqualTo(false);
@@ -142,7 +149,8 @@ public class AuctionControllerTest extends InitTest {
 
     @Test
     public void addPicture() throws Exception{
-        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", "100", 5, 1, 1608883888000L));
+        int categoryId = getCategory();
+        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", "100", 5, categoryId , 1608883888000L));
         int auctionId = auctionDomain.getId();
         System.err.println(auctionDomain.getId());
         FileInputStream fis = new FileInputStream(Image_PATH);
@@ -165,7 +173,8 @@ public class AuctionControllerTest extends InitTest {
 
     @Test
     public void findAuction() throws Exception{
-        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", "100", 5, 1, 1608883888000L));
+        int categoryId = getCategory();
+        AuctionDomain auctionDomain = addAuction(createAddAuctionRequest("testADDAuction", "", "100", 5, categoryId, 1608883888000L));
         int auctionId = auctionDomain.getId();
         String response = mvc.perform(MockMvcRequestBuilders.get(FIND + auctionId)
                 .header("auth",auth)
