@@ -29,7 +29,7 @@ public class FinalizeAuctionJob extends QuartzJobBean {
     private EmailService emailService;
 
     @Autowired
-    SimpMessagingTemplate template;
+    private SimpMessagingTemplate template;
 
     private MessageHandler messageHandler;
 
@@ -48,27 +48,35 @@ public class FinalizeAuctionJob extends QuartzJobBean {
         if (!auction.getOwner().getId().equals(user.getId())) {
             auction.setWinner(user);
             logger.info("User : " + user.getEmail() + " just won auction with id : " + auction.getId());
-            messageHandler.winMessage(auction.getId(),user.getId(),auction.getTitle());
+            if(bidService.userIsOnline(user)){
+                String winerDeviceId = bidService.getDeviceId(user);
+                messageHandler.winMessage(auction.getId(), winerDeviceId, auction.getTitle());
+            }
             messageHandler.finishMessage(auction.getId());
             bidService.removeAuction(auction.getId());
             long lastPrice = bidService.findLastPrice(auction);
-            messageHandler.ownerMessageWithWinner(auction.getOwner().getId(),auction.getId(),lastPrice,auction.getTitle());
+            if(bidService.userIsOnline(auction.getOwner())){
+                String ownerDeviceId = bidService.getDeviceId(auction.getOwner());
+                messageHandler.ownerMessageWithWinner(ownerDeviceId, auction.getId(), lastPrice, auction.getTitle());
+            }
             try {
                 emailService.notifyAuctionWinner(auction, lastPrice);
                 emailService.notifyAuctionOwner(auction, lastPrice);
             } catch (MessagingException e) {
                 logger.error("Error while sending email, " + e);
             }
-        }
-        else {
+        } else {
             bidService.removeAuction(auction.getId());
-            messageHandler.ownerMessage(auction.getOwner().getId(),auction.getId(),auction.getTitle());
+            if(bidService.userIsOnline(auction.getOwner())){
+                String ownerDeviceId = bidService.getDeviceId(auction.getOwner());
+                messageHandler.ownerMessage(ownerDeviceId, auction.getId(), auction.getTitle());
+            }
             try {
                 emailService.notifyExpiredAuction(auction);
             } catch (MessagingException e) {
                 logger.error("Error while sending email, " + e);
             }
-            logger.info("User : " + user.getEmail() + "'s auction #Id : " + auction.getId() +" expired.");
+            logger.info("User : " + user.getEmail() + "'s auction #Id : " + auction.getId() + " expired.");
         }
         auction.setState(1);
         repository.save(auction);

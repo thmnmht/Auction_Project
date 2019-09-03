@@ -22,14 +22,14 @@ import org.springframework.web.context.WebApplicationContext;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Getter
     private User user;
 
     @Override
     public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
-        User user = userRepository.findById(Integer.valueOf(id)).get();
+        User user = userRepository.findById(Integer.valueOf(id)).orElse(null);
         if (user == null)
             throw new UsernameNotFoundException("User not found with id: " + id);
         this.user = user;

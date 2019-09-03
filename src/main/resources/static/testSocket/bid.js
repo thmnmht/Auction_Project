@@ -18,7 +18,7 @@ function connect() {
     //if you connect through WebSocket (without SockJS)
     // var socket = new WebSocket('/socket');
     stompClient = Stomp.over(socket);
-    stompClient.connect({auth: "Bearer " + $("#token").val()}, function (frame) {
+    stompClient.connect({auth: "Bearer " + $("#token").val(), deviceID: $("#deviceId").val()}, function (frame) {
         console.log(frame);
         setConnected(true);
         console.log('Connected: ' + frame);
@@ -61,16 +61,12 @@ function join() {
     auctionId = $("#auctionId").val();
     $("#chatHeader").append(auctionId + " ");
     lastSubId = stompClient.subscribe('/auction/id/' + auctionId, function (greeting) {
+        console.log("get somethingggggggggggggggg");
         showChat(greeting.body);
     },function (error) {
         console.log(JSON.stringify(error));
     }).id;
     console.log(lastSubId);
-}
-
-function notif() {
-
-
 }
 
 function disjoin() {
@@ -107,9 +103,6 @@ $(function () {
     });
     $("#disjoin").click(function () {
         disjoin();
-    });
-    $("#notif").click(function () {
-        notif();
     });
     $("#init").click(function () {
         initSubscribe();

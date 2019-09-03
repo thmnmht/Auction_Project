@@ -125,4 +125,27 @@ public class BidService {
         return peopleRepository.getAuctionId(subscriptionId);
     }
 
+    public void addDeviceId(String deviceId, User user){
+        peopleRepository.addDeviceId(deviceId, user);
+    }
+
+    public int getUserId(String deviceId){
+        Integer userId = peopleRepository.getUserId(deviceId);
+        return userId;
+    }
+
+    public String getDeviceId(User user){
+        String deviceId = peopleRepository.getDeviceId(user);
+        if(deviceId == null)
+            throw new MessageException(Message.USER_NOT_FOUND);
+        return deviceId;
+    }
+
+    public boolean userIsOnline(User user){
+        return peopleRepository.userExist(user);
+    }
+    public void removeDeviceId(String deviceId){
+        peopleRepository.removeDeviceId(deviceId);
+    }
+
 }

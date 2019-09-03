@@ -2,7 +2,6 @@ package com.rahnemacollege.controller;
 
 import com.rahnemacollege.domain.Subscription;
 import com.rahnemacollege.model.User;
-import com.rahnemacollege.service.AuctionService;
 import com.rahnemacollege.service.BidService;
 import com.rahnemacollege.service.UserService;
 import com.rahnemacollege.util.MessageHandler;
@@ -21,8 +20,6 @@ import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 @Controller
 public class SessionUnsubscribeListener implements ApplicationListener<SessionUnsubscribeEvent> {
 
-    private SimpMessagingTemplate template;
-
     @Autowired
     private BidService bidService;
 
@@ -30,11 +27,11 @@ public class SessionUnsubscribeListener implements ApplicationListener<SessionUn
     private UserService userService;
 
     private Logger logger = LoggerFactory.getLogger(SessionUnsubscribeListener.class);
+
     private MessageHandler messageHandler;
 
 
     public SessionUnsubscribeListener(SimpMessagingTemplate template) {
-        this.template = template;
         messageHandler = new MessageHandler(template);
 
     }
@@ -44,7 +41,12 @@ public class SessionUnsubscribeListener implements ApplicationListener<SessionUn
         logger.info("someone try to exit from auction");
         GenericMessage message = (GenericMessage) event.getMessage();
         StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        User user = userService.findUserId(Integer.parseInt(headerAccessor.getUser().getName()));
+        Integer userId = bidService.getUserId(headerAccessor.getUser().getName());
+        if(userId == null){
+            logger.error("the user is null");
+            return;
+        }
+        User user = userService.findUserId(userId);
         String subscriptionId = String.valueOf(user.getId());
         Subscription subscription = bidService.getSubscription(subscriptionId);
         bidService.removeFromAllAuction(user);

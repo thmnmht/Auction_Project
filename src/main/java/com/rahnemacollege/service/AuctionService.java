@@ -42,7 +42,6 @@ public class AuctionService {
     private final CategoryRepository categoryRepository;
     private final PictureRepository pictureRepository;
     private final Logger logger;
-    private final BidRepository bidRepository;
     private final NumberHandler numberHandler = new NumberHandler();
 
     @Value("${server_ip}")
@@ -67,12 +66,11 @@ public class AuctionService {
 
     @Autowired
     public AuctionService(UserRepository userRepository, AuctionRepository auctionRepository, CategoryRepository categoryRepository,
-                          PictureRepository pictureRepository, BidRepository bidRepository) {
+                          PictureRepository pictureRepository) {
         this.userRepository = userRepository;
         this.auctionRepository = auctionRepository;
         this.categoryRepository = categoryRepository;
         this.pictureRepository = pictureRepository;
-        this.bidRepository = bidRepository;
         this.logger = LoggerFactory.getLogger(AuctionService.class);
     }
 
@@ -116,8 +114,8 @@ public class AuctionService {
             throw new MessageException(Message.DESCRIPTION_TOO_LONG);
         if (auctionDomain.getDate() < 1)
             throw new MessageException(Message.DATE_NULL);
-//        if (auctionDomain.getDate() - new Date().getTime() < 1800000L)
-//            throw new MessageException(Message.DATE_INVALID);
+        if (auctionDomain.getDate() - new Date().getTime() < 1800000L)
+            throw new MessageException(Message.DATE_INVALID);
         if (numberHandler.createNumberLong(auctionDomain.getBasePrice()) < 0)
             throw new MessageException(Message.BASE_PRICE_NULL);
         if (auctionDomain.getMaxNumber() < 2)
@@ -130,8 +128,7 @@ public class AuctionService {
         Date date = new Date(auctionDomain.getDate());
         Category category = categoryRepository.findById(auctionDomain.getCategoryId()).orElseThrow(() -> new MessageException(Message.CATEGORY_INVALID));
         long basePrice = numberHandler.createNumberLong(auctionDomain.getBasePrice());
-        Auction auction = new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(), basePrice, category, date, user, auctionDomain.getMaxNumber());
-        return auction;
+        return new Auction(auctionDomain.getTitle(), auctionDomain.getDescription(), basePrice, category, date, user, auctionDomain.getMaxNumber());
     }
 
     public Auction findAuctionById(int id) {
@@ -146,7 +143,7 @@ public class AuctionService {
                 auction.getId(),
                 current,
                 auction.getState());
-        if (auction.getOwner().getId() == user.getId())
+        if (auction.getOwner().getId().equals(user.getId()))
             auctionDomain.setMine(true);
         String userEmail = user.getEmail();
         user = userRepository.findByEmail(userEmail).get();
@@ -161,10 +158,6 @@ public class AuctionService {
         return auctionDomain;
     }
 
-    public Page<AuctionDomain> toAuctionDomainPage(Page<Auction> auctionPage, User user, int current) {
-        return auctionPage.map(a -> toAuctionDomain(a, user, current));
-    }
-
     public List<Category> getCategory() {
         return Lists.newArrayList(categoryRepository.findAll());
     }
@@ -174,8 +167,7 @@ public class AuctionService {
     }
 
     public Auction findById(int id) {
-        Auction auction = auctionRepository.findById(id).orElseThrow(() -> new MessageException(Message.AUCTION_NOT_FOUND));
-        return auction;
+        return auctionRepository.findById(id).orElseThrow(() -> new MessageException(Message.AUCTION_NOT_FOUND));
     }
 
 
@@ -275,7 +267,7 @@ public class AuctionService {
         }
     }
 
-    /*@PostConstruct
+   /* @PostConstruct
     public void initialReschedule() {
         Iterable<User> users = userRepository.findAll();
         Iterable<Auction> auctions = auctionRepository.findAll();
