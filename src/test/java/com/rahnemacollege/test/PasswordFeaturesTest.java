@@ -52,7 +52,7 @@ public class PasswordFeaturesTest extends InitTest {
             AssertionsForClassTypes.assertThat(simpleUserDomain.getEmail())
                     .isEqualTo(userDomain.getEmail());
             //read Email
-            Thread.sleep(10000);
+            Thread.sleep(5000);
             String token = readEmail();
             assertThat(token).isNotNull();
             System.err.println(token);
