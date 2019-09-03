@@ -68,6 +68,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     logger.info("try to connect");
                     String jwtToken = Objects.requireNonNull(headerAccessor.getFirstNativeHeader("auth")).substring(7);
                     String deviceId = Objects.requireNonNull(headerAccessor.getFirstNativeHeader("deviceID"));
+                    if(deviceId == null)
+                        throw new MessageException(com.rahnemacollege.util.exceptions.Message.USER_NOT_FOUND);
                     String id = tokenUtil.getIdFromToken(jwtToken);
                     if (tokenUtil.isTokenExpired(jwtToken))
                         throw new MessageException(com.rahnemacollege.util.exceptions.Message.TOKEN_NOT_FOUND);

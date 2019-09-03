@@ -12,6 +12,7 @@ import com.rahnemacollege.model.Bid;
 import com.rahnemacollege.model.Category;
 import com.rahnemacollege.model.User;
 import com.rahnemacollege.repository.*;
+import com.rahnemacollege.util.MessageHandler;
 import com.rahnemacollege.util.NumberHandler;
 import com.rahnemacollege.util.exceptions.Message;
 import com.rahnemacollege.util.exceptions.MessageException;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,15 +65,18 @@ public class AuctionService {
     private final String fakeBidTriggerGroup = "FakeBid-triggers";
     private final String fakeBidJobGroup = "FakeBid-jobs";
 
+    private MessageHandler messageHandler;
+
 
     @Autowired
-    public AuctionService(UserRepository userRepository, AuctionRepository auctionRepository, CategoryRepository categoryRepository,
+    public AuctionService(SimpMessagingTemplate template, UserRepository userRepository, AuctionRepository auctionRepository, CategoryRepository categoryRepository,
                           PictureRepository pictureRepository) {
         this.userRepository = userRepository;
         this.auctionRepository = auctionRepository;
         this.categoryRepository = categoryRepository;
         this.pictureRepository = pictureRepository;
         this.logger = LoggerFactory.getLogger(AuctionService.class);
+        messageHandler = new MessageHandler(template);
     }
 
     public Auction addAuction(AddAuctionDomain auctionDomain, User user) {
@@ -114,7 +119,7 @@ public class AuctionService {
             throw new MessageException(Message.DESCRIPTION_TOO_LONG);
         if (auctionDomain.getDate() < 1)
             throw new MessageException(Message.DATE_NULL);
-        if (auctionDomain.getDate() - new Date().getTime() < 1800000L)
+        if (auctionDomain.getDate() - new Date().getTime() < 120000L)
             throw new MessageException(Message.DATE_INVALID);
         if (numberHandler.createNumberLong(auctionDomain.getBasePrice()) < 0)
             throw new MessageException(Message.BASE_PRICE_NULL);
@@ -280,6 +285,7 @@ public class AuctionService {
             scheduleFakeBidOn(auction);
         }
         logger.info("Rescheduled jobs successfully.");
+
     }
 
 

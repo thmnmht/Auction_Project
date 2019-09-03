@@ -129,7 +129,7 @@ public class BidService {
         peopleRepository.addDeviceId(deviceId, user);
     }
 
-    public int getUserId(String deviceId){
+    public Integer getUserId(String deviceId){
         Integer userId = peopleRepository.getUserId(deviceId);
         return userId;
     }
