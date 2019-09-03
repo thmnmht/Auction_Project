@@ -35,6 +35,7 @@ public class MessageHandler {
         alert.addProperty("auctionId", auctionId);
         alert.addProperty("price", lastPrice);
         alert.addProperty("title", title);
+        System.err.println(deviceId);
         template.convertAndSendToUser(deviceId, "/app/all", alert.toString());
     }
 

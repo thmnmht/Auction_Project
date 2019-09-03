@@ -56,8 +56,11 @@ public class FinalizeAuctionJob extends QuartzJobBean {
             bidService.removeAuction(auction.getId());
             long lastPrice = bidService.findLastPrice(auction);
             if(bidService.userIsOnline(auction.getOwner())){
+                System.out.println("owner is online");
                 String ownerDeviceId = bidService.getDeviceId(auction.getOwner());
                 messageHandler.ownerMessageWithWinner(ownerDeviceId, auction.getId(), lastPrice, auction.getTitle());
+            }else{
+                System.err.println("owner is not online");
             }
             try {
                 emailService.notifyAuctionWinner(auction, lastPrice);
@@ -66,6 +69,7 @@ public class FinalizeAuctionJob extends QuartzJobBean {
                 logger.error("Error while sending email, " + e);
             }
         } else {
+            messageHandler.finishMessage(auction.getId());
             bidService.removeAuction(auction.getId());
             if(bidService.userIsOnline(auction.getOwner())){
                 String ownerDeviceId = bidService.getDeviceId(auction.getOwner());

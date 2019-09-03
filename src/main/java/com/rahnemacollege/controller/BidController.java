@@ -76,6 +76,7 @@ public class BidController {
             return;
         }
         User user = userService.findUserId(userId);
+        System.err.println(user.getName() + " enter in the auction " + auction.getTitle());
         bidService.addSubscriptionId(String.valueOf(userId), auction, user);
         int current = bidService.enter(auction, user);
         messageHandler.subscribeMessage(auctionId, current);
